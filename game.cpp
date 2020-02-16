@@ -27,12 +27,39 @@ Game::Game() {
     settings.antialiasingLevel = 8;
 
 
-    window.create(VideoMode(field_size_x*scale, (field_size_y+2)*scale), "Polarise",
+    window.create(VideoMode(field_x*scale, (field_y+0.1)*scale), "Polarise",
                   Style::Titlebar | Style::Close, settings);
     window.setKeyRepeatEnabled(false);
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(120);
 
-    
+
+
+
+    testLine[1][0] = Vertex(sf::Vector2f(20.0f, window.getSize().y-20.f), Color::Blue);
+    testLine[1][1] = Vertex(sf::Vector2f(window.getSize().x, 0.f), Color::Blue);
+
+    testLine[2][0] = Vertex(sf::Vector2f(20.0f, window.getSize().y-20.f), Color::Blue);
+    testLine[2][1] = Vertex(sf::Vector2f(window.getSize().x, 0.f), Color::Blue);
+
+    testLine[3][0] = Vertex(sf::Vector2f(20.0f, window.getSize().y-20.f), Color::Blue);
+    testLine[3][1] = Vertex(sf::Vector2f(window.getSize().x, 0.f), Color::Blue);
+
+    testLine[0][0] = Vertex(sf::Vector2f(20.0f, window.getSize().y-20.f), Color::Blue);
+    testLine[0][1] = Vertex(sf::Vector2f(window.getSize().x, 0.f), Color::Blue);
+
+
+
+    testLine[4][0] = Vertex(sf::Vector2f(20.0f, window.getSize().y-20.f), Color::Blue);
+    testLine[4][1] = Vertex(sf::Vector2f(window.getSize().x, 0.f), Color::Blue);
+
+    testLine[5][0] = Vertex(sf::Vector2f(20.0f, window.getSize().y-20.f), Color::Blue);
+    testLine[5][1] = Vertex(sf::Vector2f(window.getSize().x, 0.f), Color::Blue);
+
+    testLine[6][0] = Vertex(sf::Vector2f(20.0f, window.getSize().y-20.f), Color::Blue);
+    testLine[6][1] = Vertex(sf::Vector2f(window.getSize().x, 0.f), Color::Blue);
+
+    testLine[7][0] = Vertex(sf::Vector2f(20.0f, window.getSize().y-20.f), Color::Blue);
+    testLine[7][1] = Vertex(sf::Vector2f(window.getSize().x, 0.f), Color::Blue);
 
 }
 
@@ -46,23 +73,33 @@ RenderWindow* Game::getHandle() {
 
 void Game::run() {
     Clock clock;
-    float time = 1;
+    //float time = 1;
     while(window.isOpen()) {
-
-        if (time < delay) {
-            time += clock.restart().asSeconds();
-            usleep(100);
-            continue;
-        }
-        time = 0;
-
-        testRect.rotate(15);
 
         input();
         draw();
 
+        /*if (time < delay) {
+            time += clock.restart().asSeconds();
+            // /usleep(100);
+            continue;
+        }
+        time = 0;*/
+
+        testRect.rotate(1);
+
+        testLine[0][1] = Vertex(testRect.physForm.getTransform().transformPoint(testRect.physForm.getPoint(0)), Color::Blue);
+        testLine[1][1] = Vertex(testRect.physForm.getTransform().transformPoint(testRect.physForm.getPoint(1)), Color::Blue);             
+
+        testLine[2][1] = Vertex(testRect.physForm.getTransform().transformPoint(testRect.physForm.getPoint(2)), Color::Blue);
 
 
+        testLine[3][1] = Vertex(testRect.physForm.getTransform().transformPoint(testRect.physForm.getPoint(3)), Color::Blue);
+
+        testLine[4][1] = Vertex(Vector2f(0.f, 0.f), Color::Blue);
+        testLine[5][1] = Vertex(Vector2f(window.getSize().x, 0.f), Color::Blue);
+        testLine[6][1] = Vertex(Vector2f(0.f, window.getSize().y), Color::Blue);
+        testLine[7][1] = Vertex(Vector2f(window.getSize().x, window.getSize().y), Color::Blue);
     }
 }
 
@@ -70,6 +107,10 @@ void Game::draw() {
     //update_field();
     window.clear(Color(230, 235, 230));
     window.draw(testRect.physForm);
+    for (int i = 0; i < 8; ++i) {
+        window.draw(testLine[i], 2, Lines);
+    }
+
     /*for (int i = 0; i < field_size_y; i++) {
         for (int j = 0; j < field_size_x; j++) {
             window.draw(field[i][j].tile_v);
