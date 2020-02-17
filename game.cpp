@@ -202,7 +202,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
     for (int i = 0; i < level.getTileCount(); ++i) {
         window.draw(level.getField()->tile[i].physForm);
     }
-    for (int i = 0; i < rayTracing.getLineCount() + 4; ++i) {
+    for (int i = 0; i < rayTracing.getLineCount()*3; ++i) {
         window.draw(rayTracing.getRays()[i], 2, Lines);
     }
 

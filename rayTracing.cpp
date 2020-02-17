@@ -15,6 +15,7 @@ extern const int scale;
 extern const float delay;
 extern const int field_x;
 extern const int field_y;
+const float angle = 0.0002;
 
 #define NO_INTERSECTION Vector2f(-10, -10);
 
@@ -46,9 +47,9 @@ RayTracing::RayTracing() {
 
 void RayTracing::update(Level *level, Window *window) {
 
-	linesCount = level->getTileCount()*4;
+	linesCount = level->getTileCount()*4 + 4;
 	//find all vertices
-	vertices = new Vector2f[linesCount + 4];
+	vertices = new Vector2f[linesCount];
 	Tile* allTiles =level->getField()->tile;
 	for (int i = 0; i < level->getTileCount(); ++i) {
 		for (int j = 0; j < 4; ++j) {
@@ -56,10 +57,10 @@ void RayTracing::update(Level *level, Window *window) {
 		}
 
 	}
-	vertices[linesCount] = Vector2f(0.f, 0.f);
-	vertices[linesCount+1] = Vector2f(window->getSize().x, 0.f);
-	vertices[linesCount+2] = Vector2f(0.f, window->getSize().y);
-	vertices[linesCount+3] = Vector2f(window->getSize().x, window->getSize().y);
+	vertices[linesCount-4] = Vector2f(0.f, 0.f);
+	vertices[linesCount-4+1] = Vector2f(window->getSize().x, 0.f);
+	vertices[linesCount-4+2] = Vector2f(0.f, window->getSize().y);
+	vertices[linesCount-4+3] = Vector2f(window->getSize().x, window->getSize().y);
 
 
 
@@ -77,20 +78,47 @@ void RayTracing::update(Level *level, Window *window) {
 
 		}
 	}
+	//setBorders
+	int tempX = window->getSize().x;
+	int tempY = window->getSize().y;
+
+	lines[linesCount-4].startCoord.x = -1;
+    lines[linesCount-4].startCoord.y = -1;
+
+    lines[linesCount-4].dirX = window->getSize().x+2;
+    lines[linesCount-4].dirY = 0;
+
+    lines[linesCount-4+1].startCoord.x = window->getSize().x+1;
+    lines[linesCount-4+1].startCoord.y = 0;
+
+    lines[linesCount-4+1].dirX = 0;
+    lines[linesCount-4+1].dirY = window->getSize().y+2;
+
+    lines[linesCount-4+2].startCoord.x = window->getSize().x+1;
+    lines[linesCount-4+2].startCoord.y = window->getSize().y+1;
+
+    lines[linesCount-4+2].dirX = (-tempX-2);
+    lines[linesCount-4+2].dirY = 0;
+
+    lines[linesCount-4+3].startCoord.x = -1;
+    lines[linesCount-4+3].startCoord.y = window->getSize().y+1;
+
+    lines[linesCount-4+3].dirX = 0;
+    lines[linesCount-4+3].dirY = -tempY-2;
 
 	
 
 
 	//set raysVertex
-	raysVertex = new Vertex* [linesCount + 4];
-	for (int i = 0; i < linesCount + 4; ++i) {
+	raysVertex = new Vertex* [linesCount*3];
+	for (int i = 0; i < linesCount*3; ++i) {
 		raysVertex[i] = new Vertex[2];
 	}
 
 
-
-	for (int i = 0; i < level->getTileCount()*4 + 4; ++i) {
-		Vector2f mousePos;
+	Vector2f mousePos;
+	for (int i = 0; i < linesCount*3; ++i) {
+		
 		mousePos = (Vector2f)Mouse::getPosition(*window);
 
         if (Mouse::getPosition(*window).x > window->getSize().x)
@@ -106,15 +134,38 @@ void RayTracing::update(Level *level, Window *window) {
            raysVertex[i][0] = Vertex(mousePos, Color::Blue);
     }
 
-    for (int i = 0; i < linesCount + 4; ++i) {
+    for (int i = 0; i < linesCount; ++i) {
     	raysVertex[i][1] = Vertex(vertices[i], Color::Blue);
+
+    }
+    for (int i = linesCount; i < linesCount*3; i += 2) {
+    	//float rayLen = sqrt()
+
+
+
+
+
+
+
+
+    	Transform rotation1;
+    	rotation1.rotate(angle, mousePos).scale(500, 500, mousePos.x, mousePos.y);
+    	//rotate
+    	raysVertex[i][1] = Vertex(vertices[(i-linesCount)/2], Color::Blue);
+    	raysVertex[i][1].position = rotation1.transformPoint(raysVertex[i][1].position);
+
+    	Transform rotation2;
+    	rotation2.rotate(-2*angle, mousePos);
+    	//rotate
+    	raysVertex[i+1][1] = Vertex(vertices[(i-linesCount)/2], Color::Blue);
+    	raysVertex[i+1][1].position = rotation2.transformPoint(raysVertex[i][1].position);
     }
 
 
     //set rays
-	rays = new Line[linesCount + 4];
+	rays = new Line[linesCount*3];
 
-	for (int i = 0; i < linesCount+4; ++i) {
+	for (int i = 0; i < linesCount; ++i) {
 		for (int j = 0; j < 4; ++j) {
 
             rays[i].startCoord.x = raysVertex[i][0].position.x;
@@ -126,16 +177,19 @@ void RayTracing::update(Level *level, Window *window) {
 		}
 	}
 
+	for (int i = linesCount; i < linesCount*3; ++i) {
+
+		rays[i].startCoord.x = raysVertex[i][0].position.x;
+        rays[i].startCoord.y = raysVertex[i][0].position.y;
+
+        rays[i].dirX = (raysVertex[i][1].position.x - rays[i].startCoord.x);
+        rays[i].dirY = (raysVertex[i][1].position.y - rays[i].startCoord.y);
+	}
 
 
-
-
-
-
-    
 
     //calculateIntersections();
-    for (int i = 0; i < linesCount + 4; ++i) { 
+    for (int i = 0; i < linesCount*3; ++i) { 
 
 		Line prevIntersection;
         prevIntersection.param = 10000;///!!!!
@@ -170,7 +224,7 @@ void RayTracing::clear() {
 	delete [] vertices;
 	delete [] lines;
 	delete [] rays;
-	for (int i = 0; i < linesCount + 4; ++i) {
+	for (int i = 0; i < linesCount*3; ++i) {
 		delete [] raysVertex[i];
 	}
 	delete [] raysVertex;
