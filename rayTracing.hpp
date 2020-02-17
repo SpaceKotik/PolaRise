@@ -1,12 +1,15 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "level.hpp"
 
 using namespace sf;
 
 
 
 struct Line {
+
+
 	Vector2f startCoord;
 	float dirX;
 	float dirY;
@@ -16,12 +19,19 @@ struct Line {
 
 class RayTracing {
 private:
-	Vector2f vertices;
+	Vector2f *vertices;
 	Line *lines;
+	int linesCount;
 	Line *rays;
+	Vertex **raysVertex;
+
 public:
 	RayTracing();
 	//void setCanvas(Level level);
-	Vector2f getPartIntersection(Line ray, Line line);
-	Vector2f getIntersection(Line ray);
+	Line getPartIntersection(Line ray, Line line);
+	void calculateIntersections();
+	void update(Level *level, Window *window);
+	int getLineCount();
+	Vertex** getRays();
+	void clear();
 };

@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include "game.hpp"
 #include "tile.hpp"
+#include "level.hpp"
+#include "rayTracing.hpp"
 
 using namespace sf;
 
@@ -30,26 +32,26 @@ Game::Game() {
                   Style::Titlebar | Style::Close, settings);
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(120);
-
+}
 
 
     //Starting position of rays
-    for (int i = 0; i < 8; ++i) {
+    /*for (int i = 0; i < 8; ++i) {
         testLine[i][0] = Vertex(sf::Vector2f(20.0f, window.getSize().y-20.f), Color::Blue);
         testLine[i][1] = Vertex(sf::Vector2f(window.getSize().x, 0.f), Color::Blue);
-    }
+    }/*
 
 }
 
 
-Line getPartIntersection(Line ray, Line line) {
+/*Line getPartIntersection(Line ray, Line line) {
 
     // Are they parallel? If so, no intersect
     /*float r_mag = sqrt(ray.dirX*ray.dirX+ray.dirY*ray.dirY);
     float s_mag = sqrt(line.dirX*line.dirX+ line.dirY*line.dirY);
     if(ray.dirX/r_mag == line.dirX/s_mag && ray.dirY/r_mag == line.dirY/s_mag){ // Directions are the same.
         return NO_INTERSECTION;
-    }*/
+    }
 
     // SOLVE FOR T1 & T2
     // ray.startCoord.x+ray.dirX*T1 = s_px+line.startCoord.x*T2 && ray.startCoord.y+ray.dirY*T1 = line.startCoord.y+line.startCoord.y*T2
@@ -79,24 +81,35 @@ Line getPartIntersection(Line ray, Line line) {
     return tempLine;
     //return Vector2f(25, 25);
     //return;
-}
+}*/
 
 
 RenderWindow* Game::getHandle() {   
     return &window;
 }
-
-Vector2f getRectPointPos(Tile rect, int point) {
+///
+/*Vector2f getRectPointPos(Tile rect, int point) {
     return rect.getRect().getTransform().transformPoint(rect.getRect().getPoint(point));
-}
-
+}*/
+///
 void Game::run() {
     Clock clock;
     //float time = 1;
-    while(window.isOpen()) {
 
+
+    Level level;
+    level.setField();
+    RayTracing rayTracing;
+    //rayTracing.update(&level, getHandle());
+
+
+    while(window.isOpen()) {
+        //rayTracing.clear();
         input();
-        
+        rayTracing.update(&level, getHandle());
+        level.update();
+        draw(level, rayTracing);
+        rayTracing.clear();
 
         /*if (time < delay) {
             time += clock.restart().asSeconds();
@@ -104,8 +117,8 @@ void Game::run() {
             continue;
         }
         time = 0;*/
-
-         testRect.rotate(1);
+        /*
+        /* testRect.rotate(1);
 
         testLine[0][1] = Vertex(testRect.physForm.getTransform().transformPoint(testRect.physForm.getPoint(0)), Color::Blue);
         testLine[1][1] = Vertex(testRect.physForm.getTransform().transformPoint(testRect.physForm.getPoint(1)), Color::Blue);             
@@ -140,11 +153,11 @@ void Game::run() {
 
 
 
-
+        /*
             Line prevIntersection;
             prevIntersection.param = 10000;///!!!!
             for (int j = 0; j < 4; ++j) {
-            //getRectPointPos(testRect, (i+1) % 4).y;*/
+            //getRectPointPos(testRect, (i+1) % 4).y;
                 //getRectPointPos(testRect, j);
 
                 tempLine.startCoord.x = getRectPointPos(testRect, j).x;
@@ -157,14 +170,8 @@ void Game::run() {
                 /*tempLine.param = sqrt((tempLine.startCoord.x - getRectPointPos(testRect, (j+1) % 4).x)*
                                                                             (tempLine.startCoord.x - getRectPointPos(testRect, (j+1) % 4).x) +
                                                                             (tempLine.startCoord.y - getRectPointPos(testRect, (j+1) % 4).y)*
-                                                                            (tempLine.startCoord.y - getRectPointPos(testRect, (j+1) % 4).y));*/
+                                                                            (tempLine.startCoord.y - getRectPointPos(testRect, (j+1) % 4).y));
             //}
-
-
-                /*if (j == 0 && getPartIntersection(tempRay, tempLine).startCoord.x != -1 && getPartIntersection(tempRay, tempLine).startCoord.y != -1) {
-                    testLine[i][1] = Vertex(getPartIntersection(tempRay, tempLine).startCoord, Color::Red);
-                }*/
-
 
                 if (getPartIntersection(tempRay, tempLine).startCoord.x != -10 && getPartIntersection(tempRay, tempLine).startCoord.y != -10) {
                     if (getPartIntersection(tempRay, tempLine).param < prevIntersection.param) {
@@ -177,20 +184,26 @@ void Game::run() {
 
                 
             }
-        }
+        }*/
 
-        draw();
+        //draw(level, rayTracing);
     }
 
 
 }
 
-void Game::draw() {
+void Game::draw(Level level, RayTracing rayTracing) {
     //update_field();
     window.clear(Color(230, 235, 230));
-    window.draw(testRect.physForm);
+    /*window.draw(testRect.physForm);
     for (int i = 0; i < 8; ++i) {
         window.draw(testLine[i], 2, Lines);
+    }*/
+    for (int i = 0; i < level.getTileCount(); ++i) {
+        window.draw(level.getField()->tile[i].physForm);
+    }
+    for (int i = 0; i < rayTracing.getLineCount() + 4; ++i) {
+        window.draw(rayTracing.getRays()[i], 2, Lines);
     }
 
     window.display();

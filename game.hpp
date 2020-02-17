@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "tile.hpp"
 #include "rayTracing.hpp"
+#include "level.hpp"
 
 using namespace sf;
 
@@ -30,9 +31,9 @@ private:
 
 
 
-    Vertex testLine[8][2];
+    //Vertex testLine[8][2];
 
-    Tile testRect;
+    //Tile testRect;
  
 
 
@@ -46,6 +47,6 @@ public:
     void run();
     void input();
     void update();
-    void draw();
+    void draw(Level level, RayTracing rayTracing);
 
 };

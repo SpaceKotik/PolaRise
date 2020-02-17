@@ -17,10 +17,12 @@ using namespace sf;
 
 Tile::Tile() {
 	this->physForm.setPosition(field_x*scale/2.f, field_y*scale/2.f);
-	this->physForm.rotate(30);
+	//this->physForm.rotate(30);
 	this->physForm.setSize(Vector2f(scale*6, scale*3));
 	this->physForm.setOrigin(Vector2f(physForm.getSize().x/2.f, physForm.getSize().y/2.f));
-	this->physForm.setFillColor(Color(0, 0, 0));
+	this->physForm.setFillColor(Color::White);
+	this->physForm.setOutlineColor(Color::Black);
+	this->physForm.setOutlineThickness(3);	
 
 }
 

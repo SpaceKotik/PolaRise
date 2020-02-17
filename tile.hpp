@@ -13,4 +13,5 @@ public:
 	RectangleShape getRect();
 
 friend class Game;
+friend class Level;
 };
