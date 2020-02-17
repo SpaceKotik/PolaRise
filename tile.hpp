@@ -10,6 +10,7 @@ private:
 public:
 	Tile();
 	void rotate(float deg);
+	RectangleShape getRect();
 
 friend class Game;
 };

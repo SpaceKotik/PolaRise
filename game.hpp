@@ -26,6 +26,8 @@ private:
     //Texts texts;
     int total_point;
 
+    Vector2f mousePos;
+
 
 
     Vertex testLine[8][2];
