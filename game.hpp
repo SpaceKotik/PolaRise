@@ -9,11 +9,11 @@ using namespace sf;
 
 enum GameState {Menu, Menu_2, Gameplay, Leaderboard};
 
-/*struct MouseState{
+struct MouseState{
     Vector2f pos;
     bool RightButtonPressed = false;
     bool LeftButtonPressed = false;
-};*/
+};
 
 
 
@@ -41,7 +41,7 @@ public:
 //    ~Game();
     void setup();
     void run();
-    Vector2f input();
+    MouseState input();
     void update();
     void draw(Level level, RayTracing rayTracing);
 

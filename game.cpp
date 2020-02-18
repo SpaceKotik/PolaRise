@@ -52,10 +52,10 @@ void Game::run() {
 
     Level level;
     level.setField();
-    level.addTile(Vector2f(200, 200));
+    /*level.addTile(Vector2f(200, 200));
     level.addTile(Vector2f(400, 400));
     level.addTile(Vector2f(600, 600));
-    level.addTile(Vector2f(700, 200));
+    level.addTile(Vector2f(700, 200));*/
     RayTracing rayTracing;
     //rayTracing.update(&level, getHandle());
 
@@ -63,12 +63,17 @@ void Game::run() {
     while(window.isOpen()) {
         //rayTracing.clear();
         //MouseState mouseState = input();
-        Vector2f mouseClickedPos = input();
+        MouseState mouseState = input();
         Vector2f mouseNotClicked = NO_INTERSECTION;
         
-        /*if (mouseClickedPos != mouseNotClicked) {
-            level.addTile(mouseClickedPos);
-        }*/
+        if (mouseState.pos != mouseNotClicked) {
+            if (mouseState.LeftButtonPressed) {
+                level.addTile(mouseState.pos);
+            }
+            if (mouseState.RightButtonPressed) {
+                level.removeTile(mouseState.pos);
+            }
+        }
         level.update();
         //rayTracing.update(&level, getHandle(), mousePos);
         // /rayTracing.createMesh();
@@ -159,12 +164,11 @@ void Game::draw(Level level, RayTracing rayTracing) {
     window.display();
 }
 
-Vector2f Game::input() {
-        //MouseState mouseState;
-        //mouseState.pos = NO_INTERSECTION;
+MouseState Game::input() {
+        MouseState mouseState;
+        mouseState.pos = NO_INTERSECTION;
 
-        Vector2f mouseClickedPos = NO_INTERSECTION;
-        //static FloatRect prev_location = {-100, -100, scale, scale};
+        //Vector2f mouseClickedPos = NO_INTERSECTION;
         Event event;
 
         while (window.pollEvent(event)) {
@@ -176,13 +180,13 @@ Vector2f Game::input() {
 
             case Event::MouseButtonPressed:
                 if (event.mouseButton.button == sf::Mouse::Left) {
-                    mouseClickedPos = (Vector2f)Mouse::getPosition(window);
-                    //mouseClickedPos.LeftButtonPressed = true;
+                    mouseState.pos = (Vector2f)Mouse::getPosition(window);
+                    mouseState.LeftButtonPressed = true;
                 }
-                //if (event.mouseButton.button == sf::Mouse::Right) {
-                    //mouseState.pos = (Vector2f)Mouse::getPosition(window);
-                    //mouseState.RightButtonPressed = true;
-                //}
+                if (event.mouseButton.button == sf::Mouse::Right) {
+                    mouseState.pos = (Vector2f)Mouse::getPosition(window);
+                    mouseState.RightButtonPressed = true;
+                }
                 break;
             default:
                 break;
@@ -220,5 +224,5 @@ Vector2f Game::input() {
             mousePos.y = 0;
 
 
-        return mouseClickedPos;
+        return mouseState;
 }

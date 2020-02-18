@@ -26,6 +26,7 @@ public:
 	int getTileCount();
 	void update();
 	void addTile(Vector2f);
+	void removeTile(Vector2f);
 
 
 };

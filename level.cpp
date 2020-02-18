@@ -58,3 +58,16 @@ void Level::addTile(Vector2f pos) {
 	field.tiles.push_back(Tile(pos, false, false));
 	tileCount++;
 }
+
+void Level::removeTile(Vector2f pos) {
+	//Tile tempTile(Vector2f)
+
+	pos = Vector2f (((int)pos.x/(int)scale)*scale + 0*scale,((int)pos.y/(int)scale)*scale + 0*scale);
+	for (int i = 0; i < tileCount; ++i) {
+		if (field.tiles[i].physForm.getPosition() == pos) {
+			field.tiles.erase(field.tiles.begin() + i);
+			tileCount--;
+			break;
+		}
+	}
+}
