@@ -6,9 +6,7 @@
 using namespace sf;
 
 struct Field {
-	Tile *tile;
-	bool isRed;
-	bool isBlue;
+	std::vector<Tile> tiles;
 };
 
 class Level {
@@ -27,6 +25,7 @@ public:
 	Field* getField();
 	int getTileCount();
 	void update();
+	void addTile(Vector2f);
 
 
 };

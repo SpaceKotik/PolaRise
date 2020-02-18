@@ -27,7 +27,7 @@ Game::Game() {
     //texture.loadFromFile("resourses\\textures.png");
 
     ContextSettings settings;
-    //settings.antialiasingLevel = 8;
+    settings.antialiasingLevel = 8;
 
 
     window.create(VideoMode(field_x*scale, (field_y+0.1)*scale), "PolaRise",
@@ -52,13 +52,23 @@ void Game::run() {
 
     Level level;
     level.setField();
+    level.addTile(Vector2f(200, 200));
+    level.addTile(Vector2f(400, 400));
+    level.addTile(Vector2f(600, 600));
+    level.addTile(Vector2f(700, 200));
     RayTracing rayTracing;
     //rayTracing.update(&level, getHandle());
 
 
     while(window.isOpen()) {
         //rayTracing.clear();
-        input();
+        //MouseState mouseState = input();
+        Vector2f mouseClickedPos = input();
+        Vector2f mouseNotClicked = NO_INTERSECTION;
+        
+        /*if (mouseClickedPos != mouseNotClicked) {
+            level.addTile(mouseClickedPos);
+        }*/
         level.update();
         //rayTracing.update(&level, getHandle(), mousePos);
         // /rayTracing.createMesh();
@@ -79,16 +89,25 @@ void Game::draw(Level level, RayTracing rayTracing) {
         window.draw(testLine[i], 2, Lines);
     }*/
     for (int i = 0; i < level.getTileCount(); ++i) {
-        window.draw(level.getField()->tile[i].physForm);
+        window.draw(level.getField()->tiles[i].physForm);
     }
    // window.draw(rayTracing.createMesh());
 
 
-    BlendMode blendmode;
+    //BlendMode blendmode;
 
+
+    //main source
     rayTracing.update(&level, getHandle(), mousePos);
     window.draw(rayTracing.createMesh(), BlendAdd);
+    /*for (int i = 0; i < rayTracing.getLineCount()*3; ++i) {
+        window.draw(rayTracing.getRays()[i], 2, Lines);
+    }*/
     rayTracing.clear();
+
+
+
+
 
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, lightSourceSize));
@@ -124,39 +143,46 @@ void Game::draw(Level level, RayTracing rayTracing) {
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, -lightSourceSize));
     window.draw(rayTracing.createMesh(), BlendAdd);
     rayTracing.clear();
+
+    //main source moved here
+    /*rayTracing.update(&level, getHandle(), mousePos);
+    window.draw(rayTracing.createMesh(), BlendAdd);
+    for (int i = 0; i < rayTracing.getLineCount()*3; ++i) {
+        //window.draw(rayTracing.getRays()[i], 2, Lines);
+    }
+    rayTracing.clear();*/
     //window.draw(rayTracing.createMesh());
-    /*for (int i = 0; i < rayTracing.getLineCount()*3; ++i) {
-        window.draw(rayTracing.getRays()[i], 2, Lines);
-    }*/
+    
     //window.draw(*rayTracing.getMesh());
     
 
     window.display();
 }
 
-void Game::input() {
+Vector2f Game::input() {
+        //MouseState mouseState;
+        //mouseState.pos = NO_INTERSECTION;
+
+        Vector2f mouseClickedPos = NO_INTERSECTION;
         //static FloatRect prev_location = {-100, -100, scale, scale};
         Event event;
-
-
-        // controlling the position of the ray source
-        /*mousePos = (Vector2f)Mouse::getPosition(window);
-
-        if (Mouse::getPosition(window).x > window.getSize().x)
-            mousePos.x = window.getSize().x;
-        if (Mouse::getPosition(window).x < 0)
-            mousePos.x = 0;
-        if (Mouse::getPosition(window).y > window.getSize().y)
-            mousePos.y = window.getSize().y;
-        if (Mouse::getPosition(window).y < 0)
-            mousePos.y = 0;*/
-        ///
 
         while (window.pollEvent(event)) {
 
             switch (event.type) {
             case Event::Closed:
                 window.close();
+                break;
+
+            case Event::MouseButtonPressed:
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    mouseClickedPos = (Vector2f)Mouse::getPosition(window);
+                    //mouseClickedPos.LeftButtonPressed = true;
+                }
+                //if (event.mouseButton.button == sf::Mouse::Right) {
+                    //mouseState.pos = (Vector2f)Mouse::getPosition(window);
+                    //mouseState.RightButtonPressed = true;
+                //}
                 break;
             default:
                 break;
@@ -193,4 +219,6 @@ void Game::input() {
         if (Mouse::getPosition(window).y < 0)
             mousePos.y = 0;
 
+
+        return mouseClickedPos;
 }

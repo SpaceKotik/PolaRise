@@ -16,7 +16,7 @@ extern const float delay;
 extern const int field_x;
 extern const int field_y;
 const float angle = 0.02;
-const Color lightColor = Color(22, 22, 22);
+const Color lightColor = Color(23, 23, 23);
 
 
 #define NO_INTERSECTION Vector2f(-10, -10);
@@ -39,7 +39,7 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
 	linesCount = level->getTileCount()*4 + 4;
 	//find all vertices
 	vertices = new Vector2f[linesCount];
-	Tile* allTiles =level->getField()->tile;
+	std::vector<Tile> allTiles =level->getField()->tiles;
 	for (int i = 0; i < level->getTileCount(); ++i) {
 		for (int j = 0; j < 4; ++j) {
 			vertices[i*4+j] = getRectPointPos(allTiles[i], j);
@@ -72,7 +72,7 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
 		}
 	}
 	//setBorders
-	int tempX = window->getSize().x;
+	/*int tempX = window->getSize().x;
 	int tempY = window->getSize().y;
 
 	lines[linesCount-4].startCoord.x = -1;
@@ -97,36 +97,63 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
     lines[linesCount-4+3].startCoord.y = window->getSize().y+1;
 
     lines[linesCount-4+3].dirX = 0;
-    lines[linesCount-4+3].dirY = -tempY-2;
+    lines[linesCount-4+3].dirY = -tempY-2;*/
+
+    int tempX = window->getSize().x;
+	int tempY = window->getSize().y;
+
+	lines[linesCount-4].startCoord.x = 0;
+    lines[linesCount-4].startCoord.y = 0;
+
+    lines[linesCount-4].dirX = window->getSize().x;
+    lines[linesCount-4].dirY = 0;
+
+    lines[linesCount-4+1].startCoord.x = window->getSize().x;
+    lines[linesCount-4+1].startCoord.y = 0;
+
+    lines[linesCount-4+1].dirX = 0;
+    lines[linesCount-4+1].dirY = window->getSize().y;
+
+    lines[linesCount-4+2].startCoord.x = window->getSize().x;
+    lines[linesCount-4+2].startCoord.y = window->getSize().y;
+
+    lines[linesCount-4+2].dirX = (-tempX);
+    lines[linesCount-4+2].dirY = 0;
+
+    lines[linesCount-4+3].startCoord.x = 0;
+    lines[linesCount-4+3].startCoord.y = window->getSize().y;
+
+    lines[linesCount-4+3].dirX = 0;
+    lines[linesCount-4+3].dirY = -tempY;
 
 
 
     /*int tempX = window->getSize().x;
 	int tempY = window->getSize().y;
 
-	lines[linesCount-4].startCoord.x = 100;
-    lines[linesCount-4].startCoord.y = 100;
+	lines[linesCount-4].startCoord.x = 10;
+    lines[linesCount-4].startCoord.y = 10;
 
-    lines[linesCount-4].dirX = 200;
+    lines[linesCount-4].dirX = 20;
     lines[linesCount-4].dirY = 0;
 
-    lines[linesCount-4+1].startCoord.x = 300;
+    lines[linesCount-4+1].startCoord.x = 30;
     lines[linesCount-4+1].startCoord.y = 0;
 
     lines[linesCount-4+1].dirX = 0;
-    lines[linesCount-4+1].dirY = 200;
+    lines[linesCount-4+1].dirY = 20;
 
-    lines[linesCount-4+2].startCoord.x = 300;
-    lines[linesCount-4+2].startCoord.y = 300;
+    lines[linesCount-4+2].startCoord.x = 30;
+    lines[linesCount-4+2].startCoord.y = 30;
 
-    lines[linesCount-4+2].dirX = -200;
+    lines[linesCount-4+2].dirX = -20;
     lines[linesCount-4+2].dirY = 0;
 
-    lines[linesCount-4+3].startCoord.x = 100;
-    lines[linesCount-4+3].startCoord.y = 300;
+    lines[linesCount-4+3].startCoord.x = 10;
+    lines[linesCount-4+3].startCoord.y = 30;
 
     lines[linesCount-4+3].dirX = 0;
-    lines[linesCount-4+3].dirY = -200;*/
+    lines[linesCount-4+3].dirY = -20;*/
 
 	
 

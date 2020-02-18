@@ -26,6 +26,15 @@ Tile::Tile() {
 
 }
 
+Tile::Tile(Vector2f pos, bool isRed, bool isBlue) {
+	this->physForm.setPosition(pos);
+	this->physForm.setSize(Vector2f(scale, scale));
+	//this->physForm.setOrigin(Vector2f(physForm.getSize().x/2.f, physForm.getSize().y/2.f));
+	this->physForm.setFillColor(Color::White);
+	this->isRed = false;
+	this->isBlue = false;
+}
+
 void Tile::rotate(float deg) {
 	physForm.rotate(deg);
 

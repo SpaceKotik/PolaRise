@@ -9,11 +9,16 @@ using namespace sf;
 
 enum GameState {Menu, Menu_2, Gameplay, Leaderboard};
 
- /*   Vertex test_line[] =
-{
-    Vertex(Vector2f(10.f, 10.f)),
-    Vertex(Vector2f(150.f, 150.f))
-}; */
+/*struct MouseState{
+    Vector2f pos;
+    bool RightButtonPressed = false;
+    bool LeftButtonPressed = false;
+};*/
+
+
+
+
+
 
 class Game {
 private:
@@ -28,15 +33,6 @@ private:
     int total_point;
 
     Vector2f mousePos;
-    
-
-
-    //Vertex testLine[8][2];
-
-    //Tile testRect;
- 
-
-
 
 
 public:
@@ -45,7 +41,7 @@ public:
 //    ~Game();
     void setup();
     void run();
-    void input();
+    Vector2f input();
     void update();
     void draw(Level level, RayTracing rayTracing);
 
