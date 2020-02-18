@@ -24,14 +24,18 @@ private:
 	int linesCount;
 	Line *rays;
 	Vertex **raysVertex;
+	Vector2f mousePos;
+	//VertexArray *lightMesh;
 
 public:
 	RayTracing();
 	//void setCanvas(Level level);
 	Line getPartIntersection(Line ray, Line line);
 	void calculateIntersections();
-	void update(Level *level, Window *window);
+	void update(Level *level, Window *window, Vector2f mousePos);
+	VertexArray createMesh();
 	int getLineCount();
 	Vertex** getRays();
+	VertexArray* getMesh();
 	void clear();
 };

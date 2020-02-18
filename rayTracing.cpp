@@ -15,7 +15,9 @@ extern const int scale;
 extern const float delay;
 extern const int field_x;
 extern const int field_y;
-const float angle = 0.0002;
+const float angle = 0.02;
+const Color lightColor = Color(22, 22, 22);
+
 
 #define NO_INTERSECTION Vector2f(-10, -10);
 
@@ -26,26 +28,13 @@ Vector2f getRectPointPos(Tile rect, int point) {
 
 
 RayTracing::RayTracing() {
-	/*this->rays = new Line;
-	this->rays[0].startCoord = Vector2f(15.f, 90.f);
-	this->rays[0].dirX = field_x*scale - rays[0].startCoord.x/sqrt((field_x*scale - rays[0].startCoord.x)*
-																	(field_x*scale - rays[0].startCoord.x) +
-																	(field_y*scale - rays[0].startCoord.y)*
-																	(field_y*scale - rays[0].startCoord.y));
-	this->rays[0].dirY = field_y*scale - rays[0].startCoord.y/sqrt((field_x*scale - rays[0].startCoord.x)*
-																	(field_x*scale - rays[0].startCoord.x) +
-																	(field_y*scale - rays[0].startCoord.y)*
-																	(field_y*scale - rays[0].startCoord.y));
-	this->rays[0].param = sqrt((field_x*scale - rays[0].startCoord.x)*
-								(field_x*scale - rays[0].startCoord.x) +
-								(field_y*scale - rays[0].startCoord.y)*
-								(field_y*scale - rays[0].startCoord.y));*/
+	mousePos = Vector2f(100, 100);
 }
 
 
 
 
-void RayTracing::update(Level *level, Window *window) {
+void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
 
 	linesCount = level->getTileCount()*4 + 4;
 	//find all vertices
@@ -62,6 +51,10 @@ void RayTracing::update(Level *level, Window *window) {
 	vertices[linesCount-4+2] = Vector2f(0.f, window->getSize().y);
 	vertices[linesCount-4+3] = Vector2f(window->getSize().x, window->getSize().y);
 
+	/*vertices[linesCount-4] = Vector2f(100.f, 100.f);
+	vertices[linesCount-4+1] = Vector2f(300.f, 100.f);
+	vertices[linesCount-4+2] = Vector2f(100.f, 300.f);
+	vertices[linesCount-4+3] = Vector2f(300.f, 300.f);*/
 
 
 
@@ -106,6 +99,35 @@ void RayTracing::update(Level *level, Window *window) {
     lines[linesCount-4+3].dirX = 0;
     lines[linesCount-4+3].dirY = -tempY-2;
 
+
+
+    /*int tempX = window->getSize().x;
+	int tempY = window->getSize().y;
+
+	lines[linesCount-4].startCoord.x = 100;
+    lines[linesCount-4].startCoord.y = 100;
+
+    lines[linesCount-4].dirX = 200;
+    lines[linesCount-4].dirY = 0;
+
+    lines[linesCount-4+1].startCoord.x = 300;
+    lines[linesCount-4+1].startCoord.y = 0;
+
+    lines[linesCount-4+1].dirX = 0;
+    lines[linesCount-4+1].dirY = 200;
+
+    lines[linesCount-4+2].startCoord.x = 300;
+    lines[linesCount-4+2].startCoord.y = 300;
+
+    lines[linesCount-4+2].dirX = -200;
+    lines[linesCount-4+2].dirY = 0;
+
+    lines[linesCount-4+3].startCoord.x = 100;
+    lines[linesCount-4+3].startCoord.y = 300;
+
+    lines[linesCount-4+3].dirX = 0;
+    lines[linesCount-4+3].dirY = -200;*/
+
 	
 
 
@@ -115,11 +137,11 @@ void RayTracing::update(Level *level, Window *window) {
 		raysVertex[i] = new Vertex[2];
 	}
 
-
-	Vector2f mousePos;
+	//set cursor position
+	//Vector2f mousePos;
 	for (int i = 0; i < linesCount*3; ++i) {
 		
-		mousePos = (Vector2f)Mouse::getPosition(*window);
+		/*mousePos = (Vector2f)Mouse::getPosition(*window);
 
         if (Mouse::getPosition(*window).x > window->getSize().x)
             mousePos.x = window->getSize().x;
@@ -128,41 +150,36 @@ void RayTracing::update(Level *level, Window *window) {
         if (Mouse::getPosition(*window).y > window->getSize().y)
             mousePos.y = window->getSize().y;
         if (Mouse::getPosition(*window).y < 0)
-            mousePos.y = 0;
+            mousePos.y = 0;*/
 
-
-           raysVertex[i][0] = Vertex(mousePos, Color::Blue);
+         raysVertex[i][0] = Vertex(mousePos, Color::Blue);
+        //raysVertex[i][0] = Vertex(Vector2f(100, window->getSize().y-100), Color::Blue);
     }
-
+    //set 2nd dot of main raysVertex
     for (int i = 0; i < linesCount; ++i) {
     	raysVertex[i][1] = Vertex(vertices[i], Color::Blue);
 
     }
+    //set 2nd dot of assistinng raysVertex
     for (int i = linesCount; i < linesCount*3; i += 2) {
-    	//float rayLen = sqrt()
-
-
-
-
-
 
 
 
     	Transform rotation1;
-    	rotation1.rotate(angle, mousePos).scale(500, 500, mousePos.x, mousePos.y);
+    	rotation1.rotate(-angle, mousePos);//  .scale(1, 1, mousePos.x, mousePos.y);
     	//rotate
     	raysVertex[i][1] = Vertex(vertices[(i-linesCount)/2], Color::Blue);
     	raysVertex[i][1].position = rotation1.transformPoint(raysVertex[i][1].position);
 
     	Transform rotation2;
-    	rotation2.rotate(-2*angle, mousePos);
+    	rotation2.rotate(2*angle, mousePos);
     	//rotate
     	raysVertex[i+1][1] = Vertex(vertices[(i-linesCount)/2], Color::Blue);
     	raysVertex[i+1][1].position = rotation2.transformPoint(raysVertex[i][1].position);
     }
 
 
-    //set rays
+    //set main rays
 	rays = new Line[linesCount*3];
 
 	for (int i = 0; i < linesCount; ++i) {
@@ -176,7 +193,7 @@ void RayTracing::update(Level *level, Window *window) {
 
 		}
 	}
-
+	//set assisting rays
 	for (int i = linesCount; i < linesCount*3; ++i) {
 
 		rays[i].startCoord.x = raysVertex[i][0].position.x;
@@ -188,26 +205,8 @@ void RayTracing::update(Level *level, Window *window) {
 
 
 
-    //calculateIntersections();
-    for (int i = 0; i < linesCount*3; ++i) { 
-
-		Line prevIntersection;
-        prevIntersection.param = 10000;///!!!!
-        //raysVertex[i][1] = Vertex(vertices[i], Color::Blue);
-		for (int j = 0; j < linesCount; ++j) {
-
-			Line tempLine = getPartIntersection(rays[i], lines[j]);
-	    	
-			if (tempLine.startCoord.x != -10 && tempLine.startCoord.y != -10) { 
-		        if (tempLine.param < prevIntersection.param) {
-		            raysVertex[i][1] = Vertex(tempLine.startCoord, Color::Red);
-		            prevIntersection.param = tempLine.param;
-
-		        }
-
-		    }
-		}
-	}
+    calculateIntersections();
+    //createMesh();
 
 
 }
@@ -228,7 +227,7 @@ void RayTracing::clear() {
 		delete [] raysVertex[i];
 	}
 	delete [] raysVertex;
-
+	//delete [] lightMesh;
 }
 
 
@@ -252,7 +251,7 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
     float T1 = (line.startCoord.x+line.dirX*T2-ray.startCoord.x)/ray.dirX;
 
     // Must be within parametic whatevers for RAY/SEGMENT
-    if(T1<0) {
+    if(T1<-0.0001) {
         Line tempLine;
         tempLine.startCoord = NO_INTERSECTION;
         return tempLine;
@@ -269,30 +268,83 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
     tempLine.startCoord = Vector2f(ray.startCoord.x+ray.dirX*T1, ray.startCoord.y+ray.dirY*T1);
     tempLine.param = T1;
     return tempLine;
-    //return Vector2f(25, 25);
-    //return;
+}
+
+int cmp(const void *a, const void *b) {
+		 if ((atan2(((Line*)a)->dirY, ((Line*)a)->dirX) - atan2(((Line*)b)->dirY, ((Line*)b)->dirX)) < 0) {
+		 	return -1;
+		 }
+		 else {
+		 	return 1;
+		 }
+
+}
+
+VertexArray RayTracing::createMesh() {
+	//make orderArray
+	VertexArray lightMesh(TriangleFan, linesCount*3 + 2);
+	int order[linesCount*3];
+	for (int i = 0; i < linesCount*3 + 1; ++i) {
+		order[i] = i;
+	}
+
+	//sort orderArray
+
+
+	for (int i = 1; i < linesCount*3 + 1; i++) {
+		for (int j = 1; j < linesCount*3 + 1-i; ++j)
+		{
+			if(atan2(rays[order[j-1]].dirY, rays[order[j-1]].dirX) > atan2(rays[order[j+1-1]].dirY, rays[order[j+1-1]].dirX)){
+				//swap
+				/*order[j] = order[j+1]+ order[j];
+				order[j+1] = order[j] - order[j+1];
+				order[j] =  order[j] - order[j+1];*/
+				int temp = order[j-1];
+				order[j-1] = order[j+1-1];
+				order[j+1-1] = temp;
+			}
+		}
+	}
 
 
 
+	//qsort(order, linesCount*3+1, sizeof(int), cmp);
 
+	//create Mesh
+
+
+	//lightMesh = new VertexArray(TriangleFan, linesCount*3 + 1);
+	
+	lightMesh[0].position = raysVertex[0][0].position;
+	lightMesh[0].color = lightColor;
+	for (int i = 1; i < linesCount*3 + 1; ++i) {
+		(lightMesh)[i].position = raysVertex[order[i-1]][1].position;
+		(lightMesh)[i].color = lightColor;
+	}
+
+	(lightMesh)[linesCount*3 + 1].position = raysVertex[order[0]][1].position;
+	(lightMesh)[linesCount*3 + 1].color = lightColor;
+	return lightMesh;
 
 
 }
 
+
 void RayTracing::calculateIntersections() {
 
-	//for (int i = 0; i < linesCount + 4; ++i) {
-	for (int i = 0; i < 1; ++i) {
+	for (int i = 0; i < linesCount*3; ++i) { 
+
 		Line prevIntersection;
         prevIntersection.param = 10000;///!!!!
-        raysVertex[i][1] = Vertex(vertices[i], Color::Blue);
+        //raysVertex[i][1] = Vertex(vertices[i], Color::Blue);
 		for (int j = 0; j < linesCount; ++j) {
+
+			Line tempLine = getPartIntersection(rays[i], lines[j]);
 	    	
-			if (getPartIntersection(rays[i], lines[j]).startCoord.x != -10 && getPartIntersection(rays[i], lines[j]).startCoord.y != -10) {
-				raysVertex[i][1] = Vertex(vertices[i], Color::Red);
-		        if (getPartIntersection(rays[i], lines[j]).param < prevIntersection.param) {
-		            raysVertex[i][1] = Vertex(getPartIntersection(rays[i], lines[j]).startCoord, Color::Red);
-		            prevIntersection.param = getPartIntersection(rays[i], lines[j]).param;
+			if (tempLine.startCoord.x != -10 && tempLine.startCoord.y != -10) { 
+		        if (tempLine.param < prevIntersection.param) {
+		            raysVertex[i][1] = Vertex(tempLine.startCoord, Color::Red);
+		            prevIntersection.param = tempLine.param;
 
 		        }
 
@@ -300,4 +352,8 @@ void RayTracing::calculateIntersections() {
 		}
 	}
 
+}
+
+VertexArray* RayTracing::getMesh() {
+	//return lightMesh;
 }
