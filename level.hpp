@@ -18,7 +18,6 @@ private:
 	Vector2f finishPos;
 	int tileCount;
 
-
 public:
 	Level();
 	void setField();
@@ -27,6 +26,4 @@ public:
 	void update();
 	void addTile(Vector2f);
 	void removeTile(Vector2f);
-
-
 };

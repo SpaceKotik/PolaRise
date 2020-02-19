@@ -36,6 +36,5 @@ public:
 	VertexArray createMesh();
 	int getLineCount();
 	Vertex** getRays();
-	VertexArray* getMesh();
 	void clear();
 };

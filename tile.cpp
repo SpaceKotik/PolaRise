@@ -8,10 +8,8 @@
 
 
 extern const int scale;
-extern const float delay;
 extern const int field_x;
 extern const int field_y;
-extern const int mines;
 
 using namespace sf;
 
@@ -37,7 +35,6 @@ Tile::Tile(Vector2f pos, bool isRed, bool isBlue) {
 
 void Tile::rotate(float deg) {
 	physForm.rotate(deg);
-
 }
 
 RectangleShape Tile::getRect() {

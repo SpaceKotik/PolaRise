@@ -12,7 +12,6 @@
 
 
 extern const int scale;
-extern const float delay;
 extern const int field_x;
 extern const int field_y;
 const float angle = 0.02;
@@ -50,12 +49,6 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
 	vertices[linesCount-4+1] = Vector2f(window->getSize().x, 0.f);
 	vertices[linesCount-4+2] = Vector2f(0.f, window->getSize().y);
 	vertices[linesCount-4+3] = Vector2f(window->getSize().x, window->getSize().y);
-
-	/*vertices[linesCount-4] = Vector2f(100.f, 100.f);
-	vertices[linesCount-4+1] = Vector2f(300.f, 100.f);
-	vertices[linesCount-4+2] = Vector2f(100.f, 300.f);
-	vertices[linesCount-4+3] = Vector2f(300.f, 300.f);*/
-
 
 
 	//find all lines
@@ -99,6 +92,35 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
     lines[linesCount-4+3].dirX = 0;
     lines[linesCount-4+3].dirY = -tempY-2;*/
 
+
+
+        /*int tempX = window->getSize().x;
+	int tempY = window->getSize().y;
+
+	lines[linesCount-4].startCoord.x = 10;
+    lines[linesCount-4].startCoord.y = 10;
+
+    lines[linesCount-4].dirX = 20;
+    lines[linesCount-4].dirY = 0;
+
+    lines[linesCount-4+1].startCoord.x = 30;
+    lines[linesCount-4+1].startCoord.y = 0;
+
+    lines[linesCount-4+1].dirX = 0;
+    lines[linesCount-4+1].dirY = 20;
+
+    lines[linesCount-4+2].startCoord.x = 30;
+    lines[linesCount-4+2].startCoord.y = 30;
+
+    lines[linesCount-4+2].dirX = -20;
+    lines[linesCount-4+2].dirY = 0;
+
+    lines[linesCount-4+3].startCoord.x = 10;
+    lines[linesCount-4+3].startCoord.y = 30;
+
+    lines[linesCount-4+3].dirX = 0;
+    lines[linesCount-4+3].dirY = -20;*/
+
     int tempX = window->getSize().x;
 	int tempY = window->getSize().y;
 
@@ -127,37 +149,6 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
     lines[linesCount-4+3].dirY = -tempY;
 
 
-
-    /*int tempX = window->getSize().x;
-	int tempY = window->getSize().y;
-
-	lines[linesCount-4].startCoord.x = 10;
-    lines[linesCount-4].startCoord.y = 10;
-
-    lines[linesCount-4].dirX = 20;
-    lines[linesCount-4].dirY = 0;
-
-    lines[linesCount-4+1].startCoord.x = 30;
-    lines[linesCount-4+1].startCoord.y = 0;
-
-    lines[linesCount-4+1].dirX = 0;
-    lines[linesCount-4+1].dirY = 20;
-
-    lines[linesCount-4+2].startCoord.x = 30;
-    lines[linesCount-4+2].startCoord.y = 30;
-
-    lines[linesCount-4+2].dirX = -20;
-    lines[linesCount-4+2].dirY = 0;
-
-    lines[linesCount-4+3].startCoord.x = 10;
-    lines[linesCount-4+3].startCoord.y = 30;
-
-    lines[linesCount-4+3].dirX = 0;
-    lines[linesCount-4+3].dirY = -20;*/
-
-	
-
-
 	//set raysVertex
 	raysVertex = new Vertex* [linesCount*3];
 	for (int i = 0; i < linesCount*3; ++i) {
@@ -167,20 +158,8 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
 	//set cursor position
 	//Vector2f mousePos;
 	for (int i = 0; i < linesCount*3; ++i) {
-		
-		/*mousePos = (Vector2f)Mouse::getPosition(*window);
-
-        if (Mouse::getPosition(*window).x > window->getSize().x)
-            mousePos.x = window->getSize().x;
-        if (Mouse::getPosition(*window).x < 0)
-            mousePos.x = 0;
-        if (Mouse::getPosition(*window).y > window->getSize().y)
-            mousePos.y = window->getSize().y;
-        if (Mouse::getPosition(*window).y < 0)
-            mousePos.y = 0;*/
 
          raysVertex[i][0] = Vertex(mousePos, Color::Blue);
-        //raysVertex[i][0] = Vertex(Vector2f(100, window->getSize().y-100), Color::Blue);
     }
     //set 2nd dot of main raysVertex
     for (int i = 0; i < linesCount; ++i) {
@@ -189,8 +168,6 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
     }
     //set 2nd dot of assistinng raysVertex
     for (int i = linesCount; i < linesCount*3; i += 2) {
-
-
 
     	Transform rotation1;
     	rotation1.rotate(-angle, mousePos);//  .scale(1, 1, mousePos.x, mousePos.y);
@@ -230,10 +207,8 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
         rays[i].dirY = (raysVertex[i][1].position.y - rays[i].startCoord.y);
 	}
 
-
-
+	//important!
     calculateIntersections();
-    //createMesh();
 
 
 }
@@ -297,6 +272,8 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
     return tempLine;
 }
 
+
+//function coparing angles of rays
 int cmp(const void *a, const void *b) {
 		 if ((atan2(((Line*)a)->dirY, ((Line*)a)->dirX) - atan2(((Line*)b)->dirY, ((Line*)b)->dirX)) < 0) {
 		 	return -1;
@@ -317,30 +294,29 @@ VertexArray RayTracing::createMesh() {
 
 	//sort orderArray
 
-
 	for (int i = 1; i < linesCount*3 + 1; i++) {
 		for (int j = 1; j < linesCount*3 + 1-i; ++j)
 		{
 			if(atan2(rays[order[j-1]].dirY, rays[order[j-1]].dirX) > atan2(rays[order[j+1-1]].dirY, rays[order[j+1-1]].dirX)){
 				//swap
-				/*order[j] = order[j+1]+ order[j];
-				order[j+1] = order[j] - order[j+1];
-				order[j] =  order[j] - order[j+1];*/
-				int temp = order[j-1];
+				order[j-1] = order[j]+ order[j-1];
+				order[j] = order[j-1] - order[j];
+				order[j-1] =  order[j-1] - order[j];
+				/*int temp = order[j-1];
 				order[j-1] = order[j+1-1];
-				order[j+1-1] = temp;
+				order[j+1-1] = temp;*/
 			}
 		}
 	}
 
 
+	//MUST BE DONE!
+
+
+
+
 
 	//qsort(order, linesCount*3+1, sizeof(int), cmp);
-
-	//create Mesh
-
-
-	//lightMesh = new VertexArray(TriangleFan, linesCount*3 + 1);
 	
 	lightMesh[0].position = raysVertex[0][0].position;
 	lightMesh[0].color = lightColor;
@@ -351,9 +327,8 @@ VertexArray RayTracing::createMesh() {
 
 	(lightMesh)[linesCount*3 + 1].position = raysVertex[order[0]][1].position;
 	(lightMesh)[linesCount*3 + 1].color = lightColor;
+
 	return lightMesh;
-
-
 }
 
 
@@ -362,7 +337,7 @@ void RayTracing::calculateIntersections() {
 	for (int i = 0; i < linesCount*3; ++i) { 
 
 		Line prevIntersection;
-        prevIntersection.param = 10000;///!!!!
+        prevIntersection.param = 10000;///!!!! may be the problem
         //raysVertex[i][1] = Vertex(vertices[i], Color::Blue);
 		for (int j = 0; j < linesCount; ++j) {
 
@@ -379,8 +354,4 @@ void RayTracing::calculateIntersections() {
 		}
 	}
 
-}
-
-VertexArray* RayTracing::getMesh() {
-	//return lightMesh;
 }

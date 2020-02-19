@@ -27,7 +27,6 @@ private:
     GameState gameState;
     Texture texture;
     Event event;
-    //Tile **field;
     RenderWindow window;
     //Texts texts;
     int total_point;

@@ -13,7 +13,6 @@ using namespace sf;
 
 
 extern const int scale;
-extern const float delay;
 extern const int field_x;
 extern const int field_y;
 const float speed = 10;
@@ -57,12 +56,10 @@ void Game::run() {
     level.addTile(Vector2f(600, 600));
     level.addTile(Vector2f(700, 200));*/
     RayTracing rayTracing;
-    //rayTracing.update(&level, getHandle());
 
 
     while(window.isOpen()) {
-        //rayTracing.clear();
-        //MouseState mouseState = input();
+
         MouseState mouseState = input();
         Vector2f mouseNotClicked = NO_INTERSECTION;
         
@@ -75,18 +72,14 @@ void Game::run() {
             }
         }
         level.update();
-        //rayTracing.update(&level, getHandle(), mousePos);
-        // /rayTracing.createMesh();
 
         draw(level, rayTracing);
-        //rayTracing.clear();
     }
 
 
 }
 
 void Game::draw(Level level, RayTracing rayTracing) {
-    //update_field();
     //window.clear(Color(230, 235, 230));
     window.clear(Color(10, 10, 10));
     /*window.draw(testRect.physForm);
@@ -96,11 +89,8 @@ void Game::draw(Level level, RayTracing rayTracing) {
     for (int i = 0; i < level.getTileCount(); ++i) {
         window.draw(level.getField()->tiles[i].physForm);
     }
-   // window.draw(rayTracing.createMesh());
-
 
     //BlendMode blendmode;
-
 
     //main source
     rayTracing.update(&level, getHandle(), mousePos);
@@ -110,10 +100,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
     }*/
     rayTracing.clear();
 
-
-
-
-
+    //Assisting light sources
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, lightSourceSize));
     window.draw(rayTracing.createMesh(), BlendAdd);
@@ -149,18 +136,6 @@ void Game::draw(Level level, RayTracing rayTracing) {
     window.draw(rayTracing.createMesh(), BlendAdd);
     rayTracing.clear();
 
-    //main source moved here
-    /*rayTracing.update(&level, getHandle(), mousePos);
-    window.draw(rayTracing.createMesh(), BlendAdd);
-    for (int i = 0; i < rayTracing.getLineCount()*3; ++i) {
-        //window.draw(rayTracing.getRays()[i], 2, Lines);
-    }
-    rayTracing.clear();*/
-    //window.draw(rayTracing.createMesh());
-    
-    //window.draw(*rayTracing.getMesh());
-    
-
     window.display();
 }
 
@@ -191,8 +166,6 @@ MouseState Game::input() {
             default:
                 break;
 
-
-
             /*case Event::KeyPressed:
 
             if(Keyboard::isKeyPressed(Keyboard::Left)) {
@@ -208,8 +181,6 @@ MouseState Game::input() {
                 mousePos = mousePos + Vector2f(0, -speed);
             }
             break;*/
-            
-
             
             }
         }

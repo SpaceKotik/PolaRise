@@ -5,10 +5,11 @@
 #include <unistd.h>
 #include "game.hpp"
 #include "tile.hpp"
+#include <iostream>
+#include <stdlib.h>
 
 
 extern const int scale;
-extern const float delay;
 extern const int field_x;
 extern const int field_y;
 
@@ -47,16 +48,19 @@ int Level::getTileCount() {
 
 void Level::update() {
 	for (int i = 0; i < tileCount; ++i) {
-		//field.tile[i].physForm.rotate((-2 + i*2)*2);
 		//field.tiles[i].physForm.rotate(2);
 	}
 }
 
 void Level::addTile(Vector2f pos) {
-	//Tile tempTile(Vector2f)
 	pos = Vector2f (((int)pos.x/(int)scale)*scale + 0*scale,((int)pos.y/(int)scale)*scale + 0*scale);
 	field.tiles.push_back(Tile(pos, false, false));
 	tileCount++;
+
+	//debug
+	std::cout << "\033[2J\033[1;1H";
+	std::cout << "Tiles on screen: " << tileCount << '\n';
+	//debug
 }
 
 void Level::removeTile(Vector2f pos) {
@@ -67,6 +71,11 @@ void Level::removeTile(Vector2f pos) {
 		if (field.tiles[i].physForm.getPosition() == pos) {
 			field.tiles.erase(field.tiles.begin() + i);
 			tileCount--;
+
+			//debug
+			std::cout << "\033[2J\033[1;1H";
+			std::cout << "Tiles on screen: " << tileCount << '\n';
+			//debug
 			break;
 		}
 	}
