@@ -14,8 +14,14 @@
 extern const int scale;
 extern const int field_x;
 extern const int field_y;
+extern const Vector2f lightSourceTextureCenter;
+
 const float angle = 0.02;
-const Color lightColor = Color(23, 23, 23);
+
+//const Color lightColor = Color(23*2, 23*2, 23*2);
+//const Color lightColor = Color(210, 210, 160);
+//const Color lightColor = Color(102, 178, 255);
+const Color lightColor = Color(18, 32, 46);
 
 
 #define NO_INTERSECTION Vector2f(-10, -10);
@@ -34,7 +40,6 @@ RayTracing::RayTracing() {
 
 
 void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
-
 	linesCount = level->getTileCount()*4 + 4;
 	//find all vertices
 	vertices = new Vector2f[linesCount];
@@ -319,14 +324,20 @@ VertexArray RayTracing::createMesh() {
 	//qsort(order, linesCount*3+1, sizeof(int), cmp);
 	
 	lightMesh[0].position = raysVertex[0][0].position;
+	lightMesh[0].texCoords = lightSourceTextureCenter; 
 	lightMesh[0].color = lightColor;
 	for (int i = 1; i < linesCount*3 + 1; ++i) {
 		(lightMesh)[i].position = raysVertex[order[i-1]][1].position;
 		(lightMesh)[i].color = lightColor;
+
+		(lightMesh)[i].texCoords = lightSourceTextureCenter + (lightMesh[0].position  - lightMesh[i].position);
+
+
 	}
 
 	(lightMesh)[linesCount*3 + 1].position = raysVertex[order[0]][1].position;
 	(lightMesh)[linesCount*3 + 1].color = lightColor;
+	(lightMesh)[linesCount*3 + 1].texCoords = lightSourceTextureCenter + (lightMesh[0].position  - lightMesh[linesCount*3 + 1].position);
 
 	return lightMesh;
 }

@@ -15,15 +15,19 @@ using namespace sf;
 extern const int scale;
 extern const int field_x;
 extern const int field_y;
+extern const Vector2f lightSourceTextureCenter;
+
 const float speed = 10;
 const float lightSourceSize = 2;
+
 
 
 #define NO_INTERSECTION Vector2f(-10, -10);
 
 Game::Game() {
     gameState = Gameplay;
-    //texture.loadFromFile("resourses\\textures.png");
+    texture.loadFromFile("Textures/lightMask.png");
+    texture.setSmooth(true);
 
     ContextSettings settings;
     settings.antialiasingLevel = 8;
@@ -32,7 +36,7 @@ Game::Game() {
     window.create(VideoMode(field_x*scale, (field_y+0.1)*scale), "PolaRise",
                   Style::Titlebar | Style::Close, settings);
     window.setKeyRepeatEnabled(true);
-    window.setFramerateLimit(120);
+    window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(true);
 
     mousePos = Vector2f(100, 100);
@@ -51,10 +55,7 @@ void Game::run() {
 
     Level level;
     level.setField();
-    /*level.addTile(Vector2f(200, 200));
-    level.addTile(Vector2f(400, 400));
-    level.addTile(Vector2f(600, 600));
-    level.addTile(Vector2f(700, 200));*/
+
     RayTracing rayTracing;
 
 
@@ -80,63 +81,69 @@ void Game::run() {
 }
 
 void Game::draw(Level level, RayTracing rayTracing) {
-    //window.clear(Color(230, 235, 230));
+
+    RenderStates renderStates;
+    renderStates.blendMode = BlendAdd;
+
     window.clear(Color(10, 10, 10));
-    /*window.draw(testRect.physForm);
-    for (int i = 0; i < 8; ++i) {
-        window.draw(testLine[i], 2, Lines);
-    }*/
-    for (int i = 0; i < level.getTileCount(); ++i) {
-        window.draw(level.getField()->tiles[i].physForm);
-    }
 
-    //BlendMode blendmode;
-
-    //main source
+    //process light sources
     rayTracing.update(&level, getHandle(), mousePos);
-    window.draw(rayTracing.createMesh(), BlendAdd);
-    /*for (int i = 0; i < rayTracing.getLineCount()*3; ++i) {
-        window.draw(rayTracing.getRays()[i], 2, Lines);
-    }*/
+    window.draw(rayTracing.createMesh(), renderStates);
+    for (int i = 0; i < rayTracing.getLineCount()*3; ++i) {
+        //window.draw(rayTracing.getRays()[i], 2, Lines);
+    }
     rayTracing.clear();
 
-    //Assisting light sources
-
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, lightSourceSize));
-    window.draw(rayTracing.createMesh(), BlendAdd);
+    window.draw(rayTracing.createMesh(), renderStates);
     rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, -lightSourceSize));
-    window.draw(rayTracing.createMesh(), BlendAdd);
+    window.draw(rayTracing.createMesh(), renderStates);
     rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, 0));
-    window.draw(rayTracing.createMesh(), BlendAdd);
+    window.draw(rayTracing.createMesh(), renderStates);
     rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, 0));
-    window.draw(rayTracing.createMesh(), BlendAdd);
+    window.draw(rayTracing.createMesh(), renderStates);
     rayTracing.clear();
 
-
-
-    rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, lightSourceSize));
-    window.draw(rayTracing.createMesh(), BlendAdd);
+   /* rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, lightSourceSize));
+    window.draw(rayTracing.createMesh(), renderStates);
     rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, -lightSourceSize));
-    window.draw(rayTracing.createMesh(), BlendAdd);
+    window.draw(rayTracing.createMesh(), renderStates);
     rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, lightSourceSize));
-    window.draw(rayTracing.createMesh(), BlendAdd);
+    window.draw(rayTracing.createMesh(), renderStates);
     rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, -lightSourceSize));
-    window.draw(rayTracing.createMesh(), BlendAdd);
-    rayTracing.clear();
+    window.draw(rayTracing.createMesh(), renderStates);
+    rayTracing.clear();*/
 
-    window.display();
+
+    //add light fade
+    Sprite lightFade;
+    lightFade.setOrigin(lightSourceTextureCenter);
+    lightFade.setTexture(texture);
+    lightFade.setPosition(mousePos);
+    lightFade.setScale(Vector2f(1.7, 1.7));
+    window.draw(lightFade, BlendMultiply);
+
+
+    //draw all tiles
+    for (int i = 0; i < level.getTileCount(); ++i) {
+        // /window.draw(level.getField()->tiles[i].physForm, BlendMultiply);
+        window.draw(level.getField()->tiles[i].physForm);
+    }
+
+    window.display();    
 }
 
 MouseState Game::input() {

@@ -43,5 +43,4 @@ public:
     MouseState input();
     void update();
     void draw(Level level, RayTracing rayTracing);
-
 };

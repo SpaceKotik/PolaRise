@@ -29,6 +29,9 @@ Tile::Tile(Vector2f pos, bool isRed, bool isBlue) {
 	this->physForm.setSize(Vector2f(scale, scale));
 	//this->physForm.setOrigin(Vector2f(physForm.getSize().x/2.f, physForm.getSize().y/2.f));
 	this->physForm.setFillColor(Color::White);
+
+	this->physForm.setOutlineColor(Color(190, 190, 190));
+	this->physForm.setOutlineThickness(2);
 	this->isRed = false;
 	this->isBlue = false;
 }
