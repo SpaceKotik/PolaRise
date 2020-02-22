@@ -95,7 +95,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
     }
     rayTracing.clear();
 
-    rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, lightSourceSize));
+    /*rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, lightSourceSize));
     window.draw(rayTracing.createMesh(), renderStates);
     rayTracing.clear();
 
@@ -109,7 +109,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, 0));
     window.draw(rayTracing.createMesh(), renderStates);
-    rayTracing.clear();
+    rayTracing.clear();*/
 
    /* rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, lightSourceSize));
     window.draw(rayTracing.createMesh(), renderStates);
@@ -133,15 +133,22 @@ void Game::draw(Level level, RayTracing rayTracing) {
     lightFade.setOrigin(lightSourceTextureCenter);
     lightFade.setTexture(texture);
     lightFade.setPosition(mousePos);
-    lightFade.setScale(Vector2f(1.7, 1.7));
+    lightFade.setScale(Vector2f(1.3, 1.3));
     window.draw(lightFade, BlendMultiply);
 
 
     //draw all tiles
-    for (int i = 0; i < level.getTileCount(); ++i) {
+    /*for (int i = 0; i < level.getTileCount(); ++i) {
         // /window.draw(level.getField()->tiles[i].physForm, BlendMultiply);
         window.draw(level.getField()->tiles[i].physForm);
+    }*/
+
+    for (int i = 0; i < field_x*field_y; ++i) {
+        if (level.getField()->tiles[i].isBlue) {
+            window.draw(level.getField()->tiles[i].physForm);
+        }
     }
+
 
     window.display();    
 }

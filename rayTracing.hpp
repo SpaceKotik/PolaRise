@@ -2,14 +2,13 @@
 
 #include <SFML/Graphics.hpp>
 #include "level.hpp"
+#include <unistd.h>
 
 using namespace sf;
 
 
 
 struct Line {
-
-
 	Vector2f startCoord;
 	float dirX;
 	float dirY;
@@ -17,15 +16,24 @@ struct Line {
 	// line is (x,y)  (x + dirX*param, y + dirY*param)
 };
 
+
+struct Cell {
+	int edgeId[4];
+	bool edgeExist[4];
+	bool exist = false;
+};
+
 class RayTracing {
 private:
 	Vector2f *vertices;
 	Line *lines;
+	std::vector<Line> edges;
 	int linesCount;
 	Line *rays;
 	Vertex **raysVertex;
 	Vector2f mousePos;
 	//VertexArray *lightMesh;
+	std::vector<Cell> processingCells; 
 
 public:
 	RayTracing();
@@ -36,5 +44,6 @@ public:
 	VertexArray createMesh();
 	int getLineCount();
 	Vertex** getRays();
+	void convertTileMapToPolyMap(Level *level);
 	void clear();
 };

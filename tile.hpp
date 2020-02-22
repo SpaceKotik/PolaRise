@@ -14,6 +14,7 @@ public:
 	Tile(Vector2f pos, bool isRed, bool isBlue);
 	void rotate(float deg);
 	RectangleShape getRect();
+	bool checkIfBlue();
 
 friend class Game;
 friend class Level;

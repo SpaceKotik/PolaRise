@@ -16,19 +16,177 @@ extern const int field_x;
 extern const int field_y;
 extern const Vector2f lightSourceTextureCenter;
 
-const float angle = 0.02;
+#define DOWN 0
+#define LEFT 1
+#define UP 2
+#define RIGHT 3
+
+const float angle = 0.001;
+
+
 
 //const Color lightColor = Color(23*2, 23*2, 23*2);
 //const Color lightColor = Color(210, 210, 160);
 //const Color lightColor = Color(102, 178, 255);
-const Color lightColor = Color(18, 32, 46);
-
+//const Color lightColor = Color(18, 32, 46);
+const Color lightColor = Color(18*5, 32*5, 46*5);
 
 #define NO_INTERSECTION Vector2f(-10, -10);
 
 Vector2f getRectPointPos(Tile rect, int point) {
     return rect.getRect().getTransform().transformPoint(rect.getRect().getPoint(point));
 }
+
+void RayTracing::convertTileMapToPolyMap(Level *level) {
+	edges.clear();
+
+
+
+	for (int i = 0; i < field_y; ++i) {
+		for (int j = 0; j < field_x; ++j) {
+			Cell tempCell;
+			for (int k = 0; k < 4; ++k) {
+				tempCell.edgeExist[k] = false;
+				tempCell.edgeId[k] = -1;
+				if (level->getField()->tiles[i*field_x + j].checkIfBlue())
+					tempCell.exist = true;
+				else
+					tempCell.exist = false;
+			}
+			processingCells.push_back(tempCell);
+		}
+	}
+
+	for (int i = 0; i < field_y; ++i) {
+		for (int j = 0; j < field_x; ++j) {
+			int self = i*field_x + j;
+			int left = i*field_x + j - 1;
+			int right = i*field_x + j + 1;
+			int up = (i-1)*field_x + j;
+			int down =(i+1)*field_x + j;
+
+
+
+			
+			if (processingCells[self].exist) {
+
+				//check left neighbour
+				if (j != 0 && !processingCells[left].exist) {
+
+					//edge existing?
+					if ( i != 0 && processingCells[up].edgeExist[LEFT]) {
+
+						edges[processingCells[up].edgeId[LEFT]].dirY += scale;
+						processingCells[self].edgeId[LEFT] = processingCells[up].edgeId[LEFT];
+					}
+					//if not, make one
+					else {
+						Line newEdge;
+						newEdge.startCoord = getRectPointPos(level->getField()->tiles[i], 0);//
+						newEdge.dirX = getRectPointPos(level->getField()->tiles[i], 3).x - newEdge.startCoord.x;
+						newEdge.dirY = getRectPointPos(level->getField()->tiles[i], 3).y - newEdge.startCoord.y;
+
+						int edge_id = edges.size();
+
+						edges.push_back(newEdge);
+
+						processingCells[self].edgeId[LEFT] = edge_id;
+						processingCells[self].edgeExist[LEFT] = true;
+					}
+				}
+
+				//check right neighbour
+				if (j != field_x-1 && !processingCells[right].exist) {
+
+					//edge existing?
+					if ( i != 0 && processingCells[up].edgeExist[RIGHT]) {
+
+						edges[processingCells[up].edgeId[RIGHT]].dirY += scale;
+						processingCells[self].edgeId[RIGHT] = processingCells[up].edgeId[RIGHT];
+					}
+					//if not, make one
+					else {
+						Line newEdge;
+						newEdge.startCoord = getRectPointPos(level->getField()->tiles[i], 1);//
+						newEdge.dirX = getRectPointPos(level->getField()->tiles[i], 2).x - newEdge.startCoord.x;
+						newEdge.dirY = getRectPointPos(level->getField()->tiles[i], 2).y - newEdge.startCoord.y;
+
+						int edge_id = edges.size();
+
+						edges.push_back(newEdge);
+
+						processingCells[self].edgeId[RIGHT] = edge_id;
+						processingCells[self].edgeExist[RIGHT] = true;
+					}
+				}
+
+
+				//check up neighbour
+				if (i != 0 && !processingCells[up].exist) {
+
+
+					//edge existing?
+					if (j != 0 && processingCells[left].edgeExist[UP]) {
+
+						edges[processingCells[left].edgeId[UP]].dirX += scale;
+						processingCells[self].edgeId[UP] = processingCells[left].edgeId[UP];
+					}
+					//if not, make one
+					else {
+						Line newEdge;
+						newEdge.startCoord = getRectPointPos(level->getField()->tiles[i], 0);//
+						newEdge.dirX = getRectPointPos(level->getField()->tiles[i], 1).x - newEdge.startCoord.x;
+						newEdge.dirY = getRectPointPos(level->getField()->tiles[i], 1).y - newEdge.startCoord.y;
+
+						int edge_id = edges.size();
+
+						edges.push_back(newEdge);
+
+						processingCells[self].edgeId[UP] = edge_id;
+						processingCells[self].edgeExist[UP] = true;
+					}
+				}
+
+
+				//check down neighbour
+				if (j != field_y-1 && !processingCells[down].exist) {
+
+					//edge existing?
+					if (j != 0 && processingCells[left].edgeExist[DOWN]) {
+
+						edges[processingCells[left].edgeId[DOWN]].dirX += scale;
+						processingCells[self].edgeId[DOWN] = processingCells[up].edgeId[LEFT];
+					}
+					//if not, make one
+					else {
+						Line newEdge;
+						newEdge.startCoord = getRectPointPos(level->getField()->tiles[i], 1);//
+						newEdge.dirX = getRectPointPos(level->getField()->tiles[i], 2).x - newEdge.startCoord.x;
+						newEdge.dirY = getRectPointPos(level->getField()->tiles[i], 2).y - newEdge.startCoord.y;
+
+						int edge_id = edges.size();
+
+						edges.push_back(newEdge);
+
+						processingCells[self].edgeId[DOWN] = edge_id;
+						processingCells[self].edgeExist[DOWN] = true;
+					}
+				}
+			} 
+		}
+	}
+
+
+
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -43,7 +201,18 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
 	linesCount = level->getTileCount()*4 + 4;
 	//find all vertices
 	vertices = new Vector2f[linesCount];
-	std::vector<Tile> allTiles =level->getField()->tiles;
+	std::vector<Tile> tempField = level->getField()->tiles;
+	std::vector<Tile> allTiles;
+	//allTiles.clear();
+	for (int i = 0; i < field_x*field_y; ++i) {
+		if (tempField[i].checkIfBlue()) {
+			allTiles.push_back(tempField[i]);
+		}
+	}
+
+
+
+
 	for (int i = 0; i < level->getTileCount(); ++i) {
 		for (int j = 0; j < 4; ++j) {
 			vertices[i*4+j] = getRectPointPos(allTiles[i], j);
@@ -69,62 +238,7 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
 
 		}
 	}
-	//setBorders
-	/*int tempX = window->getSize().x;
-	int tempY = window->getSize().y;
-
-	lines[linesCount-4].startCoord.x = -1;
-    lines[linesCount-4].startCoord.y = -1;
-
-    lines[linesCount-4].dirX = window->getSize().x+2;
-    lines[linesCount-4].dirY = 0;
-
-    lines[linesCount-4+1].startCoord.x = window->getSize().x+1;
-    lines[linesCount-4+1].startCoord.y = 0;
-
-    lines[linesCount-4+1].dirX = 0;
-    lines[linesCount-4+1].dirY = window->getSize().y+2;
-
-    lines[linesCount-4+2].startCoord.x = window->getSize().x+1;
-    lines[linesCount-4+2].startCoord.y = window->getSize().y+1;
-
-    lines[linesCount-4+2].dirX = (-tempX-2);
-    lines[linesCount-4+2].dirY = 0;
-
-    lines[linesCount-4+3].startCoord.x = -1;
-    lines[linesCount-4+3].startCoord.y = window->getSize().y+1;
-
-    lines[linesCount-4+3].dirX = 0;
-    lines[linesCount-4+3].dirY = -tempY-2;*/
-
-
-
-        /*int tempX = window->getSize().x;
-	int tempY = window->getSize().y;
-
-	lines[linesCount-4].startCoord.x = 10;
-    lines[linesCount-4].startCoord.y = 10;
-
-    lines[linesCount-4].dirX = 20;
-    lines[linesCount-4].dirY = 0;
-
-    lines[linesCount-4+1].startCoord.x = 30;
-    lines[linesCount-4+1].startCoord.y = 0;
-
-    lines[linesCount-4+1].dirX = 0;
-    lines[linesCount-4+1].dirY = 20;
-
-    lines[linesCount-4+2].startCoord.x = 30;
-    lines[linesCount-4+2].startCoord.y = 30;
-
-    lines[linesCount-4+2].dirX = -20;
-    lines[linesCount-4+2].dirY = 0;
-
-    lines[linesCount-4+3].startCoord.x = 10;
-    lines[linesCount-4+3].startCoord.y = 30;
-
-    lines[linesCount-4+3].dirX = 0;
-    lines[linesCount-4+3].dirY = -20;*/
+	//set borders
 
     int tempX = window->getSize().x;
 	int tempY = window->getSize().y;

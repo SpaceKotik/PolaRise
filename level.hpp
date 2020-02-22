@@ -7,6 +7,7 @@ using namespace sf;
 
 struct Field {
 	std::vector<Tile> tiles;
+
 };
 
 class Level {
@@ -26,4 +27,6 @@ public:
 	void update();
 	void addTile(Vector2f);
 	void removeTile(Vector2f);
+	int loadToFile();
+	int loadFromFile();
 };

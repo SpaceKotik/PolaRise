@@ -43,3 +43,7 @@ void Tile::rotate(float deg) {
 RectangleShape Tile::getRect() {
 	return physForm;
 }
+
+bool Tile::checkIfBlue() {
+	return isBlue;
+}
