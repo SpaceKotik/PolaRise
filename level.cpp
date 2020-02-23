@@ -54,7 +54,7 @@ int Level::getTileCount() {
 void Level::update() {
 	/*for (int i = 0; i < field_x*field_y; ++i) {
 		if (field.tiles[i].isBlue)
-			field.tiles[i].physForm.rotate(3);
+			field.tiles[i].physForm.rotate(1.5);
 	}*/
 }
 
@@ -70,7 +70,7 @@ void Level::addTile(Vector2f pos) {
 	std::cout << "\033[2J\033[1;1H";
 	std::cout << "Tiles on screen: " << tileCount << '\n';
 	//debug
-	
+
 	loadToFile();
 }
 

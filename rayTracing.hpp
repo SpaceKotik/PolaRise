@@ -25,12 +25,17 @@ struct Cell {
 
 class RayTracing {
 private:
-	Vector2f *vertices;
+	//Vector2f *vertices;
 	Line *lines;
+
+
 	std::vector<Line> edges;
-	int linesCount;
-	Line *rays;
-	Vertex **raysVertex;
+	std::vector<Vector2f> vertices;
+
+	//int linesCount;
+	//Line *rays;
+	//Vertex **raysVertex;
+	std::vector<std::array<Vertex, 2>> raysVertex;
 	Vector2f mousePos;
 	//VertexArray *lightMesh;
 	std::vector<Cell> processingCells; 
@@ -42,8 +47,10 @@ public:
 	void calculateIntersections();
 	void update(Level *level, Window *window, Vector2f mousePos);
 	VertexArray createMesh();
-	int getLineCount();
+	//int getLineCount();
 	Vertex** getRays();
-	void convertTileMapToPolyMap(Level *level);
+	void convertTileMapToPolyMap(Level *level, Window *window);
+	void convertPolyMapToVertices();
 	void clear();
+	friend class Game;
 };

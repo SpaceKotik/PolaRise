@@ -90,9 +90,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
     //process light sources
     rayTracing.update(&level, getHandle(), mousePos);
     window.draw(rayTracing.createMesh(), renderStates);
-    for (int i = 0; i < rayTracing.getLineCount()*3; ++i) {
-        //window.draw(rayTracing.getRays()[i], 2, Lines);
-    }
+
     rayTracing.clear();
 
     /*rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, lightSourceSize));
@@ -148,6 +146,33 @@ void Game::draw(Level level, RayTracing rayTracing) {
             window.draw(level.getField()->tiles[i].physForm);
         }
     }
+    //DEBUG DRAW POINTS
+    /*for (int i = 0; i < rayTracing.vertices.size(); ++i) {
+        CircleShape currCirle;
+        currCirle.setRadius(2);
+        currCirle.setOrigin(2, 2);
+        currCirle.setPosition(rayTracing.vertices.at(i));
+        currCirle.setFillColor(Color::Red);
+        window.draw(currCirle);
+    }
+    //DDEBUG DRAW EDGES
+    for (int i = 0; i < rayTracing.edges.size(); ++i) {
+        Vertex currLine[2];
+        currLine[0].position = rayTracing.edges.at(i).startCoord;
+        currLine[1].position = rayTracing.edges.at(i).startCoord + Vector2f(rayTracing.edges.at(i).dirX, rayTracing.edges.at(i).dirY);
+        currLine[0].color = Color::Green;
+        currLine[1].color = Color::Green;
+        window.draw(currLine, 2, Lines);
+    }
+    //DEBUG DRAW RAYS
+    for (int i = 0; i < rayTracing.raysVertex.size(); ++i) {
+        Vertex currRay[2];
+        currRay[0].position = rayTracing.raysVertex.at(i)[0].position;
+        currRay[1].position = rayTracing.raysVertex.at(i)[1].position;
+        currRay[0].color = Color::White;
+        currRay[1].color = Color::White;
+        window.draw(currRay, 2, Lines);
+    }*/
 
 
     window.display();    
