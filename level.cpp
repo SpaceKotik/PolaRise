@@ -61,8 +61,12 @@ void Level::update() {
 void Level::addTile(Vector2f pos) {
 	pos = Vector2f (((int)pos.x/(int)scale)*scale,((int)pos.y/(int)scale)*scale);
 	//field.tiles.push_back(Tile(pos, false, false));
-	if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue != true) {
+	if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue != true && levelState == Blue) {
 	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue = true;
+	tileCount++;
+	}
+	else if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed != true && levelState == Red) {
+	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed = true;
 	tileCount++;
 	}
 	loadToFile();
@@ -75,8 +79,12 @@ void Level::addTile(Vector2f pos) {
 void Level::removeTile(Vector2f pos) {
 
 	pos = Vector2f (((int)pos.x/(int)scale)*scale + 0*scale,((int)pos.y/(int)scale)*scale + 0*scale);
-	if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue != false) {
+	if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue != false && levelState == Blue) {
 		field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue = false;
+		tileCount--;
+	}
+	else if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed != false && levelState == Red) {
+		field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed = false;
 		tileCount--;
 	}
 	loadToFile();
@@ -93,6 +101,18 @@ int Level::loadToFile() {
     for (int i = 0; i < field_y; ++i) {
     	for (int j = 0; j < field_x; ++j) {
     		if (field.tiles.at(i*field_x + j).isBlue) {
+    			levelFile << 1 << ' ';
+    		}
+    		else {
+    			levelFile << 0 << ' ';
+    		}
+    	}
+    	levelFile << std::endl;
+    }
+    levelFile << std::endl;
+    for (int i = 0; i < field_y; ++i) {
+    	for (int j = 0; j < field_x; ++j) {
+    		if (field.tiles.at(i*field_x + j).isRed) {
     			levelFile << 1 << ' ';
     		}
     		else {
@@ -124,6 +144,31 @@ int Level::loadFromFile() {
     		}
     	}
     }
+
+    for (int i = 0; i < field_y; ++i) {
+    	for (int j = 0; j < field_x; ++j) {
+    		int currTile;
+    		levelFile >> currTile;
+    		if (currTile == 1) {
+    			field.tiles[i*field_x + j].isRed = true;
+    			tileCount++;
+    		}
+    		else {
+    			field.tiles[i*field_x + j].isRed = false;
+    		}
+    	}
+    }
     levelFile.close();
     return 0;
+}
+
+void Level::changeState() {
+	if (levelState == Blue)
+		levelState = Red;
+	else
+		levelState = Blue;
+}
+
+LevelState Level::getState() {
+	return levelState;
 }

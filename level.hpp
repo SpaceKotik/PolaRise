@@ -5,6 +5,8 @@
 
 using namespace sf;
 
+enum LevelState {Red, Blue};
+
 struct Field {
 	std::vector<Tile> tiles;
 
@@ -18,6 +20,8 @@ private:
 	Vector2f startPos;
 	Vector2f finishPos;
 	int tileCount;
+	LevelState levelState = Blue;
+
 
 public:
 	Level();
@@ -29,4 +33,6 @@ public:
 	void removeTile(Vector2f);
 	int loadToFile();
 	int loadFromFile();
+	void changeState();
+	LevelState getState();
 };

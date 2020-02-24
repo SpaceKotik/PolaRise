@@ -23,7 +23,7 @@ const float lightSourceSize = 0.5;
 
 
 #define NO_INTERSECTION Vector2f(-10, -10)
-#define LIGHT_SOURCE_SCALE Vector2f(1.5, 1.5)
+#define LIGHT_SOURCE_SCALE Vector2f(1.2, 1.2)
 
 Game::Game() {
     gameState = Gameplay;
@@ -41,6 +41,12 @@ Game::Game() {
     window.setVerticalSyncEnabled(true);
 
     mousePos = Vector2f(100, 100);
+
+
+    level.setField();
+
+    rayTracing.convertTileMapToPolyMap(&level, getHandle());
+    rayTracing.convertPolyMapToVertices();
 }
 
 
@@ -52,12 +58,12 @@ RenderWindow* Game::getHandle() {
 void Game::run() {
     Clock clock;
 
-    Level level;
+    /*Level level;
     level.setField();
 
     RayTracing rayTracing;
     rayTracing.convertTileMapToPolyMap(&level, getHandle());
-    rayTracing.convertPolyMapToVertices();
+    rayTracing.convertPolyMapToVertices();*/
 
     while(window.isOpen()) {
 
@@ -104,7 +110,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, 0));
     window.draw(rayTracing.createMesh(), renderStates);*/
 
-    rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, lightSourceSize));
+    /*rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, lightSourceSize));
     window.draw(rayTracing.createMesh(), renderStates);
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, -lightSourceSize));
@@ -114,7 +120,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
     window.draw(rayTracing.createMesh(), renderStates);
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, -lightSourceSize));
-    window.draw(rayTracing.createMesh(), renderStates);
+    window.draw(rayTracing.createMesh(), renderStates);*/
 
     //add light fade
     Sprite lightFade;
@@ -127,8 +133,15 @@ void Game::draw(Level level, RayTracing rayTracing) {
     //draw all tiles
 
     for (int i = 0; i < field_x*field_y; ++i) {
-        if (level.getField()->tiles[i].isBlue) {
-            window.draw(level.getField()->tiles[i].physForm);
+        if (level.getState() == Blue) {
+            if (level.getField()->tiles[i].isBlue) {
+                window.draw(level.getField()->tiles[i].physForm);
+            }
+        }
+        else if (level.getState() == Red) {
+            if (level.getField()->tiles[i].isRed) {
+                window.draw(level.getField()->tiles[i].physForm);
+            }
         }
     }
 
@@ -192,11 +205,15 @@ MouseState Game::input() {
             default:
                 break;
 
-            /*case Event::KeyPressed:
+            case Event::KeyPressed:
 
-            if(Keyboard::isKeyPressed(Keyboard::Left)) {
-                mousePos = mousePos + Vector2f(-speed, 0);
+            if(Keyboard::isKeyPressed(Keyboard::Space)) {
+                rayTracing.changeLightColor();
+                level.changeState();
+                rayTracing.convertTileMapToPolyMap(&level, getHandle());
+                rayTracing.convertPolyMapToVertices();
             }
+            /*
             if(Keyboard::isKeyPressed(Keyboard::Right)) {
                 mousePos = mousePos + Vector2f(speed, 0);
             }
@@ -205,20 +222,20 @@ MouseState Game::input() {
             }
             if(Keyboard::isKeyPressed(Keyboard::Down)) {
                 mousePos = mousePos + Vector2f(0, -speed);
-            }
-            break;*/
+            }*/
+            break;
             
             }
         }
         mousePos = (Vector2f)Mouse::getPosition(window);
         if (Mouse::getPosition(window).x > window.getSize().x)
-            mousePos.x = window.getSize().x;
+            mousePos.x = window.getSize().x-2;
         if (Mouse::getPosition(window).x < 0)
-            mousePos.x = 0;
+            mousePos.x = 2;
         if (Mouse::getPosition(window).y > window.getSize().y)
-            mousePos.y = window.getSize().y;
+            mousePos.y = window.getSize().y-2;
         if (Mouse::getPosition(window).y < 0)
-            mousePos.y = 0;
+            mousePos.y = 2;
 
 
         return mouseState;

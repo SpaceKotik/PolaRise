@@ -24,6 +24,9 @@ private:
     RenderWindow window;
     Vector2f mousePos;
 
+    RayTracing rayTracing;
+    Level level;
+
 public:
     Game();
 //  ~Game();

@@ -24,7 +24,8 @@ class RayTracing {
 private:
 	std::vector<Line> edges;
 	std::vector<Vector2f> vertices;
-	std::vector<std::array<Vertex, 2>> raysVertex;	
+	std::vector<std::array<Vertex, 2>> raysVertex;
+	Color lightColor;
 
 public:
 	RayTracing();
@@ -34,5 +35,6 @@ public:
 	VertexArray createMesh();
 	void convertTileMapToPolyMap(Level *level, Window *window);
 	void convertPolyMapToVertices();
+	void changeLightColor();
 	friend class Game;
 };

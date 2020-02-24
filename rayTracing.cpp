@@ -24,8 +24,11 @@ extern const Vector2f lightSourceTextureCenter;
 //const Color lightColor = Color(23*2, 23*2, 23*2);
 //const Color lightColor = Color(210, 210, 160);
 //const Color lightColor = Color(102, 178, 255);
-const Color lightColor = Color(18, 32, 46);		//Blue for 5 sources
-//const Color lightColor = Color(18*5, 32*5, 46*5);	//Blue for 1 source
+//const Color lightColorBlue = Color(18, 32, 46);		//Blue for 5 sources
+//const Color lightColorRed = Color(18, 32, 46);		//Blue for 5 sources
+//const Color lightColorBlue = Color(18*5, 32*5, 46*5);	//Blue for 1 source
+const Color lightColorBlue = Color(102, 102, 255);	//Blue for 1 source
+const Color lightColorRed = Color(255, 51, 51);		//Red for 1 source
 const float angle = 0.001;
 
 
@@ -34,7 +37,7 @@ Vector2f getRectPointPos(Tile rect, int point) {
 }
 
 RayTracing::RayTracing() {
-	
+	lightColor = lightColorBlue;
 }
 
 void RayTracing::convertTileMapToPolyMap(Level *level, Window *window) {
@@ -73,7 +76,9 @@ void RayTracing::convertTileMapToPolyMap(Level *level, Window *window) {
 			for (int k = 0; k < 4; ++k) {
 				tempCell.edgeExist[k] = false;
 				tempCell.edgeId[k] = -1;
-				if (level->getField()->tiles[i*field_x + j].checkIfBlue())
+
+				if ((level->getState() == Blue && level->getField()->tiles[i*field_x + j].checkIfBlue()) ||
+					(level->getState() == Red && level->getField()->tiles[i*field_x + j].checkIfRed()))
 					tempCell.exist = true;
 				else
 					tempCell.exist = false;
@@ -81,6 +86,7 @@ void RayTracing::convertTileMapToPolyMap(Level *level, Window *window) {
 			processingCells.push_back(tempCell);
 		}
 	}
+	
 	//Do logic ad push edges to array
 	for (int i = 0; i < field_y; ++i) {
 		for (int j = 0; j < field_x; ++j) {
@@ -220,7 +226,7 @@ void RayTracing::convertPolyMapToVertices() {
 
 void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
 	raysVertex.clear();
-	
+
 	//set raysVertex for main rays
 	for (int i = 0; i < vertices.size(); ++i) {
 		std::array<Vertex, 2> currRay;
@@ -447,4 +453,11 @@ void RayTracing::calculateIntersections() {
 		}
 	}*/
 
+}
+
+void RayTracing::changeLightColor() {
+	if (lightColor == lightColorBlue)
+		lightColor = lightColorRed;
+	else
+		lightColor = lightColorBlue;
 }
