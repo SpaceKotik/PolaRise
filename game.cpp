@@ -18,7 +18,7 @@ extern const int field_x;
 extern const int field_y;
 extern const Vector2f lightSourceTextureCenter;
 
-const float lightSourceSize = 2;
+const float lightSourceSize = 0.5;
 
 
 
@@ -104,7 +104,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, 0));
     window.draw(rayTracing.createMesh(), renderStates);*/
 
-   /* rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, lightSourceSize));
+    rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, lightSourceSize));
     window.draw(rayTracing.createMesh(), renderStates);
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, -lightSourceSize));
@@ -114,7 +114,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
     window.draw(rayTracing.createMesh(), renderStates);
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, -lightSourceSize));
-    window.draw(rayTracing.createMesh(), renderStates);*/
+    window.draw(rayTracing.createMesh(), renderStates);
 
     //add light fade
     Sprite lightFade;

@@ -24,8 +24,8 @@ extern const Vector2f lightSourceTextureCenter;
 //const Color lightColor = Color(23*2, 23*2, 23*2);
 //const Color lightColor = Color(210, 210, 160);
 //const Color lightColor = Color(102, 178, 255);
-//const Color lightColor = Color(18, 32, 46);		//Blue for 5 sources
-const Color lightColor = Color(18*5, 32*5, 46*5);	//Blue for 1 source
+const Color lightColor = Color(18, 32, 46);		//Blue for 5 sources
+//const Color lightColor = Color(18*5, 32*5, 46*5);	//Blue for 1 source
 const float angle = 0.001;
 
 
@@ -219,7 +219,8 @@ void RayTracing::convertPolyMapToVertices() {
 }
 
 void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
-
+	raysVertex.clear();
+	
 	//set raysVertex for main rays
 	for (int i = 0; i < vertices.size(); ++i) {
 		std::array<Vertex, 2> currRay;
