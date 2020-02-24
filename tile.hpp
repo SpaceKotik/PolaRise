@@ -15,6 +15,7 @@ public:
 	void rotate(float deg);
 	RectangleShape getRect();
 	bool checkIfBlue();
+	bool checkIfRed();
 
 friend class Game;
 friend class Level;

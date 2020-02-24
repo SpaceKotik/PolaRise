@@ -65,13 +65,11 @@ void Level::addTile(Vector2f pos) {
 	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue = true;
 	tileCount++;
 	}
-
-	//debug
-	std::cout << "\033[2J\033[1;1H";
-	std::cout << "Tiles on screen: " << tileCount << '\n';
-	//debug
-
 	loadToFile();
+	//debug
+	//std::cout << "\033[2J\033[1;1H";
+	//std::cout << "Tiles on screen: " << tileCount << '\n';
+	//debug
 }
 
 void Level::removeTile(Vector2f pos) {
@@ -81,13 +79,11 @@ void Level::removeTile(Vector2f pos) {
 		field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue = false;
 		tileCount--;
 	}
-
-	//debug
-	std::cout << "\033[2J\033[1;1H";
-	std::cout << "Tiles on screen: " << tileCount << '\n';
-	//debug
-
 	loadToFile();
+	//debug
+	//std::cout << "\033[2J\033[1;1H";
+	//std::cout << "Tiles on screen: " << tileCount << '\n';
+	//debug
 }
 
 int Level::loadToFile() {

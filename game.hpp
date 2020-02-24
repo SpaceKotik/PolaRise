@@ -16,28 +16,19 @@ struct MouseState{
 };
 
 
-
-
-
-
 class Game {
 private:
-    int field_size_x;
-    int field_size_y;
     GameState gameState;
     Texture texture;
     Event event;
     RenderWindow window;
-    //Texts texts;
-    int total_point;
-
     Vector2f mousePos;
-
 
 public:
     Game();
+//  ~Game();
     RenderWindow* getHandle();
-//    ~Game();
+
     void setup();
     void run();
     MouseState input();

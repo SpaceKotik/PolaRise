@@ -11,18 +11,19 @@
 
 using namespace sf;
 
+#define NDEBUG true
 
 extern const int scale;
 extern const int field_x;
 extern const int field_y;
 extern const Vector2f lightSourceTextureCenter;
 
-const float speed = 10;
 const float lightSourceSize = 2;
 
 
 
-#define NO_INTERSECTION Vector2f(-10, -10);
+#define NO_INTERSECTION Vector2f(-10, -10)
+#define LIGHT_SOURCE_SCALE Vector2f(1.5, 1.5)
 
 Game::Game() {
     gameState = Gameplay;
@@ -50,14 +51,13 @@ RenderWindow* Game::getHandle() {
 
 void Game::run() {
     Clock clock;
-    //float time = 1;
-
 
     Level level;
     level.setField();
 
     RayTracing rayTracing;
-
+    rayTracing.convertTileMapToPolyMap(&level, getHandle());
+    rayTracing.convertPolyMapToVertices();
 
     while(window.isOpen()) {
 
@@ -67,17 +67,18 @@ void Game::run() {
         if (mouseState.pos != mouseNotClicked) {
             if (mouseState.LeftButtonPressed) {
                 level.addTile(mouseState.pos);
+                
             }
             if (mouseState.RightButtonPressed) {
                 level.removeTile(mouseState.pos);
             }
+            rayTracing.convertTileMapToPolyMap(&level, getHandle());
+            rayTracing.convertPolyMapToVertices();
         }
         level.update();
 
         draw(level, rayTracing);
     }
-
-
 }
 
 void Game::draw(Level level, RayTracing rayTracing) {
@@ -91,89 +92,76 @@ void Game::draw(Level level, RayTracing rayTracing) {
     rayTracing.update(&level, getHandle(), mousePos);
     window.draw(rayTracing.createMesh(), renderStates);
 
-    rayTracing.clear();
-
     /*rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, lightSourceSize));
     window.draw(rayTracing.createMesh(), renderStates);
-    rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, -lightSourceSize));
     window.draw(rayTracing.createMesh(), renderStates);
-    rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, 0));
     window.draw(rayTracing.createMesh(), renderStates);
-    rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, 0));
-    window.draw(rayTracing.createMesh(), renderStates);
-    rayTracing.clear();*/
+    window.draw(rayTracing.createMesh(), renderStates);*/
 
    /* rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, lightSourceSize));
     window.draw(rayTracing.createMesh(), renderStates);
-    rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, -lightSourceSize));
     window.draw(rayTracing.createMesh(), renderStates);
-    rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, lightSourceSize));
     window.draw(rayTracing.createMesh(), renderStates);
-    rayTracing.clear();
 
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, -lightSourceSize));
-    window.draw(rayTracing.createMesh(), renderStates);
-    rayTracing.clear();*/
-
+    window.draw(rayTracing.createMesh(), renderStates);*/
 
     //add light fade
     Sprite lightFade;
     lightFade.setOrigin(lightSourceTextureCenter);
     lightFade.setTexture(texture);
     lightFade.setPosition(mousePos);
-    lightFade.setScale(Vector2f(1.3, 1.3));
+    lightFade.setScale(LIGHT_SOURCE_SCALE);
     window.draw(lightFade, BlendMultiply);
 
-
     //draw all tiles
-    /*for (int i = 0; i < level.getTileCount(); ++i) {
-        // /window.draw(level.getField()->tiles[i].physForm, BlendMultiply);
-        window.draw(level.getField()->tiles[i].physForm);
-    }*/
 
     for (int i = 0; i < field_x*field_y; ++i) {
         if (level.getField()->tiles[i].isBlue) {
             window.draw(level.getField()->tiles[i].physForm);
         }
     }
-    //DEBUG DRAW POINTS
-    /*for (int i = 0; i < rayTracing.vertices.size(); ++i) {
-        CircleShape currCirle;
-        currCirle.setRadius(2);
-        currCirle.setOrigin(2, 2);
-        currCirle.setPosition(rayTracing.vertices.at(i));
-        currCirle.setFillColor(Color::Red);
-        window.draw(currCirle);
-    }
-    //DDEBUG DRAW EDGES
-    for (int i = 0; i < rayTracing.edges.size(); ++i) {
-        Vertex currLine[2];
-        currLine[0].position = rayTracing.edges.at(i).startCoord;
-        currLine[1].position = rayTracing.edges.at(i).startCoord + Vector2f(rayTracing.edges.at(i).dirX, rayTracing.edges.at(i).dirY);
-        currLine[0].color = Color::Green;
-        currLine[1].color = Color::Green;
-        window.draw(currLine, 2, Lines);
-    }
-    //DEBUG DRAW RAYS
-    for (int i = 0; i < rayTracing.raysVertex.size(); ++i) {
-        Vertex currRay[2];
-        currRay[0].position = rayTracing.raysVertex.at(i)[0].position;
-        currRay[1].position = rayTracing.raysVertex.at(i)[1].position;
-        currRay[0].color = Color::White;
-        currRay[1].color = Color::White;
-        window.draw(currRay, 2, Lines);
-    }*/
 
+    //DEBUG
+    if (!NDEBUG) {
+        //DEBUG DRAW POINTS
+        for (int i = 0; i < rayTracing.vertices.size(); ++i) {
+            CircleShape currCirle;
+            currCirle.setRadius(2);
+            currCirle.setOrigin(2, 2);
+            currCirle.setPosition(rayTracing.vertices.at(i));
+            currCirle.setFillColor(Color::Red);
+            window.draw(currCirle);
+        }
+        //DDEBUG DRAW EDGES
+        for (int i = 0; i < rayTracing.edges.size(); ++i) {
+            Vertex currLine[2];
+            currLine[0].position = rayTracing.edges.at(i).startCoord;
+            currLine[1].position = rayTracing.edges.at(i).startCoord + Vector2f(rayTracing.edges.at(i).dirX, rayTracing.edges.at(i).dirY);
+            currLine[0].color = Color::Green;
+            currLine[1].color = Color::Green;
+            window.draw(currLine, 2, Lines);
+        }
+        //DEBUG DRAW RAYS
+        for (int i = 0; i < rayTracing.raysVertex.size(); ++i) {
+            Vertex currRay[2];
+            currRay[0].position = rayTracing.raysVertex.at(i)[0].position;
+            currRay[1].position = rayTracing.raysVertex.at(i)[1].position;
+            currRay[0].color = Color::White;
+            currRay[1].color = Color::White;
+            window.draw(currRay, 2, Lines);
+        }
+    }
 
     window.display();    
 }
@@ -182,7 +170,6 @@ MouseState Game::input() {
         MouseState mouseState;
         mouseState.pos = NO_INTERSECTION;
 
-        //Vector2f mouseClickedPos = NO_INTERSECTION;
         Event event;
 
         while (window.pollEvent(event)) {
