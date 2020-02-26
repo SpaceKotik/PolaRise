@@ -172,3 +172,15 @@ void Level::changeState() {
 LevelState Level::getState() {
 	return levelState;
 }
+
+bool Level::isOnTile(Vector2f pos) {
+	if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue == true && levelState == Blue) {
+		return true;
+	}
+	else if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed == true && levelState == Red) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}

@@ -19,13 +19,22 @@ extern const int field_y;
 extern const Vector2f lightSourceTextureCenter;
 
 const float lightSourceSize = 0.5;
+extern const float heroRadius;
+extern const float heroAcceleration; 
+extern const float maxVelocity;
+extern const float heroVelocity;
+extern const Color backgorundColor;
 
 
 
 
 #define NO_INTERSECTION Vector2f(-10, -10)
 #define LIGHT_SOURCE_SCALE Vector2f(0.8, 0.8)
-#define BORDERS_VISIBILITY_SCALE Vector2f(0.2, 0.2)
+#define BORDERS_VISIBILITY_SCALE Vector2f(0.4, 0.4)
+
+
+
+
 
 Game::Game() {
     gameState = Gameplay;
@@ -38,8 +47,8 @@ Game::Game() {
 
     window.create(VideoMode(field_x*scale, (field_y+0.1)*scale), "PolaRise",
                   Style::Titlebar | Style::Close, settings);
-    window.setKeyRepeatEnabled(true);
-    window.setFramerateLimit(60);
+    window.setKeyRepeatEnabled(false);
+    window.setFramerateLimit(120);
     window.setVerticalSyncEnabled(true);
 
     mousePos = Vector2f(100, 100);
@@ -60,31 +69,13 @@ RenderWindow* Game::getHandle() {
 void Game::run() {
     Clock clock;
 
-    /*Level level;
-    level.setField();
-
-    RayTracing rayTracing;
-    rayTracing.convertTileMapToPolyMap(&level, getHandle());
-    rayTracing.convertPolyMapToVertices();*/
-
     while(window.isOpen()) {
+        //MouseState mouseState = input();
+        //Vector2f mouseNotClicked = NO_INTERSECTION;
 
-        MouseState mouseState = input();
-        Vector2f mouseNotClicked = NO_INTERSECTION;
-        
-        if (mouseState.pos != mouseNotClicked) {
-            if (mouseState.LeftButtonPressed) {
-                level.addTile(mouseState.pos);
-                
-            }
-            if (mouseState.RightButtonPressed) {
-                level.removeTile(mouseState.pos);
-            }
-            rayTracing.convertTileMapToPolyMap(&level, getHandle());
-            rayTracing.convertPolyMapToVertices();
-        }
-        level.update();
-
+        input();
+        logic();
+        //level.update();
         draw(level, rayTracing);
     }
 }
@@ -94,93 +85,12 @@ void Game::draw(Level level, RayTracing rayTracing) {
     RenderStates renderStates;
     renderStates.blendMode = BlendAdd;
 
-    window.clear(Color(10, 10, 10));
+    window.clear(backgorundColor);
 
-
-    rayTracing.update(&level, getHandle(), mousePos);
-
-    RenderTexture borderTexture;
-    borderTexture.create(field_x*scale, field_y*scale);
-    borderTexture.clear();
-    //Draw visible edges
-    for (int i = 0; i < rayTracing.edges.size(); ++i) {
-            Vertex currLine[2];
-            currLine[0].position = rayTracing.edges.at(i).startCoord;
-            currLine[1].position = rayTracing.edges.at(i).startCoord + Vector2f(rayTracing.edges.at(i).dirX, rayTracing.edges.at(i).dirY);
-            currLine[0].color = Color::White;
-            currLine[1].color = Color::White;
-            window.draw(currLine, 2, Lines);
-        }
-    borderTexture.display();
-
-
-
-     //add light fade
-    Sprite bordersFade;
-    bordersFade.setOrigin(lightSourceTextureCenter);
-    bordersFade.setTexture(texture);
-    bordersFade.setPosition(mousePos);
-    bordersFade.setScale(BORDERS_VISIBILITY_SCALE);
-    window.draw(bordersFade, BlendMultiply);
-
-
-
-
-    //Sprite borders1;
-    //borders1.setTexture(borderTexture.getTexture());
-
-    //RenderStates renderStatesBorder;
-    //renderStatesBorder.texture = &borderTexture.getTexture();
-    //renderStatesBorder.blendMode = BlendMode(BlendMode::DstColor, BlendMode::Zero);
-    //renderStatesBorder.blendMode = BlendMode(BlendMode::One, BlendMode::Zero);
-    //window.draw(rayTracing.createVisibleBorders());
-    //window.draw(borders1, BlendMultiply);
-
-
-
-
-
-    //process light sources
-    
-    window.draw(rayTracing.createMesh(), renderStates);
-
-    /*rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, lightSourceSize));
-    window.draw(rayTracing.createMesh(), renderStates);
-
-    rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, -lightSourceSize));
-    window.draw(rayTracing.createMesh(), renderStates);
-
-    rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, 0));
-    window.draw(rayTracing.createMesh(), renderStates);
-
-    rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, 0));
-    window.draw(rayTracing.createMesh(), renderStates);*/
-
-    /*rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, lightSourceSize));
-    window.draw(rayTracing.createMesh(), renderStates);
-
-    rayTracing.update(&level, getHandle(), mousePos + Vector2f(-lightSourceSize, -lightSourceSize));
-    window.draw(rayTracing.createMesh(), renderStates);
-
-    rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, lightSourceSize));
-    window.draw(rayTracing.createMesh(), renderStates);
-
-    rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, -lightSourceSize));
-    window.draw(rayTracing.createMesh(), renderStates);*/
-
-
-
-    //add light fade
-    Sprite lightFade;
-    lightFade.setOrigin(lightSourceTextureCenter);
-    lightFade.setTexture(texture);
-    lightFade.setPosition(mousePos);
-    lightFade.setScale(LIGHT_SOURCE_SCALE);
-    window.draw(lightFade, BlendMultiply);
 
     //draw all tiles
 
-    /*for (int i = 0; i < field_x*field_y; ++i) {
+    for (int i = 0; i < field_x*field_y; ++i) {
         if (level.getState() == Blue) {
             if (level.getField()->tiles[i].isBlue) {
                 window.draw(level.getField()->tiles[i].physForm);
@@ -191,7 +101,47 @@ void Game::draw(Level level, RayTracing rayTracing) {
                 window.draw(level.getField()->tiles[i].physForm);
             }
         }
+    }
+
+
+    //Draw visible edges
+    /*for (int i = 0; i < rayTracing.edges.size(); ++i) {
+        Vertex currLine[2];
+        currLine[0].position = rayTracing.edges.at(i).startCoord;
+        currLine[1].position = rayTracing.edges.at(i).startCoord + Vector2f(rayTracing.edges.at(i).dirX, rayTracing.edges.at(i).dirY);
+        currLine[0].color = Color::White;
+        currLine[1].color = Color::White;
+        window.draw(currLine, 2, Lines);
     }*/
+
+
+     //add light fade for bor
+    Sprite bordersFade;
+    bordersFade.setOrigin(lightSourceTextureCenter);
+    bordersFade.setTexture(texture);
+    bordersFade.setPosition(hero.getPos());
+    bordersFade.setScale(BORDERS_VISIBILITY_SCALE);
+    //window.draw(bordersFade, BlendMultiply);
+
+
+    //process light sources
+    rayTracing.update(&level, getHandle(), hero.getPos());
+    window.draw(rayTracing.createMesh(), renderStates);
+    window.draw(*hero.getPhysForm());
+
+
+    //add light fade
+    Sprite lightFade;
+    lightFade.setOrigin(lightSourceTextureCenter);
+    lightFade.setTexture(texture);
+    lightFade.setPosition(hero.getPos());
+    lightFade.setScale(LIGHT_SOURCE_SCALE);
+    ///window.draw(lightFade, BlendMultiply);
+
+
+    /*rayTracing.update(&level, getHandle(), mousePos);
+    window.draw(rayTracing.createMesh(), renderStates);*/
+
 
     //DEBUG
     if (!NDEBUG) {
@@ -222,15 +172,25 @@ void Game::draw(Level level, RayTracing rayTracing) {
             currRay[1].color = Color::White;
             window.draw(currRay, 2, Lines);
         }
+        //Sprite borders1;
+        //borders1.setTexture(borderTexture.getTexture());
+
+        //RenderStates renderStatesBorder;
+        //renderStatesBorder.texture = &borderTexture.getTexture();
+        //renderStatesBorder.blendMode = BlendMode(BlendMode::DstColor, BlendMode::Zero);
+        //renderStatesBorder.blendMode = BlendMode(BlendMode::One, BlendMode::Zero);
+        //window.draw(rayTracing.createVisibleBorders());
+        //window.draw(borders1, BlendMultiply);
     }
 
     window.display();    
 }
 
+
 MouseState Game::input() {
         MouseState mouseState;
         mouseState.pos = NO_INTERSECTION;
-
+        Vector2f desPos;
         Event event;
 
         while (window.pollEvent(event)) {
@@ -241,40 +201,106 @@ MouseState Game::input() {
                 break;
 
             case Event::MouseButtonPressed:
-                if (event.mouseButton.button == sf::Mouse::Left) {
+                /*if (event.mouseButton.button == sf::Mouse::Left) {
                     mouseState.pos = (Vector2f)Mouse::getPosition(window);
                     mouseState.LeftButtonPressed = true;
+                    level.addTile(mouseState.pos);
                 }
                 if (event.mouseButton.button == sf::Mouse::Right) {
                     mouseState.pos = (Vector2f)Mouse::getPosition(window);
                     mouseState.RightButtonPressed = true;
+                    level.removeTile(mouseState.pos);
                 }
+                rayTracing.convertTileMapToPolyMap(&level, getHandle());
+                rayTracing.convertPolyMapToVertices();*/
                 break;
-            default:
-                break;
-
             case Event::KeyPressed:
 
-            if(Keyboard::isKeyPressed(Keyboard::Space)) {
-                rayTracing.changeLightColor();
-                level.changeState();
-                rayTracing.convertTileMapToPolyMap(&level, getHandle());
-                rayTracing.convertPolyMapToVertices();
-            }
-            /*
-            if(Keyboard::isKeyPressed(Keyboard::Right)) {
-                mousePos = mousePos + Vector2f(speed, 0);
-            }
-            if(Keyboard::isKeyPressed(Keyboard::Up)) {
-                mousePos = mousePos + Vector2f(0, speed);
-            }
-            if(Keyboard::isKeyPressed(Keyboard::Down)) {
-                mousePos = mousePos + Vector2f(0, -speed);
-            }*/
-            break;
-            
+                
+                //if(Keyboard::isKeyPressed(Keyboard::Space)) {
+                if(event.key.code == sf::Keyboard::Space) {
+
+                    level.changeState();
+
+                    if (!level.isOnTile(hero.getPos() + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(hero.getPos() + Vector2f(heroRadius-.1, -heroRadius+.1))
+                        && !level.isOnTile(hero.getPos() + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(hero.getPos() + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
+
+                        rayTracing.changeLightColor();
+                        rayTracing.convertTileMapToPolyMap(&level, getHandle());
+                        rayTracing.convertPolyMapToVertices();
+
+
+                    }
+                    else {
+                        level.changeState();
+                    }
+                    
+                }
+
+
+                if(event.key.code == sf::Keyboard::D) {
+                    keys.right = 1;
+                }
+
+                if(event.key.code == sf::Keyboard::A) {
+                    keys.left = 1;
+                }
+
+                if(event.key.code == sf::Keyboard::W) {
+                    keys.up = 1;
+                }
+
+                if(event.key.code == sf::Keyboard::S) {
+                    keys.down= 1;
+                }
+                
+                break;
+
+            case Event::KeyReleased:
+                 if(event.key.code == sf::Keyboard::D) {
+                    keys.right = 0;
+                }
+
+                if(event.key.code == sf::Keyboard::A) {
+                    keys.left = 0;
+                }
+
+                if(event.key.code == sf::Keyboard::W) {
+                    keys.up = 0;
+                }
+
+                if(event.key.code == sf::Keyboard::S) {
+                    keys.down= 0;
+                }
+
+            default:
+                break;                        
             }
         }
+
+
+
+        if (Mouse::isButtonPressed(sf::Mouse::Left)) {
+                    mouseState.pos = (Vector2f)Mouse::getPosition(window);
+                    mouseState.LeftButtonPressed = true;
+                    level.addTile(mouseState.pos);
+        }
+        if (Mouse::isButtonPressed(sf::Mouse::Right)) {
+            mouseState.pos = (Vector2f)Mouse::getPosition(window);
+            mouseState.RightButtonPressed = true;
+            level.removeTile(mouseState.pos);
+        }
+        rayTracing.convertTileMapToPolyMap(&level, getHandle());
+        rayTracing.convertPolyMapToVertices();
+
+
+        
+
+        if (Keyboard::isKeyPressed(Keyboard::Escape)) {
+            window.close();
+        }
+
+
         mousePos = (Vector2f)Mouse::getPosition(window);
         if (Mouse::getPosition(window).x > window.getSize().x)
             mousePos.x = window.getSize().x-2;
@@ -287,4 +313,150 @@ MouseState Game::input() {
 
 
         return mouseState;
+}
+
+
+void Game::logic() {
+    
+    /*if (heroMoves.right == true) {
+        desPos = hero.getPos() + hero.velocity + Vector2f(heroAcceleration, 0);
+
+        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
+            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
+                //hero.move(Vector2f(heroSpeed, 0)); 
+                hero.velocity += Vector2f(heroAcceleration, 0);
+                if (sqrt((hero.velocity.x*hero.velocity.x) + (hero.velocity.y*hero.velocity.y) > maxVelocity))
+                    hero.velocity -= Vector2f(heroAcceleration, 0);
+                hero.move(hero.velocity);
+        }
+        else {
+            hero.setPos(Vector2f(((int)hero.getPos().x/(int)scale + 1)*scale - heroRadius , hero.getPos().y));
+            hero.velocity.x = 0;
+        }
+    }
+
+    if (heroMoves.left == true) {
+        desPos = hero.getPos() + hero.velocity + Vector2f(-heroAcceleration, 0);
+
+        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
+            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
+                //hero.move(Vector2f(-heroSpeed, 0));
+                hero.velocity += Vector2f(-heroAcceleration, 0);
+                if (sqrt((hero.velocity.x*hero.velocity.x) + (hero.velocity.y*hero.velocity.y) > maxVelocity))
+                    hero.velocity -= Vector2f(-heroAcceleration, 0);
+                hero.move(hero.velocity);
+        }
+        else {
+            hero.setPos(Vector2f(((int)hero.getPos().x/(int)scale)*scale + heroRadius , hero.getPos().y));
+            hero.velocity.x = 0;
+        }
+    }
+
+    if (heroMoves.up == true) {
+        desPos = hero.getPos() + hero.velocity + Vector2f(0, -heroAcceleration);
+
+        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
+            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
+
+
+            hero.velocity += Vector2f(0, -heroAcceleration);
+            if (sqrt((hero.velocity.x*hero.velocity.x) + (hero.velocity.y*hero.velocity.y) > maxVelocity))
+                hero.velocity -= Vector2f(0, -heroAcceleration);
+            hero.move(hero.velocity);
+        }
+        else {
+            hero.setPos(Vector2f(hero.getPos().x, ((int)hero.getPos().y/(int)scale)*scale + heroRadius ));
+            hero.velocity.y = 0;
+
+        }
+    }
+
+    if (heroMoves.down == true) {
+         desPos = hero.getPos() + hero.velocity + Vector2f(0, heroAcceleration);
+
+        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
+            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
+            //hero.move(Vector2f(0, heroSpeed));
+
+            hero.velocity += Vector2f(0, heroAcceleration);
+            if (sqrt((hero.velocity.x*hero.velocity.x) + (hero.velocity.y*hero.velocity.y) > maxVelocity))
+                hero.velocity -= Vector2f(0, heroAcceleration);
+            hero.move(hero.velocity);
+
+        }
+        else {
+            hero.setPos(Vector2f(hero.getPos().x, ((int)hero.getPos().y/(int)scale+1)*scale -heroRadius ));
+            hero.velocity.y = 0;
+        }
+    }*/
+
+    Vector2f desPos;
+    Vector2f heroVel = Vector2f(0, 0);
+
+    if (keys.right == true) {
+        desPos = hero.getPos() + Vector2f(heroVelocity, 0);
+
+        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
+            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
+                
+                //hero.move(Vector2f(heroVelocity, 0));
+            heroVel += Vector2f(heroVelocity, 0);
+        }
+        else {
+            hero.setPos(Vector2f(((int)hero.getPos().x/(int)scale + 1)*scale - heroRadius , hero.getPos().y));
+        }
+    }
+
+    if (keys.left == true) {
+        desPos = hero.getPos() + Vector2f(-heroVelocity, 0);
+
+        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
+            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
+
+                //hero.move(Vector2f(-heroVelocity, 0));
+            heroVel += Vector2f(-heroVelocity, 0);
+        }
+        else {
+            hero.setPos(Vector2f(((int)hero.getPos().x/(int)scale)*scale + heroRadius , hero.getPos().y));
+        }
+    }
+
+    if (keys.up == true) {
+        desPos = hero.getPos() + Vector2f(0, -heroVelocity);
+
+        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
+            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
+
+            //hero.move(Vector2f(0, -heroVelocity));
+            heroVel += Vector2f(0, -heroVelocity);
+        }
+        else {
+            hero.setPos(Vector2f(hero.getPos().x, ((int)hero.getPos().y/(int)scale)*scale + heroRadius ));
+
+        }
+    }
+
+    if (keys.down == true) {
+        desPos = hero.getPos() + Vector2f(0, heroVelocity);
+
+        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
+            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
+
+            //hero.move(Vector2f(0, heroVelocity));
+            heroVel += Vector2f(0, heroVelocity);
+
+        }
+        else {
+            hero.setPos(Vector2f(hero.getPos().x, ((int)hero.getPos().y/(int)scale+1)*scale -heroRadius ));
+        }
+    }
+    float absVelocity = sqrt(heroVel.x*heroVel.x + heroVel.y*heroVel.y);
+    if (absVelocity > heroVelocity+1) {
+        heroVel.x /= absVelocity;
+        heroVel.x *= heroVelocity;
+        heroVel.y /= absVelocity;
+        heroVel.y *= heroVelocity;
+    }
+    hero.move(heroVel);
+
 }

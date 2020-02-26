@@ -9,6 +9,7 @@
 extern const int scale;
 extern const int field_x;
 extern const int field_y;
+extern const Color tileDefaultColor;
 
 using namespace sf;
 
@@ -24,9 +25,9 @@ Tile::Tile() {
 Tile::Tile(Vector2f pos, bool isRed, bool isBlue) {
 	physForm.setPosition(pos);
 	physForm.setSize(Vector2f(scale, scale));
-	physForm.setFillColor(Color::White);
+	physForm.setFillColor(tileDefaultColor);
 	physForm.setOutlineColor(Color(190, 190, 190));
-	physForm.setOutlineThickness(2);
+	physForm.setOutlineThickness(0);
 	isRed = false;
 	isBlue = false;
 }

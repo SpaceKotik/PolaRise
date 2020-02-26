@@ -35,4 +35,5 @@ public:
 	int loadFromFile();
 	void changeState();
 	LevelState getState();
+	bool isOnTile(Vector2f pos);
 };

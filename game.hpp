@@ -4,6 +4,7 @@
 #include "tile.hpp"
 #include "rayTracing.hpp"
 #include "level.hpp"
+#include "hero.hpp"
 
 using namespace sf;
 
@@ -16,6 +17,15 @@ struct MouseState{
 };
 
 
+struct Moves {
+    bool right = 0;
+    bool left = 0;
+    bool up = 0;
+    bool down = 0;
+    bool space = 0;
+
+};
+
 class Game {
 private:
     GameState gameState;
@@ -23,9 +33,11 @@ private:
     Event event;
     RenderWindow window;
     Vector2f mousePos;
+    Hero hero;
 
     RayTracing rayTracing;
     Level level;
+    Moves keys;
 
 public:
     Game();
@@ -37,4 +49,5 @@ public:
     MouseState input();
     void update();
     void draw(Level level, RayTracing rayTracing);
+    void logic();
 };
