@@ -33,6 +33,7 @@ public:
 	void calculateIntersections();
 	void update(Level *level, Window *window, Vector2f mousePos);
 	VertexArray createMesh();
+	VertexArray createVisibleBorders();
 	void convertTileMapToPolyMap(Level *level, Window *window);
 	void convertPolyMapToVertices();
 	void changeLightColor();

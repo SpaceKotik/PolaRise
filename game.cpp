@@ -22,8 +22,10 @@ const float lightSourceSize = 0.5;
 
 
 
+
 #define NO_INTERSECTION Vector2f(-10, -10)
-#define LIGHT_SOURCE_SCALE Vector2f(1.2, 1.2)
+#define LIGHT_SOURCE_SCALE Vector2f(0.8, 0.8)
+#define BORDERS_VISIBILITY_SCALE Vector2f(0.2, 0.2)
 
 Game::Game() {
     gameState = Gameplay;
@@ -94,8 +96,52 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
     window.clear(Color(10, 10, 10));
 
-    //process light sources
+
     rayTracing.update(&level, getHandle(), mousePos);
+
+    RenderTexture borderTexture;
+    borderTexture.create(field_x*scale, field_y*scale);
+    borderTexture.clear();
+    //Draw visible edges
+    for (int i = 0; i < rayTracing.edges.size(); ++i) {
+            Vertex currLine[2];
+            currLine[0].position = rayTracing.edges.at(i).startCoord;
+            currLine[1].position = rayTracing.edges.at(i).startCoord + Vector2f(rayTracing.edges.at(i).dirX, rayTracing.edges.at(i).dirY);
+            currLine[0].color = Color::White;
+            currLine[1].color = Color::White;
+            window.draw(currLine, 2, Lines);
+        }
+    borderTexture.display();
+
+
+
+     //add light fade
+    Sprite bordersFade;
+    bordersFade.setOrigin(lightSourceTextureCenter);
+    bordersFade.setTexture(texture);
+    bordersFade.setPosition(mousePos);
+    bordersFade.setScale(BORDERS_VISIBILITY_SCALE);
+    window.draw(bordersFade, BlendMultiply);
+
+
+
+
+    //Sprite borders1;
+    //borders1.setTexture(borderTexture.getTexture());
+
+    //RenderStates renderStatesBorder;
+    //renderStatesBorder.texture = &borderTexture.getTexture();
+    //renderStatesBorder.blendMode = BlendMode(BlendMode::DstColor, BlendMode::Zero);
+    //renderStatesBorder.blendMode = BlendMode(BlendMode::One, BlendMode::Zero);
+    //window.draw(rayTracing.createVisibleBorders());
+    //window.draw(borders1, BlendMultiply);
+
+
+
+
+
+    //process light sources
+    
     window.draw(rayTracing.createMesh(), renderStates);
 
     /*rayTracing.update(&level, getHandle(), mousePos + Vector2f(0, lightSourceSize));
@@ -122,6 +168,8 @@ void Game::draw(Level level, RayTracing rayTracing) {
     rayTracing.update(&level, getHandle(), mousePos + Vector2f(lightSourceSize, -lightSourceSize));
     window.draw(rayTracing.createMesh(), renderStates);*/
 
+
+
     //add light fade
     Sprite lightFade;
     lightFade.setOrigin(lightSourceTextureCenter);
@@ -132,7 +180,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
     //draw all tiles
 
-    for (int i = 0; i < field_x*field_y; ++i) {
+    /*for (int i = 0; i < field_x*field_y; ++i) {
         if (level.getState() == Blue) {
             if (level.getField()->tiles[i].isBlue) {
                 window.draw(level.getField()->tiles[i].physForm);
@@ -143,7 +191,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
                 window.draw(level.getField()->tiles[i].physForm);
             }
         }
-    }
+    }*/
 
     //DEBUG
     if (!NDEBUG) {
