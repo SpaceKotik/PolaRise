@@ -30,6 +30,8 @@ Tile::Tile(Vector2f pos, bool isRed, bool isBlue) {
 	physForm.setOutlineThickness(0);
 	isRed = false;
 	isBlue = false;
+	isSolidBlue = false;
+	isSolidRed = false;
 }
 
 void Tile::rotate(float deg) {
@@ -46,4 +48,12 @@ bool Tile::checkIfBlue() {
 
 bool Tile::checkIfRed() {
 	return isRed;
+}
+
+bool Tile::checkIfSolidRed() {
+	return isSolidRed;
+}
+
+bool Tile::checkIfSolidBlue() {
+	return isSolidBlue;
 }

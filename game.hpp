@@ -25,6 +25,8 @@ struct Moves {
     bool space = 0;
     bool mouseLeft = 0;
     bool mouseRight = 0;
+    bool isOnStart = 0;
+    bool isOnFinish = 0;
 
 };
 
@@ -34,7 +36,7 @@ private:
     Texture texture;
     Event event;
     RenderWindow window;
-    Vector2f mousePos;
+    //Vector2f mousePos;
     Hero hero;
 
     RayTracing rayTracing;

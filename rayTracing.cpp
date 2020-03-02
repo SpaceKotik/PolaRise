@@ -25,8 +25,11 @@ extern const Vector2f lightSourceTextureCenter;
 //const Color lightColor = Color(210, 210, 160);
 //const Color lightColor = Color(102, 178, 255);
 //const Color lightColorBlue = Color(18, 32, 46);		//Blue for 5 sources
-//const Color lightColorRed = Color(18, 32, 46);		//Blue for 5 sources
-//const Color lightColorBlue = Color(18*5, 32*5, 46*5);	//Blue for 1 source
+
+
+//const Color lightColorRed = Color(50, 10, 10);		//Red for 5 sources
+//const Color lightColorBlue = Color(20, 20, 50);		//Blue for 5 sources
+
 const Color lightColorBlue = Color(102, 102, 255);	//Blue for 1 source
 const Color lightColorRed = Color(255, 51, 51);		//Red for 1 source
 const float angle = 0.001;
@@ -78,8 +81,11 @@ void RayTracing::convertTileMapToPolyMap(Level *level, Window *window) {
 				tempCell.edgeId[k] = -1;
 
 				if ((level->getState() == Blue && level->getField()->tiles[i*field_x + j].checkIfBlue()) ||
-					(level->getState() == Red && level->getField()->tiles[i*field_x + j].checkIfRed()))
-					tempCell.exist = true;
+					(level->getState() == Red && level->getField()->tiles[i*field_x + j].checkIfRed())) {
+					if ((level->getState() == Red && level->getField()->tiles[i*field_x + j].checkIfSolidRed()) ||
+					 (level->getState() == Blue && level->getField()->tiles[i*field_x + j].checkIfSolidBlue()))
+						tempCell.exist = true;
+				}
 				else
 					tempCell.exist = false;
 			}
@@ -308,7 +314,7 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
         tempLine.startCoord = NO_INTERSECTION;
        // tempLine.param = 100000;
         return tempLine;
-}
+	}
 
     // SOLVE FOR T1 & T2
     // ray.startCoord.x+ray.dirX*T1 = s_px+line.startCoord.x*T2 && ray.startCoord.y+ray.dirY*T1 = line.startCoord.y+line.startCoord.y*T2
@@ -385,13 +391,13 @@ VertexArray RayTracing::createMesh() {
 	}
 
 
-	//MUST BE DONE!
+		//MUST BE DONE!
 
 
 
 
 
-	//qsort(order, linesCount*3+1, sizeof(int), cmp);
+		//qsort(order, linesCount*3+1, sizeof(int), cmp);
 	
 	lightMesh[0].position = raysVertex[0][0].position;
 	lightMesh[0].texCoords = lightSourceTextureCenter; 

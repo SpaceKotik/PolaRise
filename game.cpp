@@ -27,7 +27,7 @@ extern const Color backgorundColor;
 
 
 #define NO_INTERSECTION Vector2f(-10, -10)
-#define LIGHT_SOURCE_SCALE Vector2f(0.8, 0.8)
+#define LIGHT_SOURCE_SCALE Vector2f(0.5, 0.5)
 #define BORDERS_VISIBILITY_SCALE Vector2f(0.4, 0.4)
 
 
@@ -45,9 +45,6 @@ Game::Game() {
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(120);
     window.setVerticalSyncEnabled(true);
-
-    mousePos = Vector2f(100, 100);
-
 
     level.setField();
 
@@ -82,9 +79,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
     window.clear(backgorundColor);
 
-
     //draw all tiles
-
     for (int i = 0; i < field_x*field_y; ++i) {
         if (level.getState() == Blue) {
             if (level.getField()->tiles[i].isBlue) {
@@ -98,19 +93,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
         }
     }
 
-
-    //Draw visible edges
-    /*for (int i = 0; i < rayTracing.edges.size(); ++i) {
-        Vertex currLine[2];
-        currLine[0].position = rayTracing.edges.at(i).startCoord;
-        currLine[1].position = rayTracing.edges.at(i).startCoord + Vector2f(rayTracing.edges.at(i).dirX, rayTracing.edges.at(i).dirY);
-        currLine[0].color = Color::White;
-        currLine[1].color = Color::White;
-        window.draw(currLine, 2, Lines);
-    }*/
-
-
-     //add light fade for bor
+    //add light fade for borders
     Sprite bordersFade;
     bordersFade.setOrigin(lightSourceTextureCenter);
     bordersFade.setTexture(texture);
@@ -122,6 +105,32 @@ void Game::draw(Level level, RayTracing rayTracing) {
     //process light sources
     rayTracing.update(&level, getHandle(), hero.getPos());
     window.draw(rayTracing.createMesh(), renderStates);
+
+    for (int i = 0; i < field_x*field_y; ++i) {
+        if (level.getState() == Blue) {
+            if (level.getField()->tiles[i].typeBlue == 1 || level.getField()->tiles[i].typeBlue == 2) 
+                window.draw(level.getField()->tiles[i].physForm);
+        }
+        else if (level.getState() == Red) {
+            if (level.getField()->tiles[i].typeRed == 1 || level.getField()->tiles[i].typeRed == 2) {
+                window.draw(level.getField()->tiles[i].physForm);
+                std::cout << "a";
+            }
+        }
+    }
+
+    /*rayTracing.update(&level, getHandle(), hero.getPos() + Vector2f(2, 2));
+    window.draw(rayTracing.createMesh(), renderStates);
+
+    rayTracing.update(&level, getHandle(), hero.getPos() + Vector2f(-2, 2));
+    window.draw(rayTracing.createMesh(), renderStates);
+
+    rayTracing.update(&level, getHandle(), hero.getPos() + Vector2f(2, -2));
+    window.draw(rayTracing.createMesh(), renderStates);
+
+    rayTracing.update(&level, getHandle(), hero.getPos() + Vector2f(-2, -2));
+    window.draw(rayTracing.createMesh(), renderStates);*/
+
     window.draw(*hero.getPhysForm());
 
 
@@ -131,7 +140,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
     lightFade.setTexture(texture);
     lightFade.setPosition(hero.getPos());
     lightFade.setScale(LIGHT_SOURCE_SCALE);
-    ///window.draw(lightFade, BlendMultiply);
+    //window.draw(lightFade, BlendMultiply);
 
 
     /*rayTracing.update(&level, getHandle(), mousePos);
@@ -196,24 +205,11 @@ MouseState Game::input() {
                 break;
 
             case Event::MouseButtonPressed:
-                /*if (event.mouseButton.button == sf::Mouse::Left) {
-                    mouseState.pos = (Vector2f)Mouse::getPosition(window);
-                    mouseState.LeftButtonPressed = true;
-                    level.addTile(mouseState.pos);
-                }
-                if (event.mouseButton.button == sf::Mouse::Right) {
-                    mouseState.pos = (Vector2f)Mouse::getPosition(window);
-                    mouseState.RightButtonPressed = true;
-                    level.removeTile(mouseState.pos);
-                }
-                rayTracing.convertTileMapToPolyMap(&level, getHandle());
-                rayTracing.convertPolyMapToVertices();*/
-                break;
-            case Event::KeyPressed:
-
                 
+                break;
+            case Event::KeyPressed:             
                 //if(Keyboard::isKeyPressed(Keyboard::Space)) {
-                if(event.key.code == sf::Keyboard::Space) {
+                if(event.key.code == Keyboard::Space) {
 
                     level.changeState();
 
@@ -224,7 +220,6 @@ MouseState Game::input() {
                         rayTracing.convertTileMapToPolyMap(&level, getHandle());
                         rayTracing.convertPolyMapToVertices();
 
-
                     }
                     else {
                         level.changeState();
@@ -232,47 +227,45 @@ MouseState Game::input() {
                     
                 }
 
-
-                if(event.key.code == sf::Keyboard::D) {
-                    keys.right = 1;
+                if(event.key.code == Keyboard::D) {
+                    keys.right = true;
                 }
 
-                if(event.key.code == sf::Keyboard::A) {
-                    keys.left = 1;
+                if(event.key.code == Keyboard::A) {
+                    keys.left = true;
                 }
 
-                if(event.key.code == sf::Keyboard::W) {
-                    keys.up = 1;
+                if(event.key.code == Keyboard::W) {
+                    keys.up = true;
                 }
 
-                if(event.key.code == sf::Keyboard::S) {
-                    keys.down= 1;
+                if(event.key.code == Keyboard::S) {
+                    keys.down= true;
                 }
                 
                 break;
 
             case Event::KeyReleased:
-                 if(event.key.code == sf::Keyboard::D) {
-                    keys.right = 0;
+                 if(event.key.code == Keyboard::D) {
+                    keys.right = false;
                 }
 
-                if(event.key.code == sf::Keyboard::A) {
-                    keys.left = 0;
+                if(event.key.code == Keyboard::A) {
+                    keys.left = false;
                 }
 
-                if(event.key.code == sf::Keyboard::W) {
-                    keys.up = 0;
+                if(event.key.code == Keyboard::W) {
+                    keys.up = false;
                 }
 
-                if(event.key.code == sf::Keyboard::S) {
-                    keys.down= 0;
+                if(event.key.code == Keyboard::S) {
+                    keys.down= false;
                 }
 
             default:
                 break;                        
             }
         }
-
 
 
         if (Mouse::isButtonPressed(sf::Mouse::Left)) {
@@ -285,26 +278,25 @@ MouseState Game::input() {
             mouseState.RightButtonPressed = true;
             level.removeTile(mouseState.pos);
         }
+
+        //calculate all edges and vertices
         rayTracing.convertTileMapToPolyMap(&level, getHandle());
         rayTracing.convertPolyMapToVertices();
-
-
 
 
         if (Keyboard::isKeyPressed(Keyboard::Escape)) {
             window.close();
         }
 
-
-        mousePos = (Vector2f)Mouse::getPosition(window);
+        //mousePos = (Vector2f)Mouse::getPosition(window);
         if (Mouse::getPosition(window).x > window.getSize().x)
-            mousePos.x = window.getSize().x-2;
+            mouseState.pos.x = window.getSize().x-2;
         if (Mouse::getPosition(window).x < 0)
-            mousePos.x = 2;
+            mouseState.pos.x = 2;
         if (Mouse::getPosition(window).y > window.getSize().y)
-            mousePos.y = window.getSize().y-2;
+            mouseState.pos.y = window.getSize().y-2;
         if (Mouse::getPosition(window).y < 0)
-            mousePos.y = 2;
+            mouseState.pos.y = 2;
 
 
         return mouseState;
@@ -312,175 +304,90 @@ MouseState Game::input() {
 
 
 void Game::logic() {
-    
-    /*if (heroMoves.right == true) {
-        desPos = hero.getPos() + hero.velocity + Vector2f(heroAcceleration, 0);
-
-        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
-            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
-                //hero.move(Vector2f(heroSpeed, 0)); 
-                hero.velocity += Vector2f(heroAcceleration, 0);
-                if (sqrt((hero.velocity.x*hero.velocity.x) + (hero.velocity.y*hero.velocity.y) > maxVelocity))
-                    hero.velocity -= Vector2f(heroAcceleration, 0);
-                hero.move(hero.velocity);
-        }
-        else {
-            hero.setPos(Vector2f(((int)hero.getPos().x/(int)scale + 1)*scale - heroRadius , hero.getPos().y));
-            hero.velocity.x = 0;
-        }
-    }
-
-    if (heroMoves.left == true) {
-        desPos = hero.getPos() + hero.velocity + Vector2f(-heroAcceleration, 0);
-
-        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
-            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
-                //hero.move(Vector2f(-heroSpeed, 0));
-                hero.velocity += Vector2f(-heroAcceleration, 0);
-                if (sqrt((hero.velocity.x*hero.velocity.x) + (hero.velocity.y*hero.velocity.y) > maxVelocity))
-                    hero.velocity -= Vector2f(-heroAcceleration, 0);
-                hero.move(hero.velocity);
-        }
-        else {
-            hero.setPos(Vector2f(((int)hero.getPos().x/(int)scale)*scale + heroRadius , hero.getPos().y));
-            hero.velocity.x = 0;
-        }
-    }
-
-    if (heroMoves.up == true) {
-        desPos = hero.getPos() + hero.velocity + Vector2f(0, -heroAcceleration);
-
-        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
-            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
-
-
-            hero.velocity += Vector2f(0, -heroAcceleration);
-            if (sqrt((hero.velocity.x*hero.velocity.x) + (hero.velocity.y*hero.velocity.y) > maxVelocity))
-                hero.velocity -= Vector2f(0, -heroAcceleration);
-            hero.move(hero.velocity);
-        }
-        else {
-            hero.setPos(Vector2f(hero.getPos().x, ((int)hero.getPos().y/(int)scale)*scale + heroRadius ));
-            hero.velocity.y = 0;
-
-        }
-    }
-
-    if (heroMoves.down == true) {
-         desPos = hero.getPos() + hero.velocity + Vector2f(0, heroAcceleration);
-
-        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
-            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
-            //hero.move(Vector2f(0, heroSpeed));
-
-            hero.velocity += Vector2f(0, heroAcceleration);
-            if (sqrt((hero.velocity.x*hero.velocity.x) + (hero.velocity.y*hero.velocity.y) > maxVelocity))
-                hero.velocity -= Vector2f(0, heroAcceleration);
-            hero.move(hero.velocity);
-
-        }
-        else {
-            hero.setPos(Vector2f(hero.getPos().x, ((int)hero.getPos().y/(int)scale+1)*scale -heroRadius ));
-            hero.velocity.y = 0;
-        }
-    }*/
-
     Vector2f desPos;
-    Vector2f heroVel = Vector2f(0, 0);
 
-
-
-
-
-
+    //process input
     if (keys.right == true) 
         hero.velocity.x += heroAcceleration;
-    desPos = hero.getPos() + Vector2f(hero.velocity.x , 0);
+    if (keys.left == true) 
+        hero.velocity.x -= heroAcceleration;
+    if (keys.up == true)
+        hero.velocity.y -= heroAcceleration;
+    if (keys.down == true) 
+        hero.velocity.y += heroAcceleration;
 
+    //restrict speed by normalizing velocity vector
+    float absVelocity = sqrt(hero.velocity.x*hero.velocity.x + hero.velocity.y*hero.velocity.y);
+    if (absVelocity > maxVelocity) {
+        hero.velocity.x /= absVelocity;
+        hero.velocity.x *= maxVelocity;
+        hero.velocity.y /= absVelocity;
+        hero.velocity.y *= maxVelocity;
+    }
+
+    //process right moving if player moves right
+    desPos = hero.getPos() + Vector2f(hero.velocity.x , 0);
+    //if no intersections, move onle horizontally
     if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1)) && hero.velocity.x >= 0) {
             
         hero.move(Vector2f(hero.velocity.x, 0));
-        //heroVel += Vector2f(heroVelocity, 0);
     }
+    //else move right to the obstacle and mirror speed
     else {
-        if (hero.velocity.x >= 0) {
+        if (hero.velocity.x > 0) {
             hero.setPos(Vector2f(((int)hero.getPos().x/(int)scale + 1)*scale - heroRadius , hero.getPos().y));
-            hero.velocity.x = 0;
+            hero.velocity.x = -hero.velocity.x * 0.2;
         }
     }
 
 
-
-    
-
-    if (keys.left == true) 
-        hero.velocity.x -= heroAcceleration;
+    //process left moving if player moves left
     desPos = hero.getPos() + Vector2f(hero.velocity.x , 0);
 
 
     if (!level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1)) && hero.velocity.x <= 0) {
 
         hero.move(Vector2f(hero.velocity.x, 0));
-        //heroVel += Vector2f(-heroVelocity, 0);
     }
     else {
-        if (hero.velocity.x <= 0) {
+        if (hero.velocity.x < 0) {
             hero.setPos(Vector2f(((int)hero.getPos().x/(int)scale)*scale + heroRadius , hero.getPos().y));
-            hero.velocity.x = 0;
+            hero.velocity.x = -hero.velocity.x * 0.2;
         }
     }
 
-
-
-
-
-    if (keys.up == true)
-        hero.velocity.y -= heroAcceleration;
+    
+    //process up moving if player moves up
     desPos = hero.getPos() + Vector2f(0, hero.velocity.y);
 
     if ( !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1)) && hero.velocity.y <= 0) {
 
         hero.move(Vector2f(0, hero.velocity.y));
-        //heroVel += Vector2f(0, -heroVelocity);
     }
     else {
-        if (hero.velocity.y <= 0) {
+        if (hero.velocity.y < 0) {
             hero.setPos(Vector2f(hero.getPos().x, ((int)hero.getPos().y/(int)scale)*scale + heroRadius ));
-            hero.velocity.y = 0;
+            hero.velocity.y = -hero.velocity.y * 0.2;
         }
 
     }
 
 
-
-    
-
-    if (keys.down == true) 
-        hero.velocity.y += heroAcceleration;
+    //process down moving if player moves down
     desPos = hero.getPos() + Vector2f(0, hero.velocity.y);
 
     if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1))&& hero.velocity.y >= 0) {
-
         hero.move(Vector2f(0, hero.velocity.y));
-        //heroVel += Vector2f(0, heroVelocity);
-
     }
     else {
-        if (hero.velocity.y >= 0) {
+        if (hero.velocity.y > 0) {
             hero.setPos(Vector2f(hero.getPos().x, ((int)hero.getPos().y/(int)scale+1)*scale -heroRadius ));
-            hero.velocity.y = 0;
+            hero.velocity.y = -hero.velocity.y * 0.2;
         }
     }
-    
 
-    //restrict speed
-    /*float absVelocity = sqrt(heroVel.x*heroVel.x + heroVel.y*heroVel.y);
-    if (absVelocity > heroVelocity+1) {
-        heroVel.x /= absVelocity;
-        heroVel.x *= heroVelocity;
-        heroVel.y /= absVelocity;
-        heroVel.y *= heroVelocity;
-    }
-    hero.move(heroVel);*/
+    //decrease veloicty if no input
+    if (keys.right == false && keys.left == false && keys.up == false && keys.down == false)
+        hero.velocity = Vector2f(hero.velocity.x * 0.88, hero.velocity.y * 0.88);
 
 }
