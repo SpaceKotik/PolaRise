@@ -26,14 +26,9 @@ extern const float heroVelocity;
 extern const Color backgorundColor;
 
 
-
-
 #define NO_INTERSECTION Vector2f(-10, -10)
 #define LIGHT_SOURCE_SCALE Vector2f(0.8, 0.8)
 #define BORDERS_VISIBILITY_SCALE Vector2f(0.4, 0.4)
-
-
-
 
 
 Game::Game() {
@@ -294,7 +289,7 @@ MouseState Game::input() {
         rayTracing.convertPolyMapToVertices();
 
 
-        
+
 
         if (Keyboard::isKeyPressed(Keyboard::Escape)) {
             window.close();
@@ -393,70 +388,99 @@ void Game::logic() {
     Vector2f desPos;
     Vector2f heroVel = Vector2f(0, 0);
 
-    if (keys.right == true) {
-        desPos = hero.getPos() + Vector2f(heroVelocity, 0);
 
-        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
-            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
-                
-                //hero.move(Vector2f(heroVelocity, 0));
-            heroVel += Vector2f(heroVelocity, 0);
-        }
-        else {
+
+
+
+
+    if (keys.right == true) 
+        hero.velocity.x += heroAcceleration;
+    desPos = hero.getPos() + Vector2f(hero.velocity.x , 0);
+
+    if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1)) && hero.velocity.x >= 0) {
+            
+        hero.move(Vector2f(hero.velocity.x, 0));
+        //heroVel += Vector2f(heroVelocity, 0);
+    }
+    else {
+        if (hero.velocity.x >= 0) {
             hero.setPos(Vector2f(((int)hero.getPos().x/(int)scale + 1)*scale - heroRadius , hero.getPos().y));
+            hero.velocity.x = 0;
         }
     }
 
-    if (keys.left == true) {
-        desPos = hero.getPos() + Vector2f(-heroVelocity, 0);
 
-        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
-            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
 
-                //hero.move(Vector2f(-heroVelocity, 0));
-            heroVel += Vector2f(-heroVelocity, 0);
-        }
-        else {
+    
+
+    if (keys.left == true) 
+        hero.velocity.x -= heroAcceleration;
+    desPos = hero.getPos() + Vector2f(hero.velocity.x , 0);
+
+
+    if (!level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1)) && hero.velocity.x <= 0) {
+
+        hero.move(Vector2f(hero.velocity.x, 0));
+        //heroVel += Vector2f(-heroVelocity, 0);
+    }
+    else {
+        if (hero.velocity.x <= 0) {
             hero.setPos(Vector2f(((int)hero.getPos().x/(int)scale)*scale + heroRadius , hero.getPos().y));
+            hero.velocity.x = 0;
         }
     }
 
-    if (keys.up == true) {
-        desPos = hero.getPos() + Vector2f(0, -heroVelocity);
 
-        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
-            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
 
-            //hero.move(Vector2f(0, -heroVelocity));
-            heroVel += Vector2f(0, -heroVelocity);
-        }
-        else {
+
+
+    if (keys.up == true)
+        hero.velocity.y -= heroAcceleration;
+    desPos = hero.getPos() + Vector2f(0, hero.velocity.y);
+
+    if ( !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1)) && hero.velocity.y <= 0) {
+
+        hero.move(Vector2f(0, hero.velocity.y));
+        //heroVel += Vector2f(0, -heroVelocity);
+    }
+    else {
+        if (hero.velocity.y <= 0) {
             hero.setPos(Vector2f(hero.getPos().x, ((int)hero.getPos().y/(int)scale)*scale + heroRadius ));
-
+            hero.velocity.y = 0;
         }
+
     }
 
-    if (keys.down == true) {
-        desPos = hero.getPos() + Vector2f(0, heroVelocity);
 
-        if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1))
-            && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
 
-            //hero.move(Vector2f(0, heroVelocity));
-            heroVel += Vector2f(0, heroVelocity);
+    
 
-        }
-        else {
+    if (keys.down == true) 
+        hero.velocity.y += heroAcceleration;
+    desPos = hero.getPos() + Vector2f(0, hero.velocity.y);
+
+    if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1))&& hero.velocity.y >= 0) {
+
+        hero.move(Vector2f(0, hero.velocity.y));
+        //heroVel += Vector2f(0, heroVelocity);
+
+    }
+    else {
+        if (hero.velocity.y >= 0) {
             hero.setPos(Vector2f(hero.getPos().x, ((int)hero.getPos().y/(int)scale+1)*scale -heroRadius ));
+            hero.velocity.y = 0;
         }
     }
-    float absVelocity = sqrt(heroVel.x*heroVel.x + heroVel.y*heroVel.y);
+    
+
+    //restrict speed
+    /*float absVelocity = sqrt(heroVel.x*heroVel.x + heroVel.y*heroVel.y);
     if (absVelocity > heroVelocity+1) {
         heroVel.x /= absVelocity;
         heroVel.x *= heroVelocity;
         heroVel.y /= absVelocity;
         heroVel.y *= heroVelocity;
     }
-    hero.move(heroVel);
+    hero.move(heroVel);*/
 
 }

@@ -7,11 +7,8 @@
 using namespace sf;
 int main()
 {
-	//std::cout << "a\n";
-    srand(time(NULL));
-    //Texts texts;
+    //srand(time(NULL));
     Game game;
-    //game.setup();
     game.run();
 
     return 0;

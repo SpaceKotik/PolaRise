@@ -23,6 +23,8 @@ struct Moves {
     bool up = 0;
     bool down = 0;
     bool space = 0;
+    bool mouseLeft = 0;
+    bool mouseRight = 0;
 
 };
 
