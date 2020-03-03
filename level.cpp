@@ -55,25 +55,8 @@ void Level::setField() {
 	tileCount ++;
 	}
 
-
 	loadToFile();
 	loadFromFile();
-
-	//field.tiles[41].isBlue = true;
-	//tileCount++;
-	/*tileCount = tilesCount;
-	//field.tile = new Tile[tilesCount];
-	for (int i = 0; i < tilesCount; ++i) {
-	//field.tile[i].physForm.setPosition(field_x*scale/2.f + i*250 - 300, field_y*scale/2.f + i*50-100);
-	field.tile[i].physForm.setPosition(field_x*scale/2.f + i*scale*8 - 300, field_y*scale/2.f + i*scale*3));
-	//field.tile[i].physForm.rotate(i*30);
-	field.tile[i].physForm.setSize(Vector2f(scale*8, scale*3));
-	//field.tile[i].physForm.setSize(Vector2f(20, 5));
-	field.tile[i].physForm.setOrigin(Vector2f(field.tile[i].physForm.getSize().x/2.f, field.tile[i].physForm.getSize().y/2.f));
-	field.tile[i].physForm.setFillColor(Color(70, 70, 70));
-	//field.tile[i].physForm.setOutlineColor(Color::Black);
-	field.tile[i].physForm.setOutlineThickness(0);
-	}*/
 }
 
 Field* Level::getField() {
@@ -237,16 +220,6 @@ int Level::loadFromFile() {
     		default:
 	    		break;
 	    	}
-
-
-
-    		/*if (currTile == 1) {
-    			field.tiles[i*field_x + j].isBlue = true;
-    			tileCount++;
-    		}
-    		else {
-    			field.tiles[i*field_x + j].isBlue = false;
-    		}*/
     	}
     }
 
@@ -288,14 +261,6 @@ int Level::loadFromFile() {
 	    	default:
 	    		break;
 	    	}
-    			
-    		/*if (currTile == 1) {
-    			field.tiles[i*field_x + j].isRed = true;
-    			tileCount++;
-    		}
-    		else {
-    			field.tiles[i*field_x + j].isRed = false;
-    		}*/
     	}
     }
 
@@ -317,10 +282,24 @@ LevelState Level::getState() {
 }
 
 bool Level::isOnTile(Vector2f pos) {
-	if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue && levelState == Blue && field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidBlue) {
+	Tile currTile = field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale);
+	if (currTile.isBlue && levelState == Blue && currTile.isSolidBlue) {
 		return true;
 	}
-	else if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed  && levelState == Red && field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidRed) {
+	else if (currTile.isRed  && levelState == Red && currTile.isSolidRed) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool Level::isOnFinish(Vector2f pos) {
+	Tile currTile = field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale);
+	if (currTile.isBlue && levelState == Blue && currTile.typeBlue == FinishPos) {
+		return true;
+	}
+	else if (currTile.isRed  && levelState == Red && currTile.typeRed == FinishPos) {
 		return true;
 	}
 	else {

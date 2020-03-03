@@ -1,6 +1,10 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <fstream>
+#include <thread>
+#include <mutex>
+#include <chrono>
+
 
 #include <math.h>
 #include <unistd.h>
@@ -29,6 +33,44 @@ extern const Color backgorundColor;
 #define NO_INTERSECTION Vector2f(-10, -10)
 #define LIGHT_SOURCE_SCALE Vector2f(0.5, 0.5)
 #define BORDERS_VISIBILITY_SCALE Vector2f(0.4, 0.4)
+
+
+class FPScounter {
+    public:
+        //FPSCounter();
+        void update();
+        void draw();
+
+    private:
+        //sf::Text m_text;
+        //sf::Font m_font;
+
+        sf::Clock delayTimer;
+        sf::Clock fpsTimer;
+
+        float fps = 0;
+
+        int frameCount = 0;
+};
+
+
+void FPScounter::update() {
+    frameCount++;
+
+    if (delayTimer.getElapsedTime().asSeconds() > 0.2) {
+        fps = frameCount / fpsTimer.restart().asSeconds();
+        frameCount = 0;
+        delayTimer.restart();
+    }
+}
+
+//Draws the FPS display to the window
+void FPScounter::draw() {
+    //m_text.setString("FPS " + std::to_string((int)m_fps));
+    //renderer.draw(m_text);
+    std::cout << "\033[2J\033[1;1H";
+    std::cout << "FPS : " << std::to_string((int)fps) << "\n";
+}
 
 
 Game::Game() {
@@ -60,10 +102,13 @@ RenderWindow* Game::getHandle() {
 
 void Game::run() {
     Clock clock;
+    FPScounter fpsCounter;
 
     while(window.isOpen()) {
         //MouseState mouseState = input();
         //Vector2f mouseNotClicked = NO_INTERSECTION;
+        fpsCounter.update();
+        fpsCounter.draw();
 
         input();
         logic();
@@ -71,6 +116,17 @@ void Game::run() {
         draw(level, rayTracing);
     }
 }
+
+
+
+
+void doRayTracing(RayTracing rayTracing, Vector2f pos, Level *level, RenderWindow* window, std::mutex *rtLock) {
+    rayTracing.update(level, window, pos);
+    rtLock->lock();
+    window->draw(rayTracing.createMesh(), BlendAdd);
+    rtLock->unlock();
+}
+
 
 void Game::draw(Level level, RayTracing rayTracing) {
 
@@ -102,22 +158,20 @@ void Game::draw(Level level, RayTracing rayTracing) {
     //window.draw(bordersFade, BlendMultiply);
 
 
+    std::mutex block;
+    std::thread thr1(doRayTracing, rayTracing, hero.getPos(), &level, &window, &block);
+    std::thread thr2(doRayTracing, rayTracing, hero.getPos()+ Vector2f(2, 2), &level, &window, &block);
+    std::thread thr3(doRayTracing, rayTracing, hero.getPos()+ Vector2f(2, -2), &level, &window, &block);
+    std::thread thr4(doRayTracing, rayTracing, hero.getPos()+ Vector2f(-2, 2), &level, &window, &block);
+    std::thread thr5(doRayTracing, rayTracing, hero.getPos()+ Vector2f(-2, -2), &level, &window, &block);
     //process light sources
-    rayTracing.update(&level, getHandle(), hero.getPos());
-    window.draw(rayTracing.createMesh(), renderStates);
-
-    for (int i = 0; i < field_x*field_y; ++i) {
-        if (level.getState() == Blue) {
-            if (level.getField()->tiles[i].typeBlue == 1 || level.getField()->tiles[i].typeBlue == 2) 
-                window.draw(level.getField()->tiles[i].physForm);
-        }
-        else if (level.getState() == Red) {
-            if (level.getField()->tiles[i].typeRed == 1 || level.getField()->tiles[i].typeRed == 2) {
-                window.draw(level.getField()->tiles[i].physForm);
-                std::cout << "a";
-            }
-        }
-    }
+    //rayTracing.update(&level, getHandle(), hero.getPos());
+    //window.draw(rayTracing.createMesh(), renderStates);
+    thr1.join();
+    thr2.join();
+    thr3.join();
+    thr4.join();
+    thr5.join();
 
     /*rayTracing.update(&level, getHandle(), hero.getPos() + Vector2f(2, 2));
     window.draw(rayTracing.createMesh(), renderStates);
@@ -130,6 +184,20 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
     rayTracing.update(&level, getHandle(), hero.getPos() + Vector2f(-2, -2));
     window.draw(rayTracing.createMesh(), renderStates);*/
+
+    for (int i = 0; i < field_x*field_y; ++i) {
+        if (level.getState() == Blue) {
+            if (level.getField()->tiles[i].typeBlue == 1 || level.getField()->tiles[i].typeBlue == 2) 
+                window.draw(level.getField()->tiles[i].physForm);
+        }
+        else if (level.getState() == Red) {
+            if (level.getField()->tiles[i].typeRed == 1 || level.getField()->tiles[i].typeRed == 2) {
+                window.draw(level.getField()->tiles[i].physForm);
+            }
+        }
+    }
+
+    
 
     window.draw(*hero.getPhysForm());
 
@@ -272,16 +340,20 @@ MouseState Game::input() {
                     mouseState.pos = (Vector2f)Mouse::getPosition(window);
                     mouseState.LeftButtonPressed = true;
                     level.addTile(mouseState.pos);
+                    rayTracing.convertTileMapToPolyMap(&level, getHandle());
+                    rayTracing.convertPolyMapToVertices();
         }
         if (Mouse::isButtonPressed(sf::Mouse::Right)) {
             mouseState.pos = (Vector2f)Mouse::getPosition(window);
             mouseState.RightButtonPressed = true;
             level.removeTile(mouseState.pos);
+            rayTracing.convertTileMapToPolyMap(&level, getHandle());
+            rayTracing.convertPolyMapToVertices();
         }
 
         //calculate all edges and vertices
-        rayTracing.convertTileMapToPolyMap(&level, getHandle());
-        rayTracing.convertPolyMapToVertices();
+        /*rayTracing.convertTileMapToPolyMap(&level, getHandle());
+        rayTracing.convertPolyMapToVertices();*/
 
 
         if (Keyboard::isKeyPressed(Keyboard::Escape)) {
@@ -389,5 +461,14 @@ void Game::logic() {
     //decrease veloicty if no input
     if (keys.right == false && keys.left == false && keys.up == false && keys.down == false)
         hero.velocity = Vector2f(hero.velocity.x * 0.88, hero.velocity.y * 0.88);
+
+
+    if(level.isOnFinish(hero.getPos())) {
+        keys.isOnFinish = true;
+        std::cout << "Finish\n";
+    }
+    else {
+        keys.isOnFinish = false;///!!!
+    }
 
 }

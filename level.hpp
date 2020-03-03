@@ -36,4 +36,5 @@ public:
 	void changeState();
 	LevelState getState();
 	bool isOnTile(Vector2f pos);
+	bool isOnFinish(Vector2f pos);
 };

@@ -27,11 +27,11 @@ extern const Vector2f lightSourceTextureCenter;
 //const Color lightColorBlue = Color(18, 32, 46);		//Blue for 5 sources
 
 
-//const Color lightColorRed = Color(50, 10, 10);		//Red for 5 sources
-//const Color lightColorBlue = Color(20, 20, 50);		//Blue for 5 sources
+const Color lightColorRed = Color(50, 10, 10);		//Red for 5 sources
+const Color lightColorBlue = Color(20, 20, 50);		//Blue for 5 sources
 
-const Color lightColorBlue = Color(102, 102, 255);	//Blue for 1 source
-const Color lightColorRed = Color(255, 51, 51);		//Red for 1 source
+//const Color lightColorBlue = Color(102, 102, 255);	//Blue for 1 source
+//const Color lightColorRed = Color(255, 51, 51);		//Red for 1 source
 const float angle = 0.001;
 
 
@@ -226,8 +226,16 @@ void RayTracing::convertPolyMapToVertices() {
 		if (std::find(vertices.begin(), vertices.end(), tempVertex) == vertices.end())
 			vertices.push_back(tempVertex);
 	}
-	std::cout << "\033[2J\033[1;1H";
-	std::cout << "Rays on screen: " << vertices.size()*3 << '\n';
+	//std::cout << "\033[2J\033[1;1H";
+	//std::cout << "Rays on screen: " << vertices.size()*3 << '\n';
+
+
+
+
+
+
+
+	
 }
 
 void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
@@ -269,12 +277,6 @@ float getLen(Line line) {
 }
 
 Line RayTracing::getPartIntersection(Line ray, Line line) {
-	/*Line ray;
-	ray.startCoord = raysVertex[0].position;
-	ray.dirX = raysVertex[1].position.x - ray.startCoord.x;
-	ray.dirY = raysVertex[1].position.y - ray.startCoord.y;*/
-
-
     // Are they parallel? If so, no intersect
     float r_mag = sqrt(ray.dirX*ray.dirX+ray.dirY*ray.dirY);
     float s_mag = sqrt(line.dirX*line.dirX+line.dirY*line.dirY);
@@ -287,7 +289,7 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
 
 
     if(abs(ray.dirX/r_mag) == abs(line.dirX/s_mag) && abs(ray.dirY/r_mag) == abs(line.dirY/s_mag)){ // Directions are the same.
-    	/*if (distance1 > distance2) {
+    	if (distance1 > distance2) {
     		Line tempLine;
 		    tempLine.startCoord = Vector2f(line.startCoord.x + line.dirX, line.startCoord.y + line.dirY);
 		    Line tempRay;
@@ -306,9 +308,7 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
 		    tempRay.dirY = line.startCoord.y + line.dirY;
 		    tempLine.param = getLen(tempRay) / getLen(ray);
 		    return tempLine;
-    	}*/
-
-
+    	}
 
         Line tempLine;
         tempLine.startCoord = NO_INTERSECTION;
@@ -347,8 +347,8 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
 
 
 //function coparing angles of rays
-int cmp(const void *a, const void *b) {
-		 if ((atan2(((Line*)a)->dirY, ((Line*)a)->dirX) - atan2(((Line*)b)->dirY, ((Line*)b)->dirX)) < 0) {
+int cmp1(const void *a, const void *b) {
+		 if ((atan2(((Line*)a)->dirY, ((Line*)a)->dirX) - atan2(((Line*)b)->dirY, ((Line*)b)->dirX)) <= 0) {
 		 	return -1;
 		 }
 		 else {
@@ -357,63 +357,58 @@ int cmp(const void *a, const void *b) {
 
 }
 
+int cmp( std::array<Vertex, 2> const&  a,  std::array<Vertex, 2> const&   b) {
+		Line aLine, bLine;
+		//Vector2f aa =(*((std::array<Vertex, 2>*)a))[0].position;
+		aLine.startCoord = a[0].position;
+		aLine.dirX = a[1].position.x - a[0].position.x;
+		aLine.dirY = a[1].position.y - a[0].position.y;
+
+
+		bLine.startCoord = b[0].position;
+		bLine.dirX = b[1].position.x - b[0].position.x;
+		bLine.dirY = b[1].position.y - b[0].position.y;
+
+
+		 if ((atan2(aLine.dirY, aLine.dirX) - atan2(bLine.dirY, bLine.dirX)) <= 0) {
+		 	return true;
+		 }
+		 else {
+		 	return false;
+		 }
+	/* if ((atan2(a->dirY, a->dirX) - atan2(b.dirY, b.dirX)) < 0) {
+		 	return -1;
+		 }
+		 else {
+		 	return 1;
+		 }*/
+
+}
+
 VertexArray RayTracing::createMesh() {
 	//make orderArray
 	VertexArray lightMesh(TriangleFan, raysVertex.size() + 2);
-	int order[raysVertex.size()];
-	for (int i = 0; i < raysVertex.size() ; ++i) {
-		order[i] = i;
-	}
-	std::vector<Line> rays;
-	for (auto e: raysVertex) {
-		Line currRay;
-		currRay.startCoord = e[0].position;
-		currRay.dirX = e[1].position.x - e[0].position.x;
-		currRay.dirY = e[1].position.y - e[0].position.y;
-		rays.push_back(currRay);
-	}
 
-	//sort orderArray
+	//Sorting array of rays to make light mesh; 
+	std::sort(raysVertex.begin(), raysVertex.end(), cmp);
 
-	for (int i = 1; i < raysVertex.size() + 1; i++) {
-		for (int j = 1; j < raysVertex.size() + 1-i; ++j)
-		{
-			if(atan2(rays[order[j-1]].dirY, rays[order[j-1]].dirX) > atan2(rays[order[j+1-1]].dirY, rays[order[j+1-1]].dirX)){
-				//swap
-				order[j-1] = order[j]+ order[j-1];
-				order[j] = order[j-1] - order[j];
-				order[j-1] =  order[j-1] - order[j];
-				/*int temp = order[j-1];
-				order[j-1] = order[j+1-1];
-				order[j+1-1] = temp;*/
-			}
-		}
-	}
-
-
-		//MUST BE DONE!
-
-
-
-
-
-		//qsort(order, linesCount*3+1, sizeof(int), cmp);
-	
+	//add central point
 	lightMesh[0].position = raysVertex[0][0].position;
 	lightMesh[0].texCoords = lightSourceTextureCenter; 
 	lightMesh[0].color = lightColor;
+	//add points clockwise/counter-clockwise
 	for (int i = 1; i < raysVertex.size() + 1; ++i) {
-		(lightMesh)[i].position = raysVertex[order[i-1]][1].position;
+		(lightMesh)[i].position = raysVertex[i-1][1].position;
 		(lightMesh)[i].color = lightColor;
 
 		(lightMesh)[i].texCoords = lightSourceTextureCenter + (lightMesh[0].position  - lightMesh[i].position);
 
-
 	}
-
-	(lightMesh)[raysVertex.size() + 1].position = raysVertex[order[0]][1].position;
+	//add closing vertex
+	(lightMesh)[raysVertex.size() + 1].position = raysVertex[0][1].position;
 	(lightMesh)[raysVertex.size() + 1].color = lightColor;
 	(lightMesh)[raysVertex.size() + 1].texCoords = lightSourceTextureCenter + (lightMesh[0].position  - lightMesh[raysVertex.size() + 1].position);
+	
 
 	return lightMesh;
 }
@@ -472,34 +467,24 @@ VertexArray RayTracing::createVisibleBorders() {
 
 
 void RayTracing::calculateIntersections() {
-	//std::cout << "\n NEW ITERATION \n";
 	for (auto &e : raysVertex) {
 		Line prevIntersection;
-        prevIntersection.param = 100000;///!!!! may be the problem
-        //raysVertex[i][1] = Vertex(vertices[i], Color::Blue);
+        prevIntersection.param = -10;
         Line ray;
 		ray.startCoord = e[0].position;
 		ray.dirX = e[1].position.x - ray.startCoord.x;
 		ray.dirY = e[1].position.y - ray.startCoord.y;
-        //std::cout << "\n new ray: \n";
 		for (auto k : edges) {
 
 			Line tempLine = getPartIntersection(ray, k);
 	    	
 			if (tempLine.startCoord.x != -10 && tempLine.startCoord.y != -10) { 
-				//std::cout << "temp: " << tempLine.param << "| ";
-		        if (tempLine.param < prevIntersection.param) {
+		        if (tempLine.param < prevIntersection.param || prevIntersection.param == -10) {
 		            e[1] = Vertex(tempLine.startCoord, Color::Red);
 		            prevIntersection.param = tempLine.param;
-
-
 		        }
-
-
 		    }
-		    //std::cout << prevIntersection.param << ' '; 
 		}
-		//std::cout << '\n';
 	}
 
 

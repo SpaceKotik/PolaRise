@@ -17,7 +17,7 @@ struct MouseState{
 };
 
 
-struct Moves {
+struct States {
     bool right = 0;
     bool left = 0;
     bool up = 0;
@@ -41,7 +41,7 @@ private:
 
     RayTracing rayTracing;
     Level level;
-    Moves keys;
+    States keys;
 
 public:
     Game();
