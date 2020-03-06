@@ -21,6 +21,7 @@ Hero::Hero() {
 	physForm.setFillColor(heroColor);
 	physForm.setOutlineColor(Color(20, 20, 20));
 	physForm.setOutlineThickness(0);
+	lineOfSight = 70;
 }
 void Hero::move(Vector2f dir) {
 	physForm.move(dir);

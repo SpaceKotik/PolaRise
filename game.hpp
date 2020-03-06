@@ -36,7 +36,7 @@ private:
     Texture texture;
     Event event;
     RenderWindow window;
-    //Vector2f mousePos;
+    Vector2f mousePos;
     Hero hero;
 
     RayTracing rayTracing;

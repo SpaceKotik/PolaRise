@@ -2,7 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
+#include <stdio.h>
 #include <math.h>
+#include <tgmath.h>
 #include "game.hpp"
 #include "tile.hpp"
 #include "rayTracing.hpp"
@@ -20,6 +22,7 @@ extern const Vector2f lightSourceTextureCenter;
 #define RIGHT 3
 
 #define NO_INTERSECTION Vector2f(-10, -10);
+#define PI 3.14159265
 
 //const Color lightColor = Color(23*2, 23*2, 23*2);
 //const Color lightColor = Color(210, 210, 160);
@@ -27,12 +30,12 @@ extern const Vector2f lightSourceTextureCenter;
 //const Color lightColorBlue = Color(18, 32, 46);		//Blue for 5 sources
 
 
-const Color lightColorRed = Color(50, 10, 10);		//Red for 5 sources
-const Color lightColorBlue = Color(20, 20, 50);		//Blue for 5 sources
+//const Color lightColorRed = Color(50, 10, 10);		//Red for 5 sources
+//const Color lightColorBlue = Color(20, 20, 50);		//Blue for 5 sources
 
-//const Color lightColorBlue = Color(102, 102, 255);	//Blue for 1 source
-//const Color lightColorRed = Color(255, 51, 51);		//Red for 1 source
-const float angle = 0.001;
+const Color lightColorBlue = Color(102, 102, 255);	//Blue for 1 source
+const Color lightColorRed = Color(255, 51, 51);		//Red for 1 source
+const float angle = 0.03;
 
 
 Vector2f getRectPointPos(Tile rect, int point) {
@@ -228,17 +231,55 @@ void RayTracing::convertPolyMapToVertices() {
 	}
 	//std::cout << "\033[2J\033[1;1H";
 	//std::cout << "Rays on screen: " << vertices.size()*3 << '\n';
-
-
-
-
-
-
-
 	
 }
 
-void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
+int cmpSpec( std::array<Vertex, 2> const&  a) {
+	Line aLine, bLine;
+
+		aLine.startCoord = a[0].position;
+		aLine.dirX = a[1].position.x - a[0].position.x;
+		aLine.dirY = a[1].position.y - a[0].position.y;
+		float aLineLen = sqrt(aLine.dirX*aLine.dirX + aLine.dirY*aLine.dirY);
+
+
+		bLine.startCoord = Vector2f(100, 100);
+		bLine.dirX = 200 - bLine.startCoord.x;
+		bLine.dirY = 200 - bLine.startCoord.y;
+		float bLineLen = sqrt(bLine.dirX*bLine.dirX + bLine.dirY*bLine.dirY);
+		float cos = (aLine.dirX*bLine.dirX + aLine.dirY*bLine.dirY)/(aLineLen*bLineLen);
+		return -1;
+}
+
+
+
+//cmp for qsort of rays by angle
+int cmp( std::array<Vertex, 2> const&  a,  std::array<Vertex, 2> const&   b) {
+		Line aLine, bLine;
+
+		aLine.startCoord = a[0].position;
+		aLine.dirX = a[1].position.x - a[0].position.x;
+		aLine.dirY = a[1].position.y - a[0].position.y;
+
+
+		bLine.startCoord = b[0].position;
+		bLine.dirX = b[1].position.x - b[0].position.x;
+		bLine.dirY = b[1].position.y - b[0].position.y;
+
+
+		 if ((atan2(aLine.dirY, aLine.dirX) - atan2(bLine.dirY, bLine.dirX)) <= 0) {
+		 	return true;
+		 }
+		 else {
+		 	return false;
+		 }
+}
+
+
+void RayTracing::update(Level *level, RenderWindow *window, Vector2f mousePos, bool _isRestricted, Vector2f view, float viewAngle) {
+	isRestricted = _isRestricted;
+
+
 	raysVertex.clear();
 
 	//set raysVertex for main rays
@@ -248,6 +289,8 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
 		currRay[1] = vertices.at(i);
 		raysVertex.push_back(currRay);
     }
+
+
     //set raysVertex for assisting rays
     for (int i = 0; i < vertices.size(); ++i) {
     	std::array<Vertex, 2> currRay;
@@ -268,8 +311,105 @@ void RayTracing::update(Level *level, Window *window, Vector2f mousePos) {
     	raysVertex.push_back(currRay);
     }
 
+
+
+   //for (int i = 0; i < raysVertex.size()-5; ++i) {
+		//if (cmp(raysVertex[i], viewRayRight) == false || cmp(raysVertex[i], viewRayLeft) == true) {
+   		//if (cmpSpec(view1, raysVertex[i]) < 0) {
+	//		raysVertex.erase(raysVertex.begin() + i);
+		//}
+	//}
+
+	std::array<Vertex, 2> view1;
+	view1[0] = mousePos;
+	view1[1] = mousePos + view;
+
+	//something complciated
+	raysVertex.erase(std::remove_if(raysVertex.begin(), raysVertex.end(), [view1, viewAngle] (std::array<Vertex, 2> const&  a) -> bool {
+		Line aLine, bLine;
+		aLine.startCoord = a[0].position;
+		aLine.dirX = a[1].position.x - a[0].position.x;
+		aLine.dirY = a[1].position.y - a[0].position.y;
+
+		bLine.startCoord = view1[0].position;
+		bLine.dirX = view1[1].position.x - view1[0].position.x;
+		bLine.dirY = view1[1].position.y - view1[0].position.y;
+
+		float aLineLen = sqrt(aLine.dirX*aLine.dirX + aLine.dirY*aLine.dirY);
+		float bLineLen = sqrt(bLine.dirX*bLine.dirX + bLine.dirY*bLine.dirY);
+		float cosin = (aLine.dirX*bLine.dirX + aLine.dirY*bLine.dirY)/(aLineLen*bLineLen);
+
+		if (cosin < cos(viewAngle/2.f/180.f*PI)) {
+		 	return true;
+		 }
+		 else {
+		 	return false;
+		 }
+	}), raysVertex.end());
+
+	Transform rotation1;
+	rotation1.rotate(-viewAngle/2, mousePos);
+	std::array<Vertex, 2> viewRayLeft;
+	viewRayLeft[0] = mousePos;
+	viewRayLeft[1] = rotation1.transformPoint(mousePos + view);
+	raysVertex.push_back(viewRayLeft);
+	
+
+	Transform rotation2;
+    rotation2.rotate(viewAngle/2, mousePos);
+    std::array<Vertex, 2> viewRayRight;
+	viewRayRight[0] = mousePos;
+	viewRayRight[1] = rotation2.transformPoint(mousePos + view);
+	raysVertex.push_back(viewRayRight);
+
+
+	calculateIntersections();
+	
+    //Sorting array of rays to make light mesh; 
+	//std::sort(raysVertex.begin(), raysVertex.end(), cmp);
+	// -1 is important!
+	std::sort(raysVertex.begin(), raysVertex.end(), [viewRayRight](std::array<Vertex, 2> const&  a,  std::array<Vertex, 2> const&   b) -> bool {
+
+		Line aLine, bLine, refLine;
+
+		aLine.startCoord = a[0].position;
+		aLine.dirX = a[1].position.x - a[0].position.x;
+		aLine.dirY = a[1].position.y - a[0].position.y;
+
+
+		bLine.startCoord = b[0].position;
+		bLine.dirX = b[1].position.x - b[0].position.x;
+		bLine.dirY = b[1].position.y - b[0].position.y;
+
+		refLine.startCoord = viewRayRight[0].position;
+		refLine.dirX = viewRayRight[1].position.x - viewRayRight[0].position.x;
+		refLine.dirY = viewRayRight[1].position.y - viewRayRight[0].position.y;
+
+		float aLineLen = sqrt(aLine.dirX*aLine.dirX + aLine.dirY*aLine.dirY);
+		float bLineLen = sqrt(bLine.dirX*bLine.dirX + bLine.dirY*bLine.dirY);
+		float refLineLen = sqrt(refLine.dirX*refLine.dirX + refLine.dirY*refLine.dirY);
+		float cos1 = (aLine.dirX*refLine.dirX + aLine.dirY*refLine.dirY)/(aLineLen*refLineLen);
+		float cos2 = (bLine.dirX*refLine.dirX + bLine.dirY*refLine.dirY)/(bLineLen*refLineLen);
+
+		if (cos1 - cos2 < 0) {
+		 	return true;
+		 }
+		 else {
+		 	return false;
+		 }
+
+		return 0;
+	});
+
+
+	
+
+
+
+	
+
 	//important!
-    calculateIntersections();
+    //calculateIntersections();
 }
 
 float getLen(Line line) {
@@ -330,7 +470,7 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
         //tempLine.param = 100000;
         return tempLine;
     }
-    if(T2<0 || T2>1) {
+    if(T2<-0.0 || T2>1.0) {
         Line tempLine;
         tempLine.startCoord = NO_INTERSECTION;
         //tempLine.param = 100000;
@@ -346,51 +486,13 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
 }
 
 
-//function coparing angles of rays
-int cmp1(const void *a, const void *b) {
-		 if ((atan2(((Line*)a)->dirY, ((Line*)a)->dirX) - atan2(((Line*)b)->dirY, ((Line*)b)->dirX)) <= 0) {
-		 	return -1;
-		 }
-		 else {
-		 	return 1;
-		 }
-
-}
-
-int cmp( std::array<Vertex, 2> const&  a,  std::array<Vertex, 2> const&   b) {
-		Line aLine, bLine;
-		//Vector2f aa =(*((std::array<Vertex, 2>*)a))[0].position;
-		aLine.startCoord = a[0].position;
-		aLine.dirX = a[1].position.x - a[0].position.x;
-		aLine.dirY = a[1].position.y - a[0].position.y;
-
-
-		bLine.startCoord = b[0].position;
-		bLine.dirX = b[1].position.x - b[0].position.x;
-		bLine.dirY = b[1].position.y - b[0].position.y;
-
-
-		 if ((atan2(aLine.dirY, aLine.dirX) - atan2(bLine.dirY, bLine.dirX)) <= 0) {
-		 	return true;
-		 }
-		 else {
-		 	return false;
-		 }
-	/* if ((atan2(a->dirY, a->dirX) - atan2(b.dirY, b.dirX)) < 0) {
-		 	return -1;
-		 }
-		 else {
-		 	return 1;
-		 }*/
-
-}
 
 VertexArray RayTracing::createMesh() {
 	//make orderArray
-	VertexArray lightMesh(TriangleFan, raysVertex.size() + 2);
+	VertexArray lightMesh(TriangleFan, raysVertex.size() + 1);
 
 	//Sorting array of rays to make light mesh; 
-	std::sort(raysVertex.begin(), raysVertex.end(), cmp);
+	//std::sort(raysVertex.begin(), raysVertex.end(), cmp);
 
 	//add central point
 	lightMesh[0].position = raysVertex[0][0].position;
@@ -405,9 +507,10 @@ VertexArray RayTracing::createMesh() {
 
 	}
 	//add closing vertex
-	(lightMesh)[raysVertex.size() + 1].position = raysVertex[0][1].position;
+
+	/*(lightMesh)[raysVertex.size() + 1].position = raysVertex[0][1].position;
 	(lightMesh)[raysVertex.size() + 1].color = lightColor;
-	(lightMesh)[raysVertex.size() + 1].texCoords = lightSourceTextureCenter + (lightMesh[0].position  - lightMesh[raysVertex.size() + 1].position);
+	(lightMesh)[raysVertex.size() + 1].texCoords = lightSourceTextureCenter + (lightMesh[0].position  - lightMesh[raysVertex.size() + 1].position);*/
 	
 
 	return lightMesh;
@@ -462,7 +565,7 @@ VertexArray RayTracing::createVisibleBorders() {
 	(lightMesh)[raysVertex.size()].color = Color::White;
 
 
-	return lightMesh;
+	return lightMesh; ///!!
 }
 
 
@@ -486,8 +589,6 @@ void RayTracing::calculateIntersections() {
 		    }
 		}
 	}
-
-
 }
 
 void RayTracing::changeLightColor() {

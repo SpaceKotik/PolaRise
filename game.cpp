@@ -31,8 +31,8 @@ extern const Color backgorundColor;
 
 
 #define NO_INTERSECTION Vector2f(-10, -10)
-#define LIGHT_SOURCE_SCALE Vector2f(0.5, 0.5)
-#define BORDERS_VISIBILITY_SCALE Vector2f(0.4, 0.4)
+#define LIGHT_SOURCE_SCALE Vector2f(0.7, 0.7)
+#define BORDERS_VISIBILITY_SCALE Vector2f(0.3, 0.3)
 
 
 class FPScounter {
@@ -42,8 +42,8 @@ class FPScounter {
         void draw();
 
     private:
-        //sf::Text m_text;
-        //sf::Font m_font;
+        //sf::Text text;
+        //sf::Font font;
 
         sf::Clock delayTimer;
         sf::Clock fpsTimer;
@@ -87,6 +87,8 @@ Game::Game() {
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(120);
     window.setVerticalSyncEnabled(true);
+    window.setPosition(Vector2i(0, 0));
+    window.setMouseCursorGrabbed(false);
 
     level.setField();
 
@@ -109,6 +111,7 @@ void Game::run() {
         //Vector2f mouseNotClicked = NO_INTERSECTION;
         fpsCounter.update();
         fpsCounter.draw();
+        std::cout << atan2(0, -1) << "\n";
 
         input();
         logic();
@@ -120,8 +123,8 @@ void Game::run() {
 
 
 
-void doRayTracing(RayTracing rayTracing, Vector2f pos, Level *level, RenderWindow* window, std::mutex *rtLock) {
-    rayTracing.update(level, window, pos);
+void doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, float lineOfSight, Level *level, RenderWindow* window, std::mutex *rtLock) {
+    rayTracing.update(level, window, pos, true, view, lineOfSight);
     rtLock->lock();
     window->draw(rayTracing.createMesh(), BlendAdd);
     rtLock->unlock();
@@ -159,19 +162,22 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
 
     std::mutex block;
-    std::thread thr1(doRayTracing, rayTracing, hero.getPos(), &level, &window, &block);
-    std::thread thr2(doRayTracing, rayTracing, hero.getPos()+ Vector2f(2, 2), &level, &window, &block);
-    std::thread thr3(doRayTracing, rayTracing, hero.getPos()+ Vector2f(2, -2), &level, &window, &block);
-    std::thread thr4(doRayTracing, rayTracing, hero.getPos()+ Vector2f(-2, 2), &level, &window, &block);
-    std::thread thr5(doRayTracing, rayTracing, hero.getPos()+ Vector2f(-2, -2), &level, &window, &block);
+    std::thread thr1(doRayTracing, rayTracing, hero.getPos(), (mousePos - hero.getPos()), hero.lineOfSight, &level, &window, &block);
+    /*std::thread thr2(doRayTracing, rayTracing, hero.getPos()+ Vector2f(2, 2), (mousePos - hero.getPos()), hero.lineOfSight, &level, &window, &block);
+    std::thread thr3(doRayTracing, rayTracing, hero.getPos()+ Vector2f(2, -2), (mousePos - hero.getPos()), hero.lineOfSight, &level, &window, &block);
+    std::thread thr4(doRayTracing, rayTracing, hero.getPos()+ Vector2f(-2, 2), (mousePos - hero.getPos()), hero.lineOfSight, &level, &window, &block);
+    std::thread thr5(doRayTracing, rayTracing, hero.getPos()+ Vector2f(-2, -2), (mousePos - hero.getPos()), hero.lineOfSight, &level, &window, &block);*/
     //process light sources
     //rayTracing.update(&level, getHandle(), hero.getPos());
     //window.draw(rayTracing.createMesh(), renderStates);
     thr1.join();
-    thr2.join();
+    /*thr2.join();
     thr3.join();
     thr4.join();
-    thr5.join();
+    thr5.join();*/
+
+    //rayTracing.update(&level, getHandle(), hero.getPos(), true, (mousePos - hero.getPos()), hero.lineOfSight);
+    //window.draw(rayTracing.createMesh(), renderStates);
 
     /*rayTracing.update(&level, getHandle(), hero.getPos() + Vector2f(2, 2));
     window.draw(rayTracing.createMesh(), renderStates);
@@ -240,9 +246,10 @@ void Game::draw(Level level, RayTracing rayTracing) {
             Vertex currRay[2];
             currRay[0].position = rayTracing.raysVertex.at(i)[0].position;
             currRay[1].position = rayTracing.raysVertex.at(i)[1].position;
-            currRay[0].color = Color::White;
-            currRay[1].color = Color::White;
+            currRay[0].color = Color::Red;
+            currRay[1].color = Color::Red;
             window.draw(currRay, 2, Lines);
+
         }
         //Sprite borders1;
         //borders1.setTexture(borderTexture.getTexture());
@@ -260,8 +267,14 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
 
 MouseState Game::input() {
-        MouseState mouseState;
-        mouseState.pos = NO_INTERSECTION;
+    MouseState mouseState;
+    mouseState.pos = NO_INTERSECTION;   
+    ;
+
+
+
+
+        
         Vector2f desPos;
         Event event;
 
@@ -335,6 +348,16 @@ MouseState Game::input() {
             }
         }
 
+        if (Keyboard::isKeyPressed(Keyboard::Escape)) {
+            window.close();
+        }
+
+
+        Vector2i mousePosition = Mouse::getPosition(window);
+        mousePos = (Vector2f)Mouse::getPosition(window);
+
+        if (mousePosition.x < 0 || mousePosition.x > window.getSize().x || mousePosition.y < 0 || mousePosition.y > window.getSize().y)
+            return mouseState;
 
         if (Mouse::isButtonPressed(sf::Mouse::Left)) {
                     mouseState.pos = (Vector2f)Mouse::getPosition(window);
@@ -356,9 +379,7 @@ MouseState Game::input() {
         rayTracing.convertPolyMapToVertices();*/
 
 
-        if (Keyboard::isKeyPressed(Keyboard::Escape)) {
-            window.close();
-        }
+        
 
         //mousePos = (Vector2f)Mouse::getPosition(window);
         if (Mouse::getPosition(window).x > window.getSize().x)
@@ -461,6 +482,8 @@ void Game::logic() {
     //decrease veloicty if no input
     if (keys.right == false && keys.left == false && keys.up == false && keys.down == false)
         hero.velocity = Vector2f(hero.velocity.x * 0.88, hero.velocity.y * 0.88);
+
+    hero.view = hero.velocity;
 
 
     if(level.isOnFinish(hero.getPos())) {

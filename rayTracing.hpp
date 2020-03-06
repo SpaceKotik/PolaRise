@@ -26,12 +26,13 @@ private:
 	std::vector<Vector2f> vertices;
 	std::vector<std::array<Vertex, 2>> raysVertex;
 	Color lightColor;
+	bool isRestricted = 0;
 
 public:
 	RayTracing();
 	Line getPartIntersection(Line ray, Line line);
 	void calculateIntersections();
-	void update(Level *level, Window *window, Vector2f mousePos);
+	void update(Level *level, RenderWindow *window, Vector2f mousePos, bool _isRestricted = 0, Vector2f view = Vector2f(1, 1), float viewAngle = 50);
 	VertexArray createMesh();
 	VertexArray createVisibleBorders();
 	void convertTileMapToPolyMap(Level *level, Window *window);
