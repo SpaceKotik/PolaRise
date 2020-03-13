@@ -192,30 +192,12 @@ void Game::run() {
 
 
 void Game::doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, float lineOfSight, std::mutex *rtLock) {
-    rtLock->lock();
-    rayTracing.update(&level, &window, pos, true, view, lineOfSight);
     
-
-    myRenderTexture.clear();
+    rayTracing.update(&level, &window, pos, true, view, lineOfSight);
+    rtLock->lock();
+    window.setActive(true);
     myRenderTexture.draw(rayTracing.createMesh(), BlendAdd);
-    for (int i = 0; i < 1; ++i) {
-        shader.setParameter("dir", Vector2f(1, 0));
-        shader.setParameter("image", myRenderTexture.getTexture());
-        sf::RenderStates states;
-        states.shader = &shader;
-        //states.blendMode = sf::BlendAdd;
-        myRenderTexture.draw(spriteWorld, states);
-        myRenderTexture.display();
-
-
-        shader.setParameter("dir", Vector2f(0, 1));
-        shader.setParameter("image", myRenderTexture.getTexture());
-        states.shader = &shader;
-        states.blendMode = BlendAdd;
-        myRenderTexture.draw(spriteWorld, states);
-        myRenderTexture.display();
-    }
-    window.draw(spriteWorld, BlendAdd);
+    //window.draw(temp, BlendAdd);
     //window.draw(rayTracing.createMesh(), BlendAdd);
     rtLock->unlock();
 }
@@ -231,7 +213,18 @@ void Game::draw(Level level, RayTracing rayTracing) {
     //window.clear(Color::Black);
     //myRenderTexture.clear(Color::Transparent);
     //draw all tiles
-    
+    for (int i = 0; i < field_x*field_y; ++i) {
+        if (level.getState() == Blue) {
+            if (level.getField()->tiles[i].isBlue) {
+                window.draw(level.getField()->tiles[i].physForm);
+            }
+        }
+        else if (level.getState() == Red) {
+            if (level.getField()->tiles[i].isRed) {
+                window.draw(level.getField()->tiles[i].physForm);
+            }
+        }
+    }
 
     //add light fade for borders
     Sprite bordersFade;
@@ -239,46 +232,37 @@ void Game::draw(Level level, RayTracing rayTracing) {
     bordersFade.setTexture(texture);
     bordersFade.setPosition(hero.getPos());
     bordersFade.setScale(BORDERS_VISIBILITY_SCALE);
-    //window.draw(bordersFade, BlendMultiply);
+    window.draw(bordersFade, BlendMultiply);
 
 
 
 
 
     Vector2f normView, normViewPerp;
-    normView.x = 45*hero.view.x/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
-    normView.y = 45*hero.view.y/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
+    normView.x = 2*hero.view.x/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
+    normView.y = 2*hero.view.y/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
     normViewPerp.x = -normView.y;
     normViewPerp.y = normView.x;
     //process light sources
+
+    myRenderTexture.clear();
     std::mutex block;
     std::thread thr1(&Game::doRayTracing, this, rayTracing,  hero.getPos(), (mousePos - hero.getPos()), hero.lineOfSight, &block);
     std::thread thr2(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + normView + normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
-    /*std::thread thr3(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + normView - normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
+    std::thread thr3(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + normView - normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
     std::thread thr4(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - normView + normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
-    std::thread thr5(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - normView - normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);*/
+    std::thread thr5(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - normView - normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
 
     thr1.join();
     thr2.join();
-    /*thr3.join();
+    thr3.join();
     thr4.join();
-    thr5.join();*/
-    
+    thr5.join();
+    myRenderTexture.display();
+    //Sprite temp;
+    //.setTexture(myRenderTexture.getTexture());
 
-    //rayTracing.update(level, window, pos, true, view, lineOfSight);
-    
-
-    /*rayTracing.update(&level, getHandle(), hero.getPos(), true, (mousePos - hero.getPos()), hero.lineOfSight);
-
-
-
-
-
-    myRenderTexture.clear();
-
-
-    myRenderTexture.draw(rayTracing.createMesh(), BlendAdd);
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 2; ++i) {
         shader.setParameter("dir", Vector2f(1, 0));
         shader.setParameter("image", myRenderTexture.getTexture());
         sf::RenderStates states;
@@ -295,22 +279,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
         myRenderTexture.display();
     }
 
-    window.draw(spriteWorld, BlendAdd);*/
-    
-
-    for (int i = 0; i < field_x*field_y; ++i) {
-        if (level.getState() == Blue) {
-            if (level.getField()->tiles[i].isBlue) {
-                window.draw(level.getField()->tiles[i].physForm);
-            }
-        }
-        else if (level.getState() == Red) {
-            if (level.getField()->tiles[i].isRed) {
-                window.draw(level.getField()->tiles[i].physForm);
-            }
-        }
-    }
-
+    window.draw(spriteWorld, BlendAdd);
 
     //rayTracing.update(&level, getHandle(), hero.getPos(), true, (mousePos - hero.getPos()), hero.lineOfSight);
     //window.draw(rayTracing.createMesh(), renderStates);
@@ -337,7 +306,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
     lightFade.setTexture(texture);
     lightFade.setPosition(hero.getPos());
     lightFade.setScale(LIGHT_SOURCE_SCALE);
-    //window.draw(lightFade, BlendMultiply);
+    window.draw(lightFade, BlendMultiply);
 
     //DEBUG
     if (!NDEBUG) {
