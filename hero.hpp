@@ -8,7 +8,7 @@ using namespace sf;
 class Hero {
 private:
 	Vector2f pos;
-	Vector2f view;
+	Vector2f view; // angle must be less than 180 
 	float lineOfSight;
 	float health;
 	CircleShape physForm;

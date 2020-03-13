@@ -32,7 +32,7 @@ public:
 	RayTracing();
 	Line getPartIntersection(Line ray, Line line);
 	void calculateIntersections();
-	void update(Level *level, RenderWindow *window, Vector2f mousePos, bool _isRestricted = 0, Vector2f view = Vector2f(1, 1), float viewAngle = 50);
+	void update(Level *level, RenderWindow *window, Vector2f mousePos, bool _isRestricted = 0, Vector2f view = Vector2f(1, 1), float viewAngle = 200);
 	VertexArray createMesh();
 	VertexArray createVisibleBorders();
 	void convertTileMapToPolyMap(Level *level, Window *window);

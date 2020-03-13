@@ -8,5 +8,5 @@ extern const float heroAcceleration = 1;
 extern const float maxVelocity = 5; 
 extern const float heroVelocity = 5;
 extern const Color tileDefaultColor = Color::White;
-extern const Color heroColor = Color::Black;
+extern const Color heroColor = Color::White;
 extern const Color backgorundColor = Color (50, 50, 50);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <mutex>
 #include "tile.hpp"
 #include "rayTracing.hpp"
 #include "level.hpp"
@@ -43,6 +44,12 @@ private:
     Level level;
     States keys;
 
+
+
+    Sprite spriteWorld;
+    Shader shader;
+    RenderTexture myRenderTexture;
+
 public:
     Game();
 //  ~Game();
@@ -54,4 +61,5 @@ public:
     void update();
     void draw(Level level, RayTracing rayTracing);
     void logic();
+    void doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, float lineOfSight, std::mutex *rtLock);
 };

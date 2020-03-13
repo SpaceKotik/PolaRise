@@ -26,8 +26,64 @@ const float lightSourceSize = 0.5;
 extern const float heroRadius;
 extern const float heroAcceleration; 
 extern const float maxVelocity;
-extern const float heroVelocity;
+extern const float heroVelocity;    
 extern const Color backgorundColor;
+
+
+/*
+static const std::string shaderCode = \
+  "uniform vec2 frag_LightOrigin;"\
+  "uniform vec3 frag_LightColor;"\
+  "uniform float frag_LightAttenuation;"\
+  "uniform vec2 frag_ScreenResolution;"\
+  "void main(){"\
+  " vec2 baseDistance =  gl_FragCoord.xy;"\
+  " baseDistance.y = frag_ScreenResolution.y-baseDistance.y;"\
+  " vec2 distance=frag_LightOrigin - baseDistance;"\
+  " float linear_distance = length(distance);"\
+  " float attenuation=1.0/( frag_LightAttenuation*linear_distance + frag_LightAttenuation*linear_distance);"\
+  " vec4 lightColor = vec4(frag_LightColor, 1.0);"\
+  " vec4 color = vec4(attenuation, attenuation, attenuation, 1.0) * lightColor; gl_FragColor=color;}";
+*/
+
+/*
+static const std::string shaderCode = \
+"uniform sampler2D image;"\
+"uniform vec2 resolution;"\
+"uniform vec2 dir;"\
+"void main(){"\
+"vec2 uv = vec2(gl_FragCoord.xy / resolution.xy);"\
+"vec4 color = vec4(0.0);"\
+"vec2 off1 = vec2(1.3846153846) * dir;"\
+"vec2 off2 = vec2(3.2307692308) * dir;"\
+"color += texture2D(image, uv) * 0.2270270270;"\
+"color += texture2D(image, uv + (off1 / resolution)) * 0.3162162162;"\
+"color += texture2D(image, uv - (off1 / resolution)) * 0.3162162162;"\
+"color += texture2D(image, uv + (off2 / resolution)) * 0.0702702703;"\
+"color += texture2D(image, uv - (off2 / resolution)) * 0.0702702703;"\
+"gl_FragColor=color;}";*/
+
+static const std::string shaderCode = \
+"uniform sampler2D image;"\
+"uniform vec2 resolution;"\
+"uniform vec2 dir;"\
+"void main(){"\
+"vec2 uv = vec2(gl_FragCoord.xy / resolution.xy);"\
+"vec4 color = vec4(0.0);"\
+"vec2 off1 = vec2(1.411764705882353) * dir;"\
+"vec2 off2 = vec2(3.2941176470588234) * dir;"\
+"vec2 off3 = vec2(7.176470588235294) * dir;"\
+"color += texture2D(image, uv) * 0.1964825501511404;"\
+"color += texture2D(image, uv + (off1 / resolution)) * 0.2969069646728344;"\
+"color += texture2D(image, uv - (off1 / resolution)) * 0.2969069646728344;"\
+"color += texture2D(image, uv + (off2 / resolution)) * 0.09447039785044732;"\
+"color += texture2D(image, uv - (off2 / resolution)) * 0.09447039785044732;"\
+"color += texture2D(image, uv + (off3 / resolution)) * 0.010381362401148057;"\
+"color += texture2D(image, uv - (off3 / resolution)) * 0.010381362401148057;"\
+"gl_FragColor=color;}";
+
+
+
 
 
 #define NO_INTERSECTION Vector2f(-10, -10)
@@ -82,7 +138,7 @@ Game::Game() {
     settings.antialiasingLevel = 8;
 
 
-    window.create(VideoMode(field_x*scale, (field_y+0.1)*scale), "PolaRise",
+    window.create(VideoMode(field_x*scale, (field_y+0.0)*scale), "PolaRise",
                   Style::Titlebar | Style::Close, settings);
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(120);
@@ -93,7 +149,22 @@ Game::Game() {
     level.setField();
 
     rayTracing.convertTileMapToPolyMap(&level, getHandle());
-    rayTracing.convertPolyMapToVertices();
+    rayTracing.convertPolyMapToVertices();  
+
+
+    myRenderTexture.create(30*40, 30*30);
+    spriteWorld.setTexture(myRenderTexture.getTexture());
+    spriteWorld.setOrigin(30*40 / 2.f, 30*30 / 2.f);
+    spriteWorld.setPosition(30*40 / 2.f, 30*30 / 2.f);
+
+
+    if(!shader.loadFromMemory(shaderCode, sf::Shader::Fragment)) {
+        window.close();
+    }
+    shader.setParameter("resolution", sf::Vector2f(30*40, 30*30));
+
+
+
 }
 
 
@@ -107,11 +178,8 @@ void Game::run() {
     FPScounter fpsCounter;
 
     while(window.isOpen()) {
-        //MouseState mouseState = input();
-        //Vector2f mouseNotClicked = NO_INTERSECTION;
         fpsCounter.update();
         fpsCounter.draw();
-        std::cout << atan2(0, -1) << "\n";
 
         input();
         logic();
@@ -123,10 +191,32 @@ void Game::run() {
 
 
 
-void doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, float lineOfSight, Level *level, RenderWindow* window, std::mutex *rtLock) {
-    rayTracing.update(level, window, pos, true, view, lineOfSight);
+void Game::doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, float lineOfSight, std::mutex *rtLock) {
     rtLock->lock();
-    window->draw(rayTracing.createMesh(), BlendAdd);
+    rayTracing.update(&level, &window, pos, true, view, lineOfSight);
+    
+
+    myRenderTexture.clear();
+    myRenderTexture.draw(rayTracing.createMesh(), BlendAdd);
+    for (int i = 0; i < 1; ++i) {
+        shader.setParameter("dir", Vector2f(1, 0));
+        shader.setParameter("image", myRenderTexture.getTexture());
+        sf::RenderStates states;
+        states.shader = &shader;
+        //states.blendMode = sf::BlendAdd;
+        myRenderTexture.draw(spriteWorld, states);
+        myRenderTexture.display();
+
+
+        shader.setParameter("dir", Vector2f(0, 1));
+        shader.setParameter("image", myRenderTexture.getTexture());
+        states.shader = &shader;
+        states.blendMode = BlendAdd;
+        myRenderTexture.draw(spriteWorld, states);
+        myRenderTexture.display();
+    }
+    window.draw(spriteWorld, BlendAdd);
+    //window.draw(rayTracing.createMesh(), BlendAdd);
     rtLock->unlock();
 }
 
@@ -137,8 +227,77 @@ void Game::draw(Level level, RayTracing rayTracing) {
     renderStates.blendMode = BlendAdd;
 
     window.clear(backgorundColor);
-
+    //window.clear();
+    //window.clear(Color::Black);
+    //myRenderTexture.clear(Color::Transparent);
     //draw all tiles
+    
+
+    //add light fade for borders
+    Sprite bordersFade;
+    bordersFade.setOrigin(lightSourceTextureCenter);
+    bordersFade.setTexture(texture);
+    bordersFade.setPosition(hero.getPos());
+    bordersFade.setScale(BORDERS_VISIBILITY_SCALE);
+    //window.draw(bordersFade, BlendMultiply);
+
+
+
+
+
+    Vector2f normView, normViewPerp;
+    normView.x = 45*hero.view.x/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
+    normView.y = 45*hero.view.y/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
+    normViewPerp.x = -normView.y;
+    normViewPerp.y = normView.x;
+    //process light sources
+    std::mutex block;
+    std::thread thr1(&Game::doRayTracing, this, rayTracing,  hero.getPos(), (mousePos - hero.getPos()), hero.lineOfSight, &block);
+    std::thread thr2(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + normView + normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
+    /*std::thread thr3(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + normView - normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
+    std::thread thr4(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - normView + normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
+    std::thread thr5(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - normView - normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);*/
+
+    thr1.join();
+    thr2.join();
+    /*thr3.join();
+    thr4.join();
+    thr5.join();*/
+    
+
+    //rayTracing.update(level, window, pos, true, view, lineOfSight);
+    
+
+    /*rayTracing.update(&level, getHandle(), hero.getPos(), true, (mousePos - hero.getPos()), hero.lineOfSight);
+
+
+
+
+
+    myRenderTexture.clear();
+
+
+    myRenderTexture.draw(rayTracing.createMesh(), BlendAdd);
+    for (int i = 0; i < 5; ++i) {
+        shader.setParameter("dir", Vector2f(1, 0));
+        shader.setParameter("image", myRenderTexture.getTexture());
+        sf::RenderStates states;
+        states.shader = &shader;
+        //states.blendMode = sf::BlendAdd;
+        myRenderTexture.draw(spriteWorld, states);
+        myRenderTexture.display();
+
+
+        shader.setParameter("dir", Vector2f(0, 1));
+        shader.setParameter("image", myRenderTexture.getTexture());
+        states.shader = &shader;
+        myRenderTexture.draw(spriteWorld, states);
+        myRenderTexture.display();
+    }
+
+    window.draw(spriteWorld, BlendAdd);*/
+    
+
     for (int i = 0; i < field_x*field_y; ++i) {
         if (level.getState() == Blue) {
             if (level.getField()->tiles[i].isBlue) {
@@ -152,45 +311,11 @@ void Game::draw(Level level, RayTracing rayTracing) {
         }
     }
 
-    //add light fade for borders
-    Sprite bordersFade;
-    bordersFade.setOrigin(lightSourceTextureCenter);
-    bordersFade.setTexture(texture);
-    bordersFade.setPosition(hero.getPos());
-    bordersFade.setScale(BORDERS_VISIBILITY_SCALE);
-    //window.draw(bordersFade, BlendMultiply);
-
-
-    std::mutex block;
-    std::thread thr1(doRayTracing, rayTracing, hero.getPos(), (mousePos - hero.getPos()), hero.lineOfSight, &level, &window, &block);
-    /*std::thread thr2(doRayTracing, rayTracing, hero.getPos()+ Vector2f(2, 2), (mousePos - hero.getPos()), hero.lineOfSight, &level, &window, &block);
-    std::thread thr3(doRayTracing, rayTracing, hero.getPos()+ Vector2f(2, -2), (mousePos - hero.getPos()), hero.lineOfSight, &level, &window, &block);
-    std::thread thr4(doRayTracing, rayTracing, hero.getPos()+ Vector2f(-2, 2), (mousePos - hero.getPos()), hero.lineOfSight, &level, &window, &block);
-    std::thread thr5(doRayTracing, rayTracing, hero.getPos()+ Vector2f(-2, -2), (mousePos - hero.getPos()), hero.lineOfSight, &level, &window, &block);*/
-    //process light sources
-    //rayTracing.update(&level, getHandle(), hero.getPos());
-    //window.draw(rayTracing.createMesh(), renderStates);
-    thr1.join();
-    /*thr2.join();
-    thr3.join();
-    thr4.join();
-    thr5.join();*/
 
     //rayTracing.update(&level, getHandle(), hero.getPos(), true, (mousePos - hero.getPos()), hero.lineOfSight);
     //window.draw(rayTracing.createMesh(), renderStates);
 
-    /*rayTracing.update(&level, getHandle(), hero.getPos() + Vector2f(2, 2));
-    window.draw(rayTracing.createMesh(), renderStates);
-
-    rayTracing.update(&level, getHandle(), hero.getPos() + Vector2f(-2, 2));
-    window.draw(rayTracing.createMesh(), renderStates);
-
-    rayTracing.update(&level, getHandle(), hero.getPos() + Vector2f(2, -2));
-    window.draw(rayTracing.createMesh(), renderStates);
-
-    rayTracing.update(&level, getHandle(), hero.getPos() + Vector2f(-2, -2));
-    window.draw(rayTracing.createMesh(), renderStates);*/
-
+    //draw start and finish
     for (int i = 0; i < field_x*field_y; ++i) {
         if (level.getState() == Blue) {
             if (level.getField()->tiles[i].typeBlue == 1 || level.getField()->tiles[i].typeBlue == 2) 
@@ -203,8 +328,6 @@ void Game::draw(Level level, RayTracing rayTracing) {
         }
     }
 
-    
-
     window.draw(*hero.getPhysForm());
 
 
@@ -215,11 +338,6 @@ void Game::draw(Level level, RayTracing rayTracing) {
     lightFade.setPosition(hero.getPos());
     lightFade.setScale(LIGHT_SOURCE_SCALE);
     //window.draw(lightFade, BlendMultiply);
-
-
-    /*rayTracing.update(&level, getHandle(), mousePos);
-    window.draw(rayTracing.createMesh(), renderStates);*/
-
 
     //DEBUG
     if (!NDEBUG) {
@@ -268,12 +386,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
 MouseState Game::input() {
     MouseState mouseState;
-    mouseState.pos = NO_INTERSECTION;   
-    ;
-
-
-
-
+    mouseState.pos = NO_INTERSECTION;
         
         Vector2f desPos;
         Event event;
@@ -374,14 +487,6 @@ MouseState Game::input() {
             rayTracing.convertPolyMapToVertices();
         }
 
-        //calculate all edges and vertices
-        /*rayTracing.convertTileMapToPolyMap(&level, getHandle());
-        rayTracing.convertPolyMapToVertices();*/
-
-
-        
-
-        //mousePos = (Vector2f)Mouse::getPosition(window);
         if (Mouse::getPosition(window).x > window.getSize().x)
             mouseState.pos.x = window.getSize().x-2;
         if (Mouse::getPosition(window).x < 0)
@@ -390,7 +495,6 @@ MouseState Game::input() {
             mouseState.pos.y = window.getSize().y-2;
         if (Mouse::getPosition(window).y < 0)
             mouseState.pos.y = 2;
-
 
         return mouseState;
 }
@@ -483,8 +587,8 @@ void Game::logic() {
     if (keys.right == false && keys.left == false && keys.up == false && keys.down == false)
         hero.velocity = Vector2f(hero.velocity.x * 0.88, hero.velocity.y * 0.88);
 
-    hero.view = hero.velocity;
-
+    //hero.view = hero.velocity;
+    hero.view = (Vector2f)Mouse::getPosition(window) - hero.getPos();
 
     if(level.isOnFinish(hero.getPos())) {
         keys.isOnFinish = true;
