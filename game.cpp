@@ -16,6 +16,7 @@
 using namespace sf;
 
 #define NDEBUG true
+#define UPDATESHADERS false
 
 extern const int scale;
 extern const int field_x;
@@ -30,64 +31,11 @@ extern const float heroVelocity;
 extern const Color backgorundColor;
 
 
-/*
-static const std::string shaderCode = \
-  "uniform vec2 frag_LightOrigin;"\
-  "uniform vec3 frag_LightColor;"\
-  "uniform float frag_LightAttenuation;"\
-  "uniform vec2 frag_ScreenResolution;"\
-  "void main(){"\
-  " vec2 baseDistance =  gl_FragCoord.xy;"\
-  " baseDistance.y = frag_ScreenResolution.y-baseDistance.y;"\
-  " vec2 distance=frag_LightOrigin - baseDistance;"\
-  " float linear_distance = length(distance);"\
-  " float attenuation=1.0/( frag_LightAttenuation*linear_distance + frag_LightAttenuation*linear_distance);"\
-  " vec4 lightColor = vec4(frag_LightColor, 1.0);"\
-  " vec4 color = vec4(attenuation, attenuation, attenuation, 1.0) * lightColor; gl_FragColor=color;}";
-*/
-
-/*
-static const std::string shaderCode = \
-"uniform sampler2D image;"\
-"uniform vec2 resolution;"\
-"uniform vec2 dir;"\
-"void main(){"\
-"vec2 uv = vec2(gl_FragCoord.xy / resolution.xy);"\
-"vec4 color = vec4(0.0);"\
-"vec2 off1 = vec2(1.3846153846) * dir;"\
-"vec2 off2 = vec2(3.2307692308) * dir;"\
-"color += texture2D(image, uv) * 0.2270270270;"\
-"color += texture2D(image, uv + (off1 / resolution)) * 0.3162162162;"\
-"color += texture2D(image, uv - (off1 / resolution)) * 0.3162162162;"\
-"color += texture2D(image, uv + (off2 / resolution)) * 0.0702702703;"\
-"color += texture2D(image, uv - (off2 / resolution)) * 0.0702702703;"\
-"gl_FragColor=color;}";*/
-
-static const std::string shaderCode = \
-"uniform sampler2D image;"\
-"uniform vec2 resolution;"\
-"uniform vec2 dir;"\
-"void main(){"\
-"vec2 uv = vec2(gl_FragCoord.xy / resolution.xy);"\
-"vec4 color = vec4(0.0);"\
-"vec2 off1 = vec2(1.411764705882353) * dir;"\
-"vec2 off2 = vec2(3.2941176470588234) * dir;"\
-"vec2 off3 = vec2(7.176470588235294) * dir;"\
-"color += texture2D(image, uv) * 0.1964825501511404;"\
-"color += texture2D(image, uv + (off1 / resolution)) * 0.2969069646728344;"\
-"color += texture2D(image, uv - (off1 / resolution)) * 0.2969069646728344;"\
-"color += texture2D(image, uv + (off2 / resolution)) * 0.09447039785044732;"\
-"color += texture2D(image, uv - (off2 / resolution)) * 0.09447039785044732;"\
-"color += texture2D(image, uv + (off3 / resolution)) * 0.010381362401148057;"\
-"color += texture2D(image, uv - (off3 / resolution)) * 0.010381362401148057;"\
-"gl_FragColor=color;}";
-
-
-
+ //"float attenuation = 1.8 *  1.0 * (1.0 / (sqrt(30000.0 * 6.28))) * exp(-(linear_distance* linear_distance)/(2.0 * 30000.0)) * (1.0 - 1.0/(linear_distance*0.09));"\
 
 
 #define NO_INTERSECTION Vector2f(-10, -10)
-#define LIGHT_SOURCE_SCALE Vector2f(0.7, 0.7)
+#define LIGHT_SOURCE_SCALE Vector2f(1.7, 1.7)
 #define BORDERS_VISIBILITY_SCALE Vector2f(0.3, 0.3)
 
 
@@ -131,8 +79,8 @@ void FPScounter::draw() {
 
 Game::Game() {
     gameState = Gameplay;
-    texture.loadFromFile("Textures/lightMask.png");
-    texture.setSmooth(true);
+    //texture.loadFromFile("Textures/lightMask.png");
+    //texture.setSmooth(true);
 
     ContextSettings settings;
     settings.antialiasingLevel = 8;
@@ -158,12 +106,19 @@ Game::Game() {
     spriteWorld.setPosition(30*40 / 2.f, 30*30 / 2.f);
 
 
-    if(!shader.loadFromMemory(shaderCode, sf::Shader::Fragment)) {
+    if(!shaderBlur.loadFromFile("shaders/blur.frag", sf::Shader::Fragment)) {
         window.close();
     }
-    shader.setParameter("resolution", sf::Vector2f(30*40, 30*30));
+    shaderBlur.setParameter("resolution", sf::Vector2f(30*40, 30*30));
 
 
+    if(!shaderShadow.loadFromFile("shaders/shadow.frag", sf::Shader::Fragment)) {
+        window.close();
+    }
+    shaderShadow.setParameter("frag_ScreenResolution", Vector2f(30*40, 30*30));
+    shaderShadow.setParameter("frag_LightColor", Vector3f(255, 255, 255));
+    //shaderShadow.setParameter("frag_ShadowParam1", 20000.0);
+    //shaderShadow.setParameter("frag_ShadowParam2", 20000.0);
 
 }
 
@@ -205,81 +160,94 @@ void Game::doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, floa
 
 void Game::draw(Level level, RayTracing rayTracing) {
 
+    if (UPDATESHADERS) {
+        if(!shaderBlur.loadFromFile("shaders/blur.frag", sf::Shader::Fragment)) {
+            window.close();
+        }
+        if(!shaderShadow.loadFromFile("shaders/shadow.frag", sf::Shader::Fragment)) {
+            window.close();
+        }
+    }
+
+
     RenderStates renderStates;
     renderStates.blendMode = BlendAdd;
 
     window.clear(backgorundColor);
-    //window.clear();
-    //window.clear(Color::Black);
-    //myRenderTexture.clear(Color::Transparent);
-    //draw all tiles
-    for (int i = 0; i < field_x*field_y; ++i) {
-        if (level.getState() == Blue) {
-            if (level.getField()->tiles[i].isBlue) {
-                window.draw(level.getField()->tiles[i].physForm);
-            }
-        }
-        else if (level.getState() == Red) {
-            if (level.getField()->tiles[i].isRed) {
-                window.draw(level.getField()->tiles[i].physForm);
-            }
-        }
-    }
+
+    //draw all tiles    
 
     //add light fade for borders
-    Sprite bordersFade;
+    /*Sprite bordersFade;
     bordersFade.setOrigin(lightSourceTextureCenter);
     bordersFade.setTexture(texture);
     bordersFade.setPosition(hero.getPos());
-    bordersFade.setScale(BORDERS_VISIBILITY_SCALE);
-    window.draw(bordersFade, BlendMultiply);
-
-
-
+    bordersFade.setScale(BORDERS_VISIBILITY_SCALE);*/
+    //window.draw(bordersFade, BlendMultiply);
 
 
     Vector2f normView, normViewPerp;
-    normView.x = 2*hero.view.x/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
-    normView.y = 2*hero.view.y/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
+    normView.x = 4*hero.view.x/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
+    normView.y = 4*hero.view.y/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
     normViewPerp.x = -normView.y;
     normViewPerp.y = normView.x;
     //process light sources
 
+
     myRenderTexture.clear();
     std::mutex block;
     std::thread thr1(&Game::doRayTracing, this, rayTracing,  hero.getPos(), (mousePos - hero.getPos()), hero.lineOfSight, &block);
-    std::thread thr2(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + normView + normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
-    std::thread thr3(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + normView - normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
-    std::thread thr4(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - normView + normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
-    std::thread thr5(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - normView - normViewPerp), (mousePos - hero.getPos()), hero.lineOfSight, &block);
+    std::thread thr2(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + normView + normViewPerp),  hero.view + normView + normViewPerp, hero.lineOfSight, &block);
+    std::thread thr3(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + normView - normViewPerp),  hero.view + normView - normViewPerp, hero.lineOfSight, &block);
+    std::thread thr4(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - normView + normViewPerp),  hero.view + normView + normViewPerp, hero.lineOfSight, &block);
+    std::thread thr5(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - normView - normViewPerp),  hero.view + normView - normViewPerp - normViewPerp, hero.lineOfSight, &block);
 
     thr1.join();
     thr2.join();
     thr3.join();
     thr4.join();
     thr5.join();
-    myRenderTexture.display();
-    //Sprite temp;
-    //.setTexture(myRenderTexture.getTexture());
 
-    for (int i = 0; i < 2; ++i) {
-        shader.setParameter("dir", Vector2f(1, 0));
-        shader.setParameter("image", myRenderTexture.getTexture());
+    myRenderTexture.display();
+    for (int i = 0; i < 1; ++i) {
+        shaderBlur.setParameter("dir", Vector2f(1, 0));
+        shaderBlur.setParameter("image", myRenderTexture.getTexture());
         sf::RenderStates states;
-        states.shader = &shader;
+        states.shader = &shaderBlur;
         //states.blendMode = sf::BlendAdd;
         myRenderTexture.draw(spriteWorld, states);
         myRenderTexture.display();
 
 
-        shader.setParameter("dir", Vector2f(0, 1));
-        shader.setParameter("image", myRenderTexture.getTexture());
-        states.shader = &shader;
+        shaderBlur.setParameter("dir", Vector2f(0, 1));
+        shaderBlur.setParameter("image", myRenderTexture.getTexture());
+        states.shader = &shaderBlur;
+        myRenderTexture.draw(spriteWorld, states);
+        myRenderTexture.display();
+
+        shaderBlur.setParameter("dir", Vector2f(1, 1));
+        shaderBlur.setParameter("image", myRenderTexture.getTexture());
+        states.shader = &shaderBlur;
+        myRenderTexture.draw(spriteWorld, states);
+        myRenderTexture.display();
+
+        shaderBlur.setParameter("dir", Vector2f(-1, 1));
+        shaderBlur.setParameter("image", myRenderTexture.getTexture());
+        states.shader = &shaderBlur;
         myRenderTexture.draw(spriteWorld, states);
         myRenderTexture.display();
     }
+    sf::RenderStates states;
+    shaderShadow.setParameter("frag_LightOrigin", hero.getPos());
+    shaderShadow.setParameter("frag_ShadowParam1", 20000.0);
+    shaderShadow.setParameter("frag_ShadowParam2", 20000.0);
+    states.shader = &shaderShadow;
+    states.blendMode = BlendMultiply;
+    myRenderTexture.draw(spriteWorld, states);
+    myRenderTexture.display();
 
-    window.draw(spriteWorld, BlendAdd);
+    window.draw(spriteWorld);
+
 
     //rayTracing.update(&level, getHandle(), hero.getPos(), true, (mousePos - hero.getPos()), hero.lineOfSight);
     //window.draw(rayTracing.createMesh(), renderStates);
@@ -287,12 +255,37 @@ void Game::draw(Level level, RayTracing rayTracing) {
     //draw start and finish
     for (int i = 0; i < field_x*field_y; ++i) {
         if (level.getState() == Blue) {
-            if (level.getField()->tiles[i].typeBlue == 1 || level.getField()->tiles[i].typeBlue == 2) 
+            if (level.getField()->tiles[i].typeBlue == 1 || level.getField()->tiles[i].typeBlue == 2) {
                 window.draw(level.getField()->tiles[i].physForm);
+            }
         }
         else if (level.getState() == Red) {
             if (level.getField()->tiles[i].typeRed == 1 || level.getField()->tiles[i].typeRed == 2) {
                 window.draw(level.getField()->tiles[i].physForm);
+            }
+        }
+    }
+    
+    
+    shaderShadow.setParameter("frag_LightOrigin", hero.getPos());
+    shaderShadow.setParameter("frag_ShadowParam1", 30000.0);
+    shaderShadow.setParameter("frag_ShadowParam2", 3000.0);
+    states.shader = &shaderShadow;
+    states.blendMode = BlendMultiply;
+    myRenderTexture.draw(spriteWorld, states);
+    myRenderTexture.display();
+    //window.draw(spriteWorld, BlendAdd);
+
+    states.blendMode = BlendAdd;
+    for (int i = 0; i < field_x*field_y; ++i) {
+        if (level.getState() == Blue) {
+            if (level.getField()->tiles[i].isBlue) {
+                window.draw(level.getField()->tiles[i].physForm, states);
+            }
+        }
+        else if (level.getState() == Red) {
+            if (level.getField()->tiles[i].isRed) {
+                window.draw(level.getField()->tiles[i].physForm, states);
             }
         }
     }
@@ -301,12 +294,12 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
 
     //add light fade
-    Sprite lightFade;
+    /*Sprite lightFade;
     lightFade.setOrigin(lightSourceTextureCenter);
     lightFade.setTexture(texture);
     lightFade.setPosition(hero.getPos());
     lightFade.setScale(LIGHT_SOURCE_SCALE);
-    window.draw(lightFade, BlendMultiply);
+    //window.draw(lightFade, BlendMultiply);*/
 
     //DEBUG
     if (!NDEBUG) {
@@ -336,22 +329,11 @@ void Game::draw(Level level, RayTracing rayTracing) {
             currRay[0].color = Color::Red;
             currRay[1].color = Color::Red;
             window.draw(currRay, 2, Lines);
-
         }
-        //Sprite borders1;
-        //borders1.setTexture(borderTexture.getTexture());
-
-        //RenderStates renderStatesBorder;
-        //renderStatesBorder.texture = &borderTexture.getTexture();
-        //renderStatesBorder.blendMode = BlendMode(BlendMode::DstColor, BlendMode::Zero);
-        //renderStatesBorder.blendMode = BlendMode(BlendMode::One, BlendMode::Zero);
-        //window.draw(rayTracing.createVisibleBorders());
-        //window.draw(borders1, BlendMultiply);
     }
 
     window.display();    
 }
-
 
 MouseState Game::input() {
     MouseState mouseState;
@@ -568,3 +550,5 @@ void Game::logic() {
     }
 
 }
+
+

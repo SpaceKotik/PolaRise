@@ -13,3 +13,7 @@ int main()
 
     return 0;
 }
+
+
+  /*if (attenuation < 0.0001)
+    attenuation = attenuation / (linear_distance * 0.002);*/

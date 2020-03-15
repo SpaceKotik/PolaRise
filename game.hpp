@@ -34,7 +34,7 @@ struct States {
 class Game {
 private:
     GameState gameState;
-    Texture texture;
+    //Texture texture;
     Event event;
     RenderWindow window;
     Vector2f mousePos;
@@ -43,11 +43,9 @@ private:
     RayTracing rayTracing;
     Level level;
     States keys;
-
-
-
     Sprite spriteWorld;
-    Shader shader;
+    Shader shaderBlur;
+    Shader shaderShadow;
     RenderTexture myRenderTexture;
 
 public:
