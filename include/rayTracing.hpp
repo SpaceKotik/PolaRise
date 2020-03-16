@@ -33,10 +33,9 @@ public:
 	Line getPartIntersection(Line ray, Line line);
 	void calculateIntersections();
 	void update(Level *level, RenderWindow *window, Vector2f mousePos, bool _isRestricted = 0, Vector2f view = Vector2f(1, 1), float viewAngle = 200);
-	VertexArray createMesh();
-	VertexArray createVisibleBorders();
+	VertexArray createMesh(Color);
 	void convertTileMapToPolyMap(Level *level, Window *window);
 	void convertPolyMapToVertices();
-	void changeLightColor();
+	//void changeLightColor();
 	friend class Game;
 };

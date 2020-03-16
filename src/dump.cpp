@@ -10,7 +10,7 @@ void Dump::add(std::string str) {
 }
 
 void Dump::display() {
-	std::cout << "\033[2J\033[1;1H";
+	//std::cout << "\033[2J\033[1;1H";
 	std::cout << "###############################\n";
 	for (auto e : output) {
 		std::cout << e << "\n";

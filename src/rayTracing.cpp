@@ -1,10 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <fstream>
-#include <unistd.h>
-#include <stdio.h>
 #include <math.h>
-#include <tgmath.h>
 #include "game.hpp"
 #include "tile.hpp"
 #include "rayTracing.hpp"
@@ -23,12 +19,6 @@ extern const int field_y;
 #define NO_INTERSECTION Vector2f(-10, -10);
 #define PI 3.14159265
 
-const Color lightColorRed = Color(50, 10, 10);		//Red for 5 sources
-const Color lightColorBlue = Color(20, 20, 50);		//Blue for 5 sources
-
-//const Color lightColorBlue = Color(102, 102, 255);	//Blue for 1 source
-//const Color lightColorRed = Color(255, 51, 51);		//Red for 1 source
-
 const float angle = 0.03;
 
 
@@ -37,7 +27,7 @@ Vector2f getRectPointPos(Tile rect, int point) {
 }
 
 RayTracing::RayTracing() {
-	lightColor = lightColorBlue;
+///	lightColor = lightColorBlue;
 }
 
 void RayTracing::convertTileMapToPolyMap(Level *level, Window *window) {
@@ -267,31 +257,37 @@ void RayTracing::update(Level *level, RenderWindow *window, Vector2f mousePos, b
 	viewVec[0] = mousePos;
 	viewVec[1] = mousePos + view;
 
-	// erasing all rays that are not in line of sight (lambda function as bool expression)
-	raysVertex.erase(std::remove_if(raysVertex.begin(), raysVertex.end(), [viewVec, viewAngle] (std::array<Vertex, 2> const&  a) -> bool {
-		// representing current ray and view vector as lines and checking if current ray is in line of sight
-		Line curLine, viewLine;
+    // erasing all rays that are not in line of sight (lambda function as bool expression)
+	if(isRestricted) {
+        raysVertex.erase(std::remove_if(raysVertex.begin(), raysVertex.end(),
+                                        [viewVec, viewAngle](std::array<Vertex, 2> const &a) -> bool {
+                                            // representing current ray and view vector as lines and checking if current ray is in line of sight
+                                            Line curLine, viewLine;
 
-		curLine.startCoord = a[0].position;
-		curLine.dirX = a[1].position.x - a[0].position.x;
-		curLine.dirY = a[1].position.y - a[0].position.y;
+                                            curLine.startCoord = a[0].position;
+                                            curLine.dirX = a[1].position.x - a[0].position.x;
+                                            curLine.dirY = a[1].position.y - a[0].position.y;
 
-		viewLine.startCoord = viewVec[0].position;
-		viewLine.dirX = viewVec[1].position.x - viewVec[0].position.x;
-		viewLine.dirY = viewVec[1].position.y - viewVec[0].position.y;
+                                            viewLine.startCoord = viewVec[0].position;
+                                            viewLine.dirX = viewVec[1].position.x - viewVec[0].position.x;
+                                            viewLine.dirY = viewVec[1].position.y - viewVec[0].position.y;
 
-		float curLineLen = sqrt(curLine.dirX*curLine.dirX + curLine.dirY*curLine.dirY);
-		float viewLineLen = sqrt(viewLine.dirX*viewLine.dirX + viewLine.dirY*viewLine.dirY);
-		float cosine = (curLine.dirX*viewLine.dirX + curLine.dirY*viewLine.dirY)/(curLineLen*viewLineLen);
+                                            float curLineLen = sqrt(
+                                                    curLine.dirX * curLine.dirX + curLine.dirY * curLine.dirY);
+                                            float viewLineLen = sqrt(
+                                                    viewLine.dirX * viewLine.dirX + viewLine.dirY * viewLine.dirY);
+                                            float cosine =
+                                                    (curLine.dirX * viewLine.dirX + curLine.dirY * viewLine.dirY) /
+                                                    (curLineLen * viewLineLen);
 
-		if (cosine < cos(viewAngle/2.f/180.f*PI)) {
-		 	return true;
-		 }
-		 else {
-		 	return false;
-		 }
+                                            if (cosine < cos(viewAngle / 2.f / 180.f * PI)) {
+                                                return true;
+                                            } else {
+                                                return false;
+                                            }
 
-	}), raysVertex.end());
+                                        }), raysVertex.end());
+    }
 
 	// adding restricting rays
 	Transform rotationLeft;
@@ -313,39 +309,66 @@ void RayTracing::update(Level *level, RenderWindow *window, Vector2f mousePos, b
 	//calculating intersections before sorting
 	calculateIntersections();
 	
-    //Sorting array of rays to make light mesh; 
-	std::sort(raysVertex.begin(), raysVertex.end(), [viewRayRight](std::array<Vertex, 2> const&  a,  std::array<Vertex, 2> const&   b) -> bool {
+    //Sorting array of rays to make light mesh;
+    if (isRestricted) {
+        std::sort(raysVertex.begin(), raysVertex.end(),
+                  [viewRayRight](std::array<Vertex, 2> const &a, std::array<Vertex, 2> const &b) -> bool {
 
-		Line aLine, bLine, refLine;
+                      Line aLine, bLine, refLine;
 
-		aLine.startCoord = a[0].position;
-		aLine.dirX = a[1].position.x - a[0].position.x;
-		aLine.dirY = a[1].position.y - a[0].position.y;
+                      aLine.startCoord = a[0].position;
+                      aLine.dirX = a[1].position.x - a[0].position.x;
+                      aLine.dirY = a[1].position.y - a[0].position.y;
 
 
-		bLine.startCoord = b[0].position;
-		bLine.dirX = b[1].position.x - b[0].position.x;
-		bLine.dirY = b[1].position.y - b[0].position.y;
+                      bLine.startCoord = b[0].position;
+                      bLine.dirX = b[1].position.x - b[0].position.x;
+                      bLine.dirY = b[1].position.y - b[0].position.y;
 
-		refLine.startCoord = viewRayRight[0].position;
-		refLine.dirX = viewRayRight[1].position.x - viewRayRight[0].position.x;
-		refLine.dirY = viewRayRight[1].position.y - viewRayRight[0].position.y;
+                      refLine.startCoord = viewRayRight[0].position;
+                      refLine.dirX = viewRayRight[1].position.x - viewRayRight[0].position.x;
+                      refLine.dirY = viewRayRight[1].position.y - viewRayRight[0].position.y;
 
-		float aLineLen = sqrt(aLine.dirX*aLine.dirX + aLine.dirY*aLine.dirY);
-		float bLineLen = sqrt(bLine.dirX*bLine.dirX + bLine.dirY*bLine.dirY);
-		float refLineLen = sqrt(refLine.dirX*refLine.dirX + refLine.dirY*refLine.dirY);
-		float cos1 = (aLine.dirX*refLine.dirX + aLine.dirY*refLine.dirY)/(aLineLen*refLineLen);
-		float cos2 = (bLine.dirX*refLine.dirX + bLine.dirY*refLine.dirY)/(bLineLen*refLineLen);
+                      float aLineLen = sqrt(aLine.dirX * aLine.dirX + aLine.dirY * aLine.dirY);
+                      float bLineLen = sqrt(bLine.dirX * bLine.dirX + bLine.dirY * bLine.dirY);
+                      float refLineLen = sqrt(refLine.dirX * refLine.dirX + refLine.dirY * refLine.dirY);
+                      float cos1 = (aLine.dirX * refLine.dirX + aLine.dirY * refLine.dirY) / (aLineLen * refLineLen);
+                      float cos2 = (bLine.dirX * refLine.dirX + bLine.dirY * refLine.dirY) / (bLineLen * refLineLen);
 
-		if (cos1 - cos2 < 0) {
-		 	return true;
-		 }
-		 else {
-		 	return false;
-		 }
+                      if (cos1 - cos2 < 0) {
+                          return true;
+                      } else {
+                          return false;
+                      }
+                  });
+    }
+    else {
+        std::sort(raysVertex.begin(), raysVertex.end(), [](std::array<Vertex, 2> const &a, std::array<Vertex, 2> const &b) -> bool {
+            Line aLine, bLine;
+            //Vector2f aa =(*((std::array<Vertex, 2>*)a))[0].position;
+            aLine.startCoord = a[0].position;
+            aLine.dirX = a[1].position.x - a[0].position.x;
+            aLine.dirY = a[1].position.y - a[0].position.y;
 
-		return 0;
-	});
+
+            bLine.startCoord = b[0].position;
+            bLine.dirX = b[1].position.x - b[0].position.x;
+            bLine.dirY = b[1].position.y - b[0].position.y;
+
+
+            if ((atan2(aLine.dirY, aLine.dirX) - atan2(bLine.dirY, bLine.dirX)) < 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        });
+    }
+	/*for (auto &e : raysVertex) {
+        Transform transform;
+        transform.scale(1.1, 1.1, mousePos.x, mousePos.y);
+        e[1].position = transform.transformPoint(e[1].position);
+	}*/
 
 }
 
@@ -422,7 +445,7 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
     return tempLine;
 }
 
-VertexArray RayTracing::createMesh() {
+VertexArray RayTracing::createMesh(Color color) {
 	//make orderArray
 	float meshSize;
 	if (isRestricted)
@@ -432,23 +455,19 @@ VertexArray RayTracing::createMesh() {
 
 	VertexArray lightMesh(TriangleFan, meshSize);
 
-	//Sorting array of rays to make light mesh; 
-	//std::sort(raysVertex.begin(), raysVertex.end(), cmp);
-
 	//add central point
 	lightMesh[0].position = raysVertex[0][0].position; 
-	lightMesh[0].color = lightColor;
+	lightMesh[0].color = color;
 	//add points clockwise/counter-clockwise
 	for (int i = 1; i < raysVertex.size() + 1; ++i) {
 		(lightMesh)[i].position = raysVertex[i-1][1].position;
-		(lightMesh)[i].color = lightColor;
+		(lightMesh)[i].color = color;
 
 	}
 	//add closing vertex if not restricted
-
 	if (!isRestricted) {
 		(lightMesh)[raysVertex.size() + 1].position = raysVertex[0][1].position;
-		(lightMesh)[raysVertex.size() + 1].color = lightColor;
+		(lightMesh)[raysVertex.size() + 1].color = color;
 	}
 	
 	return lightMesh;
@@ -457,7 +476,7 @@ VertexArray RayTracing::createMesh() {
 void RayTracing::calculateIntersections() {
 	for (auto &e : raysVertex) {
 		Line prevIntersection;
-        prevIntersection.param = 1; //set to -10 if some problems with rays lengh occur
+        prevIntersection.param = 1; //set to -10 if some problems with rays length occur
         Line ray;
 		ray.startCoord = e[0].position;
 		ray.dirX = e[1].position.x - ray.startCoord.x;
@@ -476,9 +495,9 @@ void RayTracing::calculateIntersections() {
 	}
 }
 
-void RayTracing::changeLightColor() {
+/*void RayTracing::changeLightColor() {
 	if (lightColor == lightColorBlue)
 		lightColor = lightColorRed;
 	else
 		lightColor = lightColorBlue;
-}
+}*/

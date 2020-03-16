@@ -7,6 +7,7 @@
 #include <math.h>
 #include <unistd.h>
 
+#include "../SmartVector2/SmartVector2f.h"
 #include "game.hpp"
 #include "tile.hpp"
 #include "level.hpp"
@@ -18,22 +19,24 @@ using namespace sf;
 #define UPDATESHADERS false //update changes in shaders in real time
 #define DOBLUR true
 #define DOSHADOW true
-#define DUMP true
+#define DUMP false
 
 extern const int scale;
 extern const int field_x;
 extern const int field_y;
 
-const float lightSourceSize = 0.5;
+//const float lightSourceSize = 0.5;
 extern const float heroRadius;
 extern const float heroAcceleration; 
 extern const float maxVelocity; 
 extern const Color backgorundColor;
+extern const Color lightColorRed;
+extern const Color lightColorBlue;
 
 #define NO_INTERSECTION Vector2f(-10, -10)
 #define LIGHT_SOURCE_SCALE Vector2f(1.7, 1.7)
 #define BORDERS_VISIBILITY_SCALE Vector2f(0.3, 0.3)
-
+eVector2f view(10, 0);
 
 class FPScounter {
     public:
@@ -116,16 +119,17 @@ void Game::run() {
     }
 }
 
-void Game::doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, float lineOfSight, std::mutex *rtLock) {
+void Game::doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, float lineOfSight, Color color, std::mutex *rtLock) {
     
     rayTracing.update(&level, &window, pos, true, view, lineOfSight);
     rtLock->lock();
     window.setActive(true);
-    bufferTex.draw(rayTracing.createMesh(), BlendAdd);
+    bufferTex.draw(rayTracing.createMesh(color), BlendAdd);
     rtLock->unlock();
 }
 
 void Game::draw(Level level, RayTracing rayTracing) {
+    std::cout << view.len() << std::endl;
     //load shaders every iteration to apply all changes in real time
     if (UPDATESHADERS) {
         if(!shaderBlur.loadFromFile("shaders/blur.frag", sf::Shader::Fragment)) {
@@ -147,20 +151,25 @@ void Game::draw(Level level, RayTracing rayTracing) {
     Vector2f normViewPerp;
     normViewPerp.x = -hero.view.y/120;
     normViewPerp.y = hero.view.x/120;
-    
+
+
+    //view = (view - eVector2f(700, 200));
+    view.rotate(0.1);
     bufferTex.clear(backgorundColor);
     std::mutex block;
-    std::thread thr1(&Game::doRayTracing, this, rayTracing,  hero.getPos(), (mousePos - hero.getPos()), hero.lineOfSight, &block);
-    std::thread thr2(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + hero.view + normViewPerp),  hero.view + normViewPerp, hero.lineOfSight, &block);
-    std::thread thr3(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + hero.view - normViewPerp),  hero.view - normViewPerp, hero.lineOfSight, &block);
-    std::thread thr4(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - hero.view + normViewPerp),  hero.view + normViewPerp, hero.lineOfSight, &block);
-    std::thread thr5(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - hero.view - normViewPerp),  hero.view - normViewPerp, hero.lineOfSight, &block);
+    std::thread thr1(&Game::doRayTracing, this, rayTracing,  hero.getPos(), (mousePos - hero.getPos()), hero.lineOfSight, lightColorBlue, &block);
+    std::thread thr2(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + hero.view + normViewPerp),  hero.view + normViewPerp,  hero.lineOfSight,lightColorBlue, &block);
+    std::thread thr3(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + hero.view - normViewPerp),  hero.view - normViewPerp, hero.lineOfSight, lightColorBlue, &block);
+    std::thread thr4(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - hero.view + normViewPerp),  hero.view + normViewPerp, hero.lineOfSight, lightColorBlue, &block);
+    std::thread thr5(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - hero.view - normViewPerp),  hero.view - normViewPerp, hero.lineOfSight, lightColorBlue, &block);
+    std::thread thr6(&Game::doRayTracing, this, rayTracing,  Vector2f(700, 200),  view, hero.lineOfSight/2, lightColorRed, &block);
 
     thr1.join();
     thr2.join();
     thr3.join();
     thr4.join();
     thr5.join();
+    thr6.join();
     bufferTex.display();
 
     //blur all light
@@ -260,7 +269,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
 bool Game::setShaders() {
     if(DOSHADOW) {
-        if(!shaderShadow.loadFromFile("shaders/shadow.frag", sf::Shader::Fragment)) {
+        if(!shaderShadow.loadFromFile("../shaders/shadow.frag", sf::Shader::Fragment)) {
             return false;
         }
         shaderShadow.setParameter("frag_ScreenResolution", Vector2f(field_x*scale, field_y*scale));
@@ -268,7 +277,7 @@ bool Game::setShaders() {
     }
 
     if(DOBLUR) {
-        if(!shaderBlur.loadFromFile("shaders/blur.frag", sf::Shader::Fragment)) {
+        if(!shaderBlur.loadFromFile("../shaders/blur.frag", sf::Shader::Fragment)) {
             window.close();
         }
         shaderBlur.setParameter("resolution", sf::Vector2f(field_x*scale, field_y*scale));
@@ -332,7 +341,7 @@ MouseState Game::input() {
                     if (!level.isOnTile(hero.getPos() + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(hero.getPos() + Vector2f(heroRadius-.1, -heroRadius+.1))
                         && !level.isOnTile(hero.getPos() + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(hero.getPos() + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
 
-                        rayTracing.changeLightColor();
+                        ///rayTracing.changeLightColor();
                         rayTracing.convertTileMapToPolyMap(&level, getHandle());
                         rayTracing.convertPolyMapToVertices();
 

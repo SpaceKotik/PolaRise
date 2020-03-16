@@ -100,7 +100,7 @@ void Level::removeTile(Vector2f pos) {
 }
 
 int Level::loadToFile() {
-	std::ofstream levelFile("Levels//Level_01.txt");
+	std::ofstream levelFile("../Levels/Level_01.txt");
     if(!levelFile.is_open())
         return -1;
     for (int i = 0; i < field_y; ++i) {
@@ -162,7 +162,7 @@ int Level::loadToFile() {
 }
 
 int Level::loadFromFile() {
-	std::ifstream levelFile("Levels//Level_01.txt");
+	std::ifstream levelFile("../Levels//Level_01.txt");
     if(!levelFile.is_open())
         return -1;
 

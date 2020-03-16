@@ -1,6 +1,5 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include "tile.hpp"
 #include "game.hpp"
 
 
