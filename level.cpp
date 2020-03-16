@@ -1,5 +1,4 @@
 #include <SFML/Graphics.hpp>
-//#include <windows.h>
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
@@ -7,7 +6,6 @@
 #include "tile.hpp"
 #include <iostream>
 #include <stdlib.h>
-
 
 extern const int scale;
 extern const int field_x;
@@ -68,15 +66,10 @@ int Level::getTileCount() {
 }
 
 void Level::update() {
-	/*for (int i = 0; i < field_x*field_y; ++i) {
-		if (field.tiles[i].isBlue)
-			field.tiles[i].physForm.rotate(1.5);
-	}*/
 }
 
 void Level::addTile(Vector2f pos) {
 	pos = Vector2f (((int)pos.x/(int)scale)*scale,((int)pos.y/(int)scale)*scale);
-	//field.tiles.push_back(Tile(pos, false, false));
 	if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue != true && levelState == Blue) {
 	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue = true;
 	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidBlue = true;
@@ -88,10 +81,6 @@ void Level::addTile(Vector2f pos) {
 	tileCount++;
 	}
 	loadToFile();
-	//debug
-	//std::cout << "\033[2J\033[1;1H";
-	//std::cout << "Tiles on screen: " << tileCount << '\n';
-	//debug
 }
 
 void Level::removeTile(Vector2f pos) {
@@ -108,10 +97,6 @@ void Level::removeTile(Vector2f pos) {
 		tileCount--;
 	}
 	loadToFile();
-	//debug
-	//std::cout << "\033[2J\033[1;1H";
-	//std::cout << "Tiles on screen: " << tileCount << '\n';
-	//debug
 }
 
 int Level::loadToFile() {

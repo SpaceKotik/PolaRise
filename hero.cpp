@@ -10,18 +10,18 @@ extern const int field_x;
 extern const int field_y;
 extern const float heroRadius;
 extern const Color heroColor;
+extern const float viewAngle;
 
 
 Hero::Hero() {
 	physForm.setRadius(heroRadius);
 	physForm.setOrigin(Vector2f(heroRadius, heroRadius));
 	physForm.setPosition(Vector2f(100, 100));
-	
 	//physForm.setFillColor(Color(102, 0, 204));
 	physForm.setFillColor(heroColor);
 	physForm.setOutlineColor(Color(20, 20, 20));
 	physForm.setOutlineThickness(0);
-	lineOfSight = 70;
+	lineOfSight = viewAngle;
 }
 void Hero::move(Vector2f dir) {
 	physForm.move(dir);

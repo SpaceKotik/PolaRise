@@ -14,7 +14,6 @@
 extern const int scale;
 extern const int field_x;
 extern const int field_y;
-extern const Vector2f lightSourceTextureCenter;
 
 #define DOWN 0
 #define LEFT 1
@@ -24,10 +23,8 @@ extern const Vector2f lightSourceTextureCenter;
 #define NO_INTERSECTION Vector2f(-10, -10);
 #define PI 3.14159265
 
-
 const Color lightColorRed = Color(50, 10, 10);		//Red for 5 sources
 const Color lightColorBlue = Color(20, 20, 50);		//Blue for 5 sources
-
 
 //const Color lightColorBlue = Color(102, 102, 255);	//Blue for 1 source
 //const Color lightColorRed = Color(255, 51, 51);		//Red for 1 source
@@ -226,9 +223,6 @@ void RayTracing::convertPolyMapToVertices() {
 		if (std::find(vertices.begin(), vertices.end(), tempVertex) == vertices.end())
 			vertices.push_back(tempVertex);
 	}
-	//std::cout << "\033[2J\033[1;1H";
-	//std::cout << "Rays on screen: " << vertices.size()*3 << '\n';
-	
 }
 
 
@@ -253,14 +247,15 @@ void RayTracing::update(Level *level, RenderWindow *window, Vector2f mousePos, b
     	currRay[0] = Vertex(mousePos, Color::Blue);
 
     	Transform rotation1;
-    	rotation1.rotate(-angle, mousePos);//.scale(500, 500, mousePos.x, mousePos.y);
+    	rotation1.rotate(-angle, mousePos).scale(1000, 1000, mousePos.x, mousePos.y);
     	//rotate
     	currRay[1] = Vertex(vertices[i], Color::Blue);
+
     	currRay[1].position = rotation1.transformPoint(currRay[1].position);
     	raysVertex.push_back(currRay);
 
     	Transform rotation2;
-    	rotation2.rotate(angle, mousePos);//.scale(500, 500, mousePos.x, mousePos.y);
+    	rotation2.rotate(angle, mousePos).scale(1000, 1000, mousePos.x, mousePos.y);
     	//rotate
     	currRay[1] = Vertex(vertices[i], Color::Blue);
     	currRay[1].position = rotation2.transformPoint(currRay[1].position);
@@ -299,19 +294,19 @@ void RayTracing::update(Level *level, RenderWindow *window, Vector2f mousePos, b
 	}), raysVertex.end());
 
 	// adding restricting rays
-	Transform rotation1;
-	rotation1.rotate(-viewAngle/2, mousePos);
+	Transform rotationLeft;
+	rotationLeft.rotate(-viewAngle/2, mousePos).scale(10000, 10000, mousePos.x, mousePos.y);
 	std::array<Vertex, 2> viewRayLeft;
 	viewRayLeft[0] = mousePos;
-	viewRayLeft[1] = rotation1.transformPoint(mousePos + view);
+	viewRayLeft[1] = rotationLeft.transformPoint(mousePos + view);
 	raysVertex.push_back(viewRayLeft);
 	
 
-	Transform rotation2;
-    rotation2.rotate(viewAngle/2, mousePos);
+	Transform rotationRight;
+    rotationRight.rotate(viewAngle/2, mousePos).scale(10000, 10000, mousePos.x, mousePos.y);
     std::array<Vertex, 2> viewRayRight;
 	viewRayRight[0] = mousePos;
-	viewRayRight[1] = rotation2.transformPoint(mousePos + view);
+	viewRayRight[1] = rotationRight.transformPoint(mousePos + view);
 	raysVertex.push_back(viewRayRight);
 
 
@@ -427,8 +422,6 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
     return tempLine;
 }
 
-
-
 VertexArray RayTracing::createMesh() {
 	//make orderArray
 	float meshSize;
@@ -443,15 +436,12 @@ VertexArray RayTracing::createMesh() {
 	//std::sort(raysVertex.begin(), raysVertex.end(), cmp);
 
 	//add central point
-	lightMesh[0].position = raysVertex[0][0].position;
-	lightMesh[0].texCoords = lightSourceTextureCenter; 
+	lightMesh[0].position = raysVertex[0][0].position; 
 	lightMesh[0].color = lightColor;
 	//add points clockwise/counter-clockwise
 	for (int i = 1; i < raysVertex.size() + 1; ++i) {
 		(lightMesh)[i].position = raysVertex[i-1][1].position;
 		(lightMesh)[i].color = lightColor;
-
-		(lightMesh)[i].texCoords = lightSourceTextureCenter + (lightMesh[0].position  - lightMesh[i].position);
 
 	}
 	//add closing vertex if not restricted
@@ -459,69 +449,15 @@ VertexArray RayTracing::createMesh() {
 	if (!isRestricted) {
 		(lightMesh)[raysVertex.size() + 1].position = raysVertex[0][1].position;
 		(lightMesh)[raysVertex.size() + 1].color = lightColor;
-		(lightMesh)[raysVertex.size() + 1].texCoords = lightSourceTextureCenter + (lightMesh[0].position  - lightMesh[raysVertex.size() + 1].position);
 	}
 	
 	return lightMesh;
 }
 
-VertexArray RayTracing::createVisibleBorders() {
-
-	VertexArray lightMesh(LineStrip, raysVertex.size() + 1);
-
-	//make orderArray
-	
-	int order[raysVertex.size()];
-	for (int i = 0; i < raysVertex.size() ; ++i) {
-		order[i] = i;
-	}
-	std::vector<Line> rays;
-	for (auto e: raysVertex) {
-		Line currRay;
-		currRay.startCoord = e[0].position;
-		currRay.dirX = e[1].position.x - e[0].position.x;
-		currRay.dirY = e[1].position.y - e[0].position.y;
-		rays.push_back(currRay);
-	}
-
-	//sort orderArray
-
-	for (int i = 1; i < raysVertex.size() + 1; i++) {
-		for (int j = 1; j < raysVertex.size() + 1-i; ++j)
-		{
-			if(atan2(rays[order[j-1]].dirY, rays[order[j-1]].dirX) > atan2(rays[order[j+1-1]].dirY, rays[order[j+1-1]].dirX)){
-				//swap
-				order[j-1] = order[j]+ order[j-1];
-				order[j] = order[j-1] - order[j];
-				order[j-1] =  order[j-1] - order[j];
-			}
-		}
-	}
-
-
-	//MUST BE DONE!
-
-	//qsort(order, linesCount*3+1, sizeof(int), cmp);
-
-
-	for (int i = 0; i < raysVertex.size(); ++i) {
-		(lightMesh)[i].position = raysVertex[order[i]][1].position;
-		(lightMesh)[i].color = Color::White;
-
-	}
-
-	(lightMesh)[raysVertex.size()].position = raysVertex[order[1]][1].position;
-	(lightMesh)[raysVertex.size()].color = Color::White;
-
-
-	return lightMesh; ///!!
-}
-
-
 void RayTracing::calculateIntersections() {
 	for (auto &e : raysVertex) {
 		Line prevIntersection;
-        prevIntersection.param = -10;
+        prevIntersection.param = 1; //set to -10 if some problems with rays lengh occur
         Line ray;
 		ray.startCoord = e[0].position;
 		ray.dirX = e[1].position.x - ray.startCoord.x;

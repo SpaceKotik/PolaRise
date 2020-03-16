@@ -9,7 +9,6 @@ enum LevelState {Red, Blue};
 
 struct Field {
 	std::vector<Tile> tiles;
-
 };
 
 class Level {
@@ -21,8 +20,6 @@ private:
 	Vector2f finishPos;
 	int tileCount;
 	LevelState levelState = Blue;
-
-
 public:
 	Level();
 	void setField();

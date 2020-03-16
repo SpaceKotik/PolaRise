@@ -5,15 +5,9 @@
 
 
 using namespace sf;
-int main()
-{
-    //srand(time(NULL));
+int main() {
     Game game;
     game.run();
 
     return 0;
 }
-
-
-  /*if (attenuation < 0.0001)
-    attenuation = attenuation / (linear_distance * 0.002);*/

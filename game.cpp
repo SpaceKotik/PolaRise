@@ -4,10 +4,9 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
-
-
 #include <math.h>
 #include <unistd.h>
+
 #include "game.hpp"
 #include "tile.hpp"
 #include "level.hpp"
@@ -15,24 +14,21 @@
 
 using namespace sf;
 
-#define NDEBUG true
-#define UPDATESHADERS false
+#define NDEBUG true   //show rays, obstacles, etc
+#define UPDATESHADERS false //update changes in shaders in real time
+#define DOBLUR true
+#define DOSHADOW true
+#define DUMP true
 
 extern const int scale;
 extern const int field_x;
 extern const int field_y;
-extern const Vector2f lightSourceTextureCenter;
 
 const float lightSourceSize = 0.5;
 extern const float heroRadius;
 extern const float heroAcceleration; 
-extern const float maxVelocity;
-extern const float heroVelocity;    
+extern const float maxVelocity; 
 extern const Color backgorundColor;
-
-
- //"float attenuation = 1.8 *  1.0 * (1.0 / (sqrt(30000.0 * 6.28))) * exp(-(linear_distance* linear_distance)/(2.0 * 30000.0)) * (1.0 - 1.0/(linear_distance*0.09));"\
-
 
 #define NO_INTERSECTION Vector2f(-10, -10)
 #define LIGHT_SOURCE_SCALE Vector2f(1.7, 1.7)
@@ -42,8 +38,8 @@ extern const Color backgorundColor;
 class FPScounter {
     public:
         //FPSCounter();
-        void update();
-        void draw();
+        std::string update();
+        //std::string draw();
 
     private:
         //sf::Text text;
@@ -57,36 +53,26 @@ class FPScounter {
         int frameCount = 0;
 };
 
-
-void FPScounter::update() {
+std::string FPScounter::update() {
     frameCount++;
 
     if (delayTimer.getElapsedTime().asSeconds() > 0.2) {
         fps = frameCount / fpsTimer.restart().asSeconds();
         frameCount = 0;
         delayTimer.restart();
+
     }
+    return "FPS: " + std::to_string((int)fps);
 }
-
-//Draws the FPS display to the window
-void FPScounter::draw() {
-    //m_text.setString("FPS " + std::to_string((int)m_fps));
-    //renderer.draw(m_text);
-    std::cout << "\033[2J\033[1;1H";
-    std::cout << "FPS : " << std::to_string((int)fps) << "\n";
-}
-
 
 Game::Game() {
     gameState = Gameplay;
-    //texture.loadFromFile("Textures/lightMask.png");
-    //texture.setSmooth(true);
 
     ContextSettings settings;
     settings.antialiasingLevel = 8;
 
 
-    window.create(VideoMode(field_x*scale, (field_y+0.0)*scale), "PolaRise",
+    window.create(VideoMode(field_x*scale, (field_y)*scale), "PolaRise",
                   Style::Titlebar | Style::Close, settings);
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(120);
@@ -99,30 +85,18 @@ Game::Game() {
     rayTracing.convertTileMapToPolyMap(&level, getHandle());
     rayTracing.convertPolyMapToVertices();  
 
+    bufferTex.create(field_x*scale, field_y*scale);
+    bufferTex.setSmooth(true);
+    bufferSprite.setTexture(bufferTex.getTexture());
+    bufferSprite.setOrigin(field_x*scale / 2.f, field_y*scale / 2.f);
+    bufferSprite.setPosition(field_x*scale / 2.f, field_y*scale / 2.f);
 
-    myRenderTexture.create(30*40, 30*30);
-    spriteWorld.setTexture(myRenderTexture.getTexture());
-    spriteWorld.setOrigin(30*40 / 2.f, 30*30 / 2.f);
-    spriteWorld.setPosition(30*40 / 2.f, 30*30 / 2.f);
-
-
-    if(!shaderBlur.loadFromFile("shaders/blur.frag", sf::Shader::Fragment)) {
+    if(!setShaders()) {
         window.close();
     }
-    shaderBlur.setParameter("resolution", sf::Vector2f(30*40, 30*30));
 
-
-    if(!shaderShadow.loadFromFile("shaders/shadow.frag", sf::Shader::Fragment)) {
-        window.close();
-    }
-    shaderShadow.setParameter("frag_ScreenResolution", Vector2f(30*40, 30*30));
-    shaderShadow.setParameter("frag_LightColor", Vector3f(255, 255, 255));
-    //shaderShadow.setParameter("frag_ShadowParam1", 20000.0);
-    //shaderShadow.setParameter("frag_ShadowParam2", 20000.0);
-
+    srand(time(NULL));
 }
-
-
 
 RenderWindow* Game::getHandle() {   
     return &window;
@@ -133,149 +107,88 @@ void Game::run() {
     FPScounter fpsCounter;
 
     while(window.isOpen()) {
-        fpsCounter.update();
-        fpsCounter.draw();
-
+        dump.add(fpsCounter.update());
         input();
         logic();
-        //level.update();
         draw(level, rayTracing);
+        if(DUMP)
+            dump.display();
     }
 }
-
-
-
 
 void Game::doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, float lineOfSight, std::mutex *rtLock) {
     
     rayTracing.update(&level, &window, pos, true, view, lineOfSight);
     rtLock->lock();
     window.setActive(true);
-    myRenderTexture.draw(rayTracing.createMesh(), BlendAdd);
-    //window.draw(temp, BlendAdd);
-    //window.draw(rayTracing.createMesh(), BlendAdd);
+    bufferTex.draw(rayTracing.createMesh(), BlendAdd);
     rtLock->unlock();
 }
 
-
 void Game::draw(Level level, RayTracing rayTracing) {
-
+    //load shaders every iteration to apply all changes in real time
     if (UPDATESHADERS) {
         if(!shaderBlur.loadFromFile("shaders/blur.frag", sf::Shader::Fragment)) {
             window.close();
         }
+        shaderBlur.setParameter("resolution", sf::Vector2f(field_x*scale, field_y*scale));
+
+
         if(!shaderShadow.loadFromFile("shaders/shadow.frag", sf::Shader::Fragment)) {
             window.close();
         }
+        shaderShadow.setParameter("frag_ScreenResolution", Vector2f(field_x*scale, field_y*scale));
+        shaderShadow.setParameter("frag_LightColor", Vector3f(255, 255, 255));
     }
 
+    window.clear(backgorundColor);    
 
-    RenderStates renderStates;
-    renderStates.blendMode = BlendAdd;
-
-    window.clear(backgorundColor);
-
-    //draw all tiles    
-
-    //add light fade for borders
-    /*Sprite bordersFade;
-    bordersFade.setOrigin(lightSourceTextureCenter);
-    bordersFade.setTexture(texture);
-    bordersFade.setPosition(hero.getPos());
-    bordersFade.setScale(BORDERS_VISIBILITY_SCALE);*/
-    //window.draw(bordersFade, BlendMultiply);
-
-
-    Vector2f normView, normViewPerp;
-    normView.x = 4*hero.view.x/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
-    normView.y = 4*hero.view.y/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y);
-    normViewPerp.x = -normView.y;
-    normViewPerp.y = normView.x;
-    //process light sources
-
-
-    myRenderTexture.clear();
+    //process light sources in parallel
+    Vector2f normViewPerp;
+    normViewPerp.x = -hero.view.y/120;
+    normViewPerp.y = hero.view.x/120;
+    
+    bufferTex.clear(backgorundColor);
     std::mutex block;
     std::thread thr1(&Game::doRayTracing, this, rayTracing,  hero.getPos(), (mousePos - hero.getPos()), hero.lineOfSight, &block);
-    std::thread thr2(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + normView + normViewPerp),  hero.view + normView + normViewPerp, hero.lineOfSight, &block);
-    std::thread thr3(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + normView - normViewPerp),  hero.view + normView - normViewPerp, hero.lineOfSight, &block);
-    std::thread thr4(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - normView + normViewPerp),  hero.view + normView + normViewPerp, hero.lineOfSight, &block);
-    std::thread thr5(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - normView - normViewPerp),  hero.view + normView - normViewPerp - normViewPerp, hero.lineOfSight, &block);
+    std::thread thr2(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + hero.view + normViewPerp),  hero.view + normViewPerp, hero.lineOfSight, &block);
+    std::thread thr3(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + hero.view - normViewPerp),  hero.view - normViewPerp, hero.lineOfSight, &block);
+    std::thread thr4(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - hero.view + normViewPerp),  hero.view + normViewPerp, hero.lineOfSight, &block);
+    std::thread thr5(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - hero.view - normViewPerp),  hero.view - normViewPerp, hero.lineOfSight, &block);
 
     thr1.join();
     thr2.join();
     thr3.join();
     thr4.join();
     thr5.join();
+    bufferTex.display();
 
-    myRenderTexture.display();
+    //blur all light
     for (int i = 0; i < 1; ++i) {
-        shaderBlur.setParameter("dir", Vector2f(1, 0));
-        shaderBlur.setParameter("image", myRenderTexture.getTexture());
-        sf::RenderStates states;
-        states.shader = &shaderBlur;
-        //states.blendMode = sf::BlendAdd;
-        myRenderTexture.draw(spriteWorld, states);
-        myRenderTexture.display();
 
+        bufferTex.draw(bufferSprite, getStatesBlur(Vector2f(1, 0), bufferTex.getTexture()));
+        bufferTex.display();
 
-        shaderBlur.setParameter("dir", Vector2f(0, 1));
-        shaderBlur.setParameter("image", myRenderTexture.getTexture());
-        states.shader = &shaderBlur;
-        myRenderTexture.draw(spriteWorld, states);
-        myRenderTexture.display();
+        bufferTex.draw(bufferSprite, getStatesBlur(Vector2f(0, 1), bufferTex.getTexture()));
+        bufferTex.display();
 
-        shaderBlur.setParameter("dir", Vector2f(1, 1));
-        shaderBlur.setParameter("image", myRenderTexture.getTexture());
-        states.shader = &shaderBlur;
-        myRenderTexture.draw(spriteWorld, states);
-        myRenderTexture.display();
+        bufferTex.draw(bufferSprite, getStatesBlur(Vector2f(1, 1), bufferTex.getTexture()));
+        bufferTex.display();
 
-        shaderBlur.setParameter("dir", Vector2f(-1, 1));
-        shaderBlur.setParameter("image", myRenderTexture.getTexture());
-        states.shader = &shaderBlur;
-        myRenderTexture.draw(spriteWorld, states);
-        myRenderTexture.display();
+        bufferTex.draw(bufferSprite, getStatesBlur(Vector2f(1, -1), bufferTex.getTexture()));
+        bufferTex.display();
     }
-    sf::RenderStates states;
-    shaderShadow.setParameter("frag_LightOrigin", hero.getPos());
-    shaderShadow.setParameter("frag_ShadowParam1", 20000.0);
-    shaderShadow.setParameter("frag_ShadowParam2", 20000.0);
-    states.shader = &shaderShadow;
-    states.blendMode = BlendMultiply;
-    myRenderTexture.draw(spriteWorld, states);
-    myRenderTexture.display();
 
-    window.draw(spriteWorld);
+    //make shadow
+    bufferTex.draw(bufferSprite, getStatesShadow(20000, 20000));
+    bufferTex.setSmooth(true);
+    bufferTex.display();
 
+    //draw to screen from buffer
+    window.draw(bufferSprite);
 
-    //rayTracing.update(&level, getHandle(), hero.getPos(), true, (mousePos - hero.getPos()), hero.lineOfSight);
-    //window.draw(rayTracing.createMesh(), renderStates);
-
-    //draw start and finish
-    for (int i = 0; i < field_x*field_y; ++i) {
-        if (level.getState() == Blue) {
-            if (level.getField()->tiles[i].typeBlue == 1 || level.getField()->tiles[i].typeBlue == 2) {
-                window.draw(level.getField()->tiles[i].physForm);
-            }
-        }
-        else if (level.getState() == Red) {
-            if (level.getField()->tiles[i].typeRed == 1 || level.getField()->tiles[i].typeRed == 2) {
-                window.draw(level.getField()->tiles[i].physForm);
-            }
-        }
-    }
-    
-    
-    shaderShadow.setParameter("frag_LightOrigin", hero.getPos());
-    shaderShadow.setParameter("frag_ShadowParam1", 30000.0);
-    shaderShadow.setParameter("frag_ShadowParam2", 3000.0);
-    states.shader = &shaderShadow;
-    states.blendMode = BlendMultiply;
-    myRenderTexture.draw(spriteWorld, states);
-    myRenderTexture.display();
-    //window.draw(spriteWorld, BlendAdd);
-
+    //draw all tiles
+    RenderStates states = getStatesShadow(30000, 3000);
     states.blendMode = BlendAdd;
     for (int i = 0; i < field_x*field_y; ++i) {
         if (level.getState() == Blue) {
@@ -290,16 +203,19 @@ void Game::draw(Level level, RayTracing rayTracing) {
         }
     }
 
-    window.draw(*hero.getPhysForm());
-
-
-    //add light fade
-    /*Sprite lightFade;
-    lightFade.setOrigin(lightSourceTextureCenter);
-    lightFade.setTexture(texture);
-    lightFade.setPosition(hero.getPos());
-    lightFade.setScale(LIGHT_SOURCE_SCALE);
-    //window.draw(lightFade, BlendMultiply);*/
+    //draw start and finish
+    for (int i = 0; i < field_x*field_y; ++i) {
+        if (level.getState() == Blue) {
+            if (level.getField()->tiles[i].typeBlue == 1 || level.getField()->tiles[i].typeBlue == 2) {
+                window.draw(level.getField()->tiles[i].physForm, BlendMultiply);
+            }
+        }
+        else if (level.getState() == Red) {
+            if (level.getField()->tiles[i].typeRed == 1 || level.getField()->tiles[i].typeRed == 2) {
+                window.draw(level.getField()->tiles[i].physForm, BlendMultiply);
+            }
+        }
+    }
 
     //DEBUG
     if (!NDEBUG) {
@@ -322,17 +238,72 @@ void Game::draw(Level level, RayTracing rayTracing) {
             window.draw(currLine, 2, Lines);
         }
         //DEBUG DRAW RAYS
+        rayTracing.update(&level, &window, hero.getPos(), true, hero.view, hero.lineOfSight);
+        dump.add("Rays on screen: " + std::to_string(rayTracing.raysVertex.size()) + "\n");
         for (int i = 0; i < rayTracing.raysVertex.size(); ++i) {
+            
             Vertex currRay[2];
             currRay[0].position = rayTracing.raysVertex.at(i)[0].position;
             currRay[1].position = rayTracing.raysVertex.at(i)[1].position;
-            currRay[0].color = Color::Red;
-            currRay[1].color = Color::Red;
+            currRay[0].color = Color::White;
+            currRay[1].color = Color::White;
             window.draw(currRay, 2, Lines);
         }
+
     }
 
+    //draw player
+    window.draw(*hero.getPhysForm());
+
     window.display();    
+}
+
+bool Game::setShaders() {
+    if(DOSHADOW) {
+        if(!shaderShadow.loadFromFile("shaders/shadow.frag", sf::Shader::Fragment)) {
+            return false;
+        }
+        shaderShadow.setParameter("frag_ScreenResolution", Vector2f(field_x*scale, field_y*scale));
+        shaderShadow.setParameter("frag_LightColor", Vector3f(255, 255, 255));
+    }
+
+    if(DOBLUR) {
+        if(!shaderBlur.loadFromFile("shaders/blur.frag", sf::Shader::Fragment)) {
+            window.close();
+        }
+        shaderBlur.setParameter("resolution", sf::Vector2f(field_x*scale, field_y*scale));
+    }
+
+    return true;
+}
+
+//Note: param1 must be about 20000-30000 to make smooth light
+//      param2 is inverse to the size of the light circle
+//This shader uses kind of gaussian distribution function with different sigmas
+RenderStates Game::getStatesShadow(float param1, float param2) {
+    RenderStates states;
+    states.blendMode = BlendMultiply;
+    if (!DOSHADOW)
+        return states;
+
+    shaderShadow.setParameter("frag_LightOrigin", hero.getPos());
+    shaderShadow.setParameter("frag_ShadowParam1", param1);
+    shaderShadow.setParameter("frag_ShadowParam2", param2);
+    states.shader = &shaderShadow;
+    
+    return states;
+}
+
+RenderStates Game::getStatesBlur(Vector2f dir, Texture buffer) {
+    RenderStates states;
+    if (!DOBLUR)
+        return states;
+
+    shaderBlur.setParameter("dir", dir);
+    shaderBlur.setParameter("image", buffer);
+    states.shader = &shaderBlur;
+    
+    return states;
 }
 
 MouseState Game::input() {
@@ -450,7 +421,6 @@ MouseState Game::input() {
         return mouseState;
 }
 
-
 void Game::logic() {
     Vector2f desPos;
 
@@ -464,14 +434,7 @@ void Game::logic() {
     if (keys.down == true) 
         hero.velocity.y += heroAcceleration;
 
-    //restrict speed by normalizing velocity vector
-    float absVelocity = sqrt(hero.velocity.x*hero.velocity.x + hero.velocity.y*hero.velocity.y);
-    if (absVelocity > maxVelocity) {
-        hero.velocity.x /= absVelocity;
-        hero.velocity.x *= maxVelocity;
-        hero.velocity.y /= absVelocity;
-        hero.velocity.y *= maxVelocity;
-    }
+    
 
     //process right moving if player moves right
     desPos = hero.getPos() + Vector2f(hero.velocity.x , 0);
@@ -538,8 +501,22 @@ void Game::logic() {
     if (keys.right == false && keys.left == false && keys.up == false && keys.down == false)
         hero.velocity = Vector2f(hero.velocity.x * 0.88, hero.velocity.y * 0.88);
 
-    //hero.view = hero.velocity;
+    //restrict speed by normalizing velocity vector
+    float absVelocity = sqrt(hero.velocity.x*hero.velocity.x + hero.velocity.y*hero.velocity.y);
+    if (absVelocity > maxVelocity) {
+        hero.velocity.x /= absVelocity;
+        hero.velocity.x *= maxVelocity;
+        hero.velocity.y /= absVelocity;
+        hero.velocity.y *= maxVelocity;
+    }
+    if (absVelocity < 0.001) {
+        hero.velocity = Vector2f(0, 0);
+    }
     hero.view = (Vector2f)Mouse::getPosition(window) - hero.getPos();
+    hero.view = Vector2f(hero.view.x/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y), hero.view.y/sqrt(hero.view.x*hero.view.x + hero.view.y*hero.view.y));
+
+    dump.add("Velocity: (" + std::to_string(hero.velocity.x) + " : " + std::to_string(hero.velocity.y) + ")");    
+    dump.add("View: (" + std::to_string(hero.view.x) + " : " + std::to_string(hero.view.y) + ")");
 
     if(level.isOnFinish(hero.getPos())) {
         keys.isOnFinish = true;
@@ -548,7 +525,4 @@ void Game::logic() {
     else {
         keys.isOnFinish = false;///!!!
     }
-
 }
-
-
