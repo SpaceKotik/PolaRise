@@ -7,6 +7,7 @@
 #include "level.hpp"
 #include "hero.hpp"
 #include "dump.hpp"
+#include "lightScene.h"
 
 using namespace sf;
 
@@ -41,6 +42,10 @@ private:
     Hero hero;
     RayTracing rayTracing;
     Level level;
+
+
+    LightScene lightScene;
+
 
     States keys;
     Sprite bufferSprite;

@@ -18,7 +18,7 @@ using namespace sf;
 #define NDEBUG true   //show rays, obstacles, etc
 #define UPDATESHADERS false //update changes in shaders in real time
 #define DOBLUR true
-#define DOSHADOW true
+#define DOSHADOW false
 #define DUMP false
 
 extern const int scale;
@@ -85,7 +85,7 @@ Game::Game() {
 
     level.setField();
 
-    rayTracing.convertTileMapToPolyMap(&level, getHandle());
+    rayTracing.convertTileMapToPolyMap(&level);
     rayTracing.convertPolyMapToVertices();  
 
     bufferTex.create(field_x*scale, field_y*scale);
@@ -94,11 +94,21 @@ Game::Game() {
     bufferSprite.setOrigin(field_x*scale / 2.f, field_y*scale / 2.f);
     bufferSprite.setPosition(field_x*scale / 2.f, field_y*scale / 2.f);
 
+
     if(!setShaders()) {
         window.close();
     }
 
     srand(time(NULL));
+
+    lightScene.setShaders(DOBLUR, DOSHADOW);
+    lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1));
+    lightScene.addEmitter(eVector2f(900, 100), eVector2f(-1, 1));
+    lightScene.updateObstacles(&level);
+    lightScene.updateEmittersRayTracing();
+
+
+
 }
 
 RenderWindow* Game::getHandle() {   
@@ -121,31 +131,23 @@ void Game::run() {
 
 void Game::doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, float lineOfSight, Color color, std::mutex *rtLock) {
     
-    rayTracing.update(&level, &window, pos, true, view, lineOfSight);
+    rayTracing.update(pos, true, view, lineOfSight);
     rtLock->lock();
-    window.setActive(true);
+    //window.setActive(true);
+    //bufferTex.setActive(true);
     bufferTex.draw(rayTracing.createMesh(color), BlendAdd);
+    bufferTex.display();
     rtLock->unlock();
 }
 
 void Game::draw(Level level, RayTracing rayTracing) {
-    std::cout << view.len() << std::endl;
     //load shaders every iteration to apply all changes in real time
-    if (UPDATESHADERS) {
-        if(!shaderBlur.loadFromFile("shaders/blur.frag", sf::Shader::Fragment)) {
-            window.close();
-        }
-        shaderBlur.setParameter("resolution", sf::Vector2f(field_x*scale, field_y*scale));
 
-
-        if(!shaderShadow.loadFromFile("shaders/shadow.frag", sf::Shader::Fragment)) {
-            window.close();
-        }
-        shaderShadow.setParameter("frag_ScreenResolution", Vector2f(field_x*scale, field_y*scale));
-        shaderShadow.setParameter("frag_LightColor", Vector3f(255, 255, 255));
-    }
+    if (UPDATESHADERS)
+        setShaders();
 
     window.clear(backgorundColor);    
+
 
     //process light sources in parallel
     Vector2f normViewPerp;
@@ -154,22 +156,29 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
 
     //view = (view - eVector2f(700, 200));
-    view.rotate(0.1);
+    view.rotate(0.05);
     bufferTex.clear(backgorundColor);
     std::mutex block;
+    window.setActive(false);
+    //bufferTex.setActive(false);
     std::thread thr1(&Game::doRayTracing, this, rayTracing,  hero.getPos(), (mousePos - hero.getPos()), hero.lineOfSight, lightColorBlue, &block);
-    std::thread thr2(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + hero.view + normViewPerp),  hero.view + normViewPerp,  hero.lineOfSight,lightColorBlue, &block);
+    /*std::thread thr2(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + hero.view + normViewPerp),  hero.view + normViewPerp,  hero.lineOfSight,lightColorBlue, &block);
     std::thread thr3(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + hero.view - normViewPerp),  hero.view - normViewPerp, hero.lineOfSight, lightColorBlue, &block);
     std::thread thr4(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - hero.view + normViewPerp),  hero.view + normViewPerp, hero.lineOfSight, lightColorBlue, &block);
     std::thread thr5(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - hero.view - normViewPerp),  hero.view - normViewPerp, hero.lineOfSight, lightColorBlue, &block);
+     */
     std::thread thr6(&Game::doRayTracing, this, rayTracing,  Vector2f(700, 200),  view, hero.lineOfSight/2, lightColorRed, &block);
+    std::thread thr7(&Game::doRayTracing, this, rayTracing,  Vector2f(200, 200),  view, hero.lineOfSight/2, lightColorRed, &block);
 
     thr1.join();
-    thr2.join();
+    /*thr2.join();
     thr3.join();
     thr4.join();
-    thr5.join();
+    thr5.join();*/
     thr6.join();
+    thr7.join();
+    //window.setActive(true);
+    bufferTex.setActive(true);
     bufferTex.display();
 
     //blur all light
@@ -189,12 +198,24 @@ void Game::draw(Level level, RayTracing rayTracing) {
     }
 
     //make shadow
+    //bufferTex.setActive(true);
     bufferTex.draw(bufferSprite, getStatesShadow(20000, 20000));
     bufferTex.setSmooth(true);
     bufferTex.display();
 
     //draw to screen from buffer
+    //window.setActive(true);
     window.draw(bufferSprite);
+
+//////////////////////
+    window.setActive(false);
+    lightScene.draw();
+    Sprite tempSprite;
+    tempSprite.setTexture(lightScene.getTexture());
+    tempSprite.setOrigin(field_x*scale / 2.f, field_y*scale / 2.f);
+    tempSprite.setPosition(field_x*scale / 2.f, field_y*scale / 2.f);
+    window.draw(tempSprite, BlendAdd);
+//////////////////////
 
     //draw all tiles
     RenderStates states = getStatesShadow(30000, 3000);
@@ -247,7 +268,7 @@ void Game::draw(Level level, RayTracing rayTracing) {
             window.draw(currLine, 2, Lines);
         }
         //DEBUG DRAW RAYS
-        rayTracing.update(&level, &window, hero.getPos(), true, hero.view, hero.lineOfSight);
+        rayTracing.update(hero.getPos(), true, hero.view, hero.lineOfSight);
         dump.add("Rays on screen: " + std::to_string(rayTracing.raysVertex.size()) + "\n");
         for (int i = 0; i < rayTracing.raysVertex.size(); ++i) {
             
@@ -263,6 +284,9 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
     //draw player
     window.draw(*hero.getPhysForm());
+
+
+
 
     window.display();    
 }
@@ -282,6 +306,7 @@ bool Game::setShaders() {
         }
         shaderBlur.setParameter("resolution", sf::Vector2f(field_x*scale, field_y*scale));
     }
+
 
     return true;
 }
@@ -305,6 +330,7 @@ RenderStates Game::getStatesShadow(float param1, float param2) {
 
 RenderStates Game::getStatesBlur(Vector2f dir, Texture buffer) {
     RenderStates states;
+    //states.blendMode = BlendMultiply;
     if (!DOBLUR)
         return states;
 
@@ -342,8 +368,10 @@ MouseState Game::input() {
                         && !level.isOnTile(hero.getPos() + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(hero.getPos() + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
 
                         ///rayTracing.changeLightColor();
-                        rayTracing.convertTileMapToPolyMap(&level, getHandle());
+                        rayTracing.convertTileMapToPolyMap(&level);
                         rayTracing.convertPolyMapToVertices();
+                            lightScene.updateObstacles(&level);//////////
+                            lightScene.updateEmittersRayTracing();///////
 
                     }
                     else {
@@ -407,15 +435,19 @@ MouseState Game::input() {
                     mouseState.pos = (Vector2f)Mouse::getPosition(window);
                     mouseState.LeftButtonPressed = true;
                     level.addTile(mouseState.pos);
-                    rayTracing.convertTileMapToPolyMap(&level, getHandle());
+                    rayTracing.convertTileMapToPolyMap(&level);
                     rayTracing.convertPolyMapToVertices();
+                        lightScene.updateObstacles(&level);//////////
+                        lightScene.updateEmittersRayTracing();///////
         }
         if (Mouse::isButtonPressed(sf::Mouse::Right)) {
             mouseState.pos = (Vector2f)Mouse::getPosition(window);
             mouseState.RightButtonPressed = true;
             level.removeTile(mouseState.pos);
-            rayTracing.convertTileMapToPolyMap(&level, getHandle());
+            rayTracing.convertTileMapToPolyMap(&level);
             rayTracing.convertPolyMapToVertices();
+                lightScene.updateObstacles(&level);//////////
+                lightScene.updateEmittersRayTracing();///////
         }
 
         if (Mouse::getPosition(window).x > window.getSize().x)

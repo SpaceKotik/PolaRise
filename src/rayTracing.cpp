@@ -30,13 +30,13 @@ RayTracing::RayTracing() {
 ///	lightColor = lightColorBlue;
 }
 
-void RayTracing::convertTileMapToPolyMap(Level *level, Window *window) {
+void RayTracing::convertTileMapToPolyMap(Level *level) {
 	std::vector<Cell> processingCells;
 	processingCells.clear();
 	edges.clear();
 
 	//Set borders
-	Vector2f windowSize = (Vector2f)window->getSize();
+	Vector2f windowSize = Vector2f(field_x*scale, field_y*scale);
 
 	Line newBorder;
 	newBorder.startCoord = Vector2f(0, 0);
@@ -216,7 +216,7 @@ void RayTracing::convertPolyMapToVertices() {
 }
 
 
-void RayTracing::update(Level *level, RenderWindow *window, Vector2f mousePos, bool _isRestricted, Vector2f view, float viewAngle) {
+void RayTracing::update(Vector2f mousePos, bool _isRestricted, Vector2f view, float viewAngle) {
 
 	isRestricted = _isRestricted;
 
@@ -495,9 +495,16 @@ void RayTracing::calculateIntersections() {
 	}
 }
 
+void RayTracing::updateObstacles(Level *level) {
+    convertTileMapToPolyMap(level);
+    convertPolyMapToVertices();
+}
+
 /*void RayTracing::changeLightColor() {
 	if (lightColor == lightColorBlue)
 		lightColor = lightColorRed;
 	else
 		lightColor = lightColorBlue;
 }*/
+
+

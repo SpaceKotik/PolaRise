@@ -32,9 +32,10 @@ public:
 	RayTracing();
 	Line getPartIntersection(Line ray, Line line);
 	void calculateIntersections();
-	void update(Level *level, RenderWindow *window, Vector2f mousePos, bool _isRestricted = 0, Vector2f view = Vector2f(1, 1), float viewAngle = 200);
+	void update(Vector2f mousePos, bool _isRestricted = true, Vector2f view = Vector2f(1, 1), float viewAngle = 170);
 	VertexArray createMesh(Color);
-	void convertTileMapToPolyMap(Level *level, Window *window);
+	void updateObstacles(Level *level);
+	void convertTileMapToPolyMap(Level *level);
 	void convertPolyMapToVertices();
 	//void changeLightColor();
 	friend class Game;
