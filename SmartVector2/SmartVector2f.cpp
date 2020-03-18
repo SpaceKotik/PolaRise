@@ -12,6 +12,11 @@ eVector2f::eVector2f(float x1, float y1) {
     y = y1;
 }
 
+eVector2f::eVector2f(Vector2f other) {
+    x = other.x;
+    y = other.y;
+}
+
 eVector2f::~eVector2f() {
     x = 0;
     y = 0;

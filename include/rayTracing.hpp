@@ -25,7 +25,6 @@ private:
 	std::vector<Line> edges;
 	std::vector<Vector2f> vertices;
 	std::vector<std::array<Vertex, 2>> raysVertex;
-	Color lightColor;
 	bool isRestricted = 0;
 
 public:
@@ -37,6 +36,5 @@ public:
 	void updateObstacles(Level *level);
 	void convertTileMapToPolyMap(Level *level);
 	void convertPolyMapToVertices();
-	//void changeLightColor();
 	friend class Game;
 };

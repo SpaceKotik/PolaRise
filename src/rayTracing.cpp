@@ -215,7 +215,6 @@ void RayTracing::convertPolyMapToVertices() {
 	}
 }
 
-
 void RayTracing::update(Vector2f mousePos, bool _isRestricted, Vector2f view, float viewAngle) {
 
 	isRestricted = _isRestricted;
@@ -499,12 +498,3 @@ void RayTracing::updateObstacles(Level *level) {
     convertTileMapToPolyMap(level);
     convertPolyMapToVertices();
 }
-
-/*void RayTracing::changeLightColor() {
-	if (lightColor == lightColorBlue)
-		lightColor = lightColorRed;
-	else
-		lightColor = lightColorBlue;
-}*/
-
-

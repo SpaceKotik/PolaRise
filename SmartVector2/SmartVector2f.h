@@ -7,6 +7,7 @@ class eVector2f : public sf::Vector2f {
 public:
     eVector2f();
     eVector2f(float, float);
+    eVector2f(Vector2f);
     ~eVector2f();
     eVector2f operator+(const Vector2i&) const;
     eVector2f& operator+=(const Vector2i&);
@@ -30,6 +31,7 @@ public:
     eVector2f& operator*=(float k);
     eVector2f operator/(float k);
     eVector2f& operator/=(float k);
+
 
     float len() const;
     float squareLen() const;

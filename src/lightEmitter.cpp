@@ -1,11 +1,6 @@
 #include <SFML/Graphics.hpp>
-#include <mutex>
-#include <thread>
-#include "tile.hpp"
+
 #include "rayTracing.hpp"
-#include "level.hpp"
-#include "hero.hpp"
-#include "dump.hpp"
 #include "../SmartVector2/SmartVector2f.h"
 #include "lightEmitter.h"
 
@@ -13,22 +8,26 @@ extern const float viewAngle;
 extern const Color lightColorBlue;
 extern const Color lightColorRed;
 
+#define DEFAULTEMITTER_POS eVector2f(-100, -100)
+#define DEFAULTEMITTER_VIEW eVector2f(-100, -100)
+#define DEFAULTEMITTER_LINEOFSIGHT 10
 
 Emitter::Emitter() {
-    position = Vector2f(100, 100);
-    view = Vector2f(100, 100);
+    position = DEFAULTEMITTER_POS;
+    view = DEFAULTEMITTER_VIEW;
     isRestricted = true;
-    lineOfSight = viewAngle;
+    lineOfSight = DEFAULTEMITTER_LINEOFSIGHT;
     color = lightColorRed;
 }
 
-Emitter::Emitter(eVector2f _position, eVector2f _view) {
+Emitter::Emitter(const eVector2f _position, const eVector2f _view, bool _updateOnDemand, Color _color) {
     position = _position;
     view = _view;
+
     isRestricted = true;
     lineOfSight = viewAngle;
-    //color = lightColorRed;
-    color = Color(80, 80, 230);
+    updateOnDemand = _updateOnDemand;
+    color = _color;
 }
 
 Emitter::~Emitter() {
@@ -39,10 +38,6 @@ void Emitter::updateLightMap(const RayTracing* _rayTracing) {
     rayTracing = *_rayTracing;
 }
 
-void Emitter::setColor(Color _color) {
-    color = _color;
-}
-
 void Emitter::setPosition(eVector2f pos) {
     position = pos;
 }
@@ -51,32 +46,27 @@ void Emitter::setView(eVector2f _view) {
     view = _view;
 }
 
+void Emitter::setColor(Color _color) {
+    color = _color;
+}
+
 void Emitter::setRestricted(bool _isRestricted) {
     isRestricted = _isRestricted;
 }
 
-void Emitter::setLineOfSight(float viewAngle) {
-    lineOfSight = viewAngle;
+bool Emitter::setLineOfSight(float _viewAngle) {
+    if (viewAngle < 0)
+        return false;
+    lineOfSight = _viewAngle;
+    return true;
 }
 
-void Emitter::setStates(Shader &shaderBlur, Shader &shaderShadow, BlendMode blendMode) {
-    //shaderBlur.setParameter("dir", dir);
-    //shaderBlur.setParameter("image", buffer);
-    states.shader = &shaderBlur;
-    //states.blendMode = BlendAdd;
+void Emitter::updateRayTracing(bool update) {
+    if (!updateOnDemand || update)
+        rayTracing.update(position, isRestricted, view, lineOfSight);
+
 }
 
-void Emitter::doRayTracing(RenderTexture *targetTex, std::mutex *rtLock) {
-
-    rayTracing.update(position, true, view, lineOfSight);
-    rtLock->lock();
-    targetTex->draw(rayTracing.createMesh(color), BlendAdd);
-    rtLock->unlock();
+VertexArray Emitter::createMesh() {
+    return rayTracing.createMesh(color);
 }
-
-void Emitter::draw(RenderTexture *targetTex, std::mutex *rtLock) {
-    std::thread thr1(&Emitter::doRayTracing, this, targetTex, rtLock);
-    thr1.join();
-    //doRayTracing(targetTex, rtLock);
-}
-

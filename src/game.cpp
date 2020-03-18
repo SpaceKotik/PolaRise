@@ -9,7 +9,6 @@
 
 #include "../SmartVector2/SmartVector2f.h"
 #include "game.hpp"
-#include "tile.hpp"
 #include "level.hpp"
 #include "rayTracing.hpp"
 
@@ -18,14 +17,13 @@ using namespace sf;
 #define NDEBUG true   //show rays, obstacles, etc
 #define UPDATESHADERS false //update changes in shaders in real time
 #define DOBLUR true
-#define DOSHADOW false
+#define DOSHADOW true
 #define DUMP false
 
 extern const int scale;
 extern const int field_x;
 extern const int field_y;
 
-//const float lightSourceSize = 0.5;
 extern const float heroRadius;
 extern const float heroAcceleration; 
 extern const float maxVelocity; 
@@ -34,8 +32,7 @@ extern const Color lightColorRed;
 extern const Color lightColorBlue;
 
 #define NO_INTERSECTION Vector2f(-10, -10)
-#define LIGHT_SOURCE_SCALE Vector2f(1.7, 1.7)
-#define BORDERS_VISIBILITY_SCALE Vector2f(0.3, 0.3)
+
 eVector2f view(10, 0);
 
 class FPScounter {
@@ -65,7 +62,7 @@ std::string FPScounter::update() {
         delayTimer.restart();
 
     }
-    return "FPS: " + std::to_string((int)fps);
+    return " FPS: " + std::to_string((int)fps);
 }
 
 Game::Game() {
@@ -95,18 +92,26 @@ Game::Game() {
     bufferSprite.setPosition(field_x*scale / 2.f, field_y*scale / 2.f);
 
 
-    if(!setShaders()) {
+    /*if(!setShaders()) {
         window.close();
-    }
+    }*/
 
     srand(time(NULL));
 
-    lightScene.setShaders(DOBLUR, DOSHADOW);
-    lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1));
-    lightScene.addEmitter(eVector2f(900, 100), eVector2f(-1, 1));
-    lightScene.updateObstacles(&level);
-    lightScene.updateEmittersRayTracing();
 
+    lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1), false);
+    lightScene.addEmitter(eVector2f(900, 100), eVector2f(-1, 1), false);
+    //lightScene.addEmitter(eVector2f(200, 100), eVector2f(-1, 1), false);
+    //lightScene.addEmitter(eVector2f(700, 100), eVector2f(-1, 1), false);
+
+    /*lightScene.addEmitter(eVector2f(200, 200), eVector2f(0,1), false);
+    lightScene.addEmitter(eVector2f(300, 200), eVector2f(0,1), false);
+    lightScene.addEmitter(eVector2f(400, 200), eVector2f(0,1), false);
+    lightScene.addEmitter(eVector2f(500, 200), eVector2f(0,1), false);*/
+
+    lightScene.updateEmittersRayTracing(&level);
+    //if(!lightScene.setShaders(DOBLUR, DOSHADOW))
+     //   window.close();
 
 
 }
@@ -120,7 +125,7 @@ void Game::run() {
     FPScounter fpsCounter;
 
     while(window.isOpen()) {
-        dump.add(fpsCounter.update());
+        window.setTitle("Polarise" + fpsCounter.update());
         input();
         logic();
         draw(level, rayTracing);
@@ -141,74 +146,20 @@ void Game::doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, floa
 }
 
 void Game::draw(Level level, RayTracing rayTracing) {
-    //load shaders every iteration to apply all changes in real time
 
-    if (UPDATESHADERS)
-        setShaders();
-
-    window.clear(backgorundColor);    
-
-
-    //process light sources in parallel
-    Vector2f normViewPerp;
-    normViewPerp.x = -hero.view.y/120;
-    normViewPerp.y = hero.view.x/120;
-
-
-    //view = (view - eVector2f(700, 200));
-    view.rotate(0.05);
+    window.clear(backgorundColor);
     bufferTex.clear(backgorundColor);
-    std::mutex block;
-    window.setActive(false);
-    //bufferTex.setActive(false);
-    std::thread thr1(&Game::doRayTracing, this, rayTracing,  hero.getPos(), (mousePos - hero.getPos()), hero.lineOfSight, lightColorBlue, &block);
-    /*std::thread thr2(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + hero.view + normViewPerp),  hero.view + normViewPerp,  hero.lineOfSight,lightColorBlue, &block);
-    std::thread thr3(&Game::doRayTracing, this, rayTracing,  (hero.getPos() + hero.view - normViewPerp),  hero.view - normViewPerp, hero.lineOfSight, lightColorBlue, &block);
-    std::thread thr4(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - hero.view + normViewPerp),  hero.view + normViewPerp, hero.lineOfSight, lightColorBlue, &block);
-    std::thread thr5(&Game::doRayTracing, this, rayTracing,  (hero.getPos() - hero.view - normViewPerp),  hero.view - normViewPerp, hero.lineOfSight, lightColorBlue, &block);
-     */
-    std::thread thr6(&Game::doRayTracing, this, rayTracing,  Vector2f(700, 200),  view, hero.lineOfSight/2, lightColorRed, &block);
-    std::thread thr7(&Game::doRayTracing, this, rayTracing,  Vector2f(200, 200),  view, hero.lineOfSight/2, lightColorRed, &block);
 
-    thr1.join();
-    /*thr2.join();
-    thr3.join();
-    thr4.join();
-    thr5.join();*/
-    thr6.join();
-    thr7.join();
-    //window.setActive(true);
-    bufferTex.setActive(true);
-    bufferTex.display();
-
-    //blur all light
-    for (int i = 0; i < 1; ++i) {
-
-        bufferTex.draw(bufferSprite, getStatesBlur(Vector2f(1, 0), bufferTex.getTexture()));
-        bufferTex.display();
-
-        bufferTex.draw(bufferSprite, getStatesBlur(Vector2f(0, 1), bufferTex.getTexture()));
-        bufferTex.display();
-
-        bufferTex.draw(bufferSprite, getStatesBlur(Vector2f(1, 1), bufferTex.getTexture()));
-        bufferTex.display();
-
-        bufferTex.draw(bufferSprite, getStatesBlur(Vector2f(1, -1), bufferTex.getTexture()));
-        bufferTex.display();
-    }
-
-    //make shadow
-    //bufferTex.setActive(true);
-    bufferTex.draw(bufferSprite, getStatesShadow(20000, 20000));
-    bufferTex.setSmooth(true);
-    bufferTex.display();
-
-    //draw to screen from buffer
-    //window.setActive(true);
-    window.draw(bufferSprite);
-
+    view.rotate(0.05);
 //////////////////////
     window.setActive(false);
+    lightScene.updateEmitter(0, eVector2f(hero.getPos()), hero.view, false);
+    lightScene.updateEmitter(1, eVector2f(Vector2f(1200, 900) - hero.getPos()), -hero.view, false);
+    //lightScene.updateEmitter(2, eVector2f(200, 100), view, false);
+    //lightScene.updateEmitter(3, eVector2f(1000, 100), view, false);
+    /*lightScene.updateEmitter(4, eVector2f(200, 200), view, false);
+    lightScene.updateEmitter(5, eVector2f(300, 300), view, false);
+    lightScene.updateEmitter(6, eVector2f(400, 400), view, false);*/
     lightScene.draw();
     Sprite tempSprite;
     tempSprite.setTexture(lightScene.getTexture());
@@ -217,8 +168,19 @@ void Game::draw(Level level, RayTracing rayTracing) {
     window.draw(tempSprite, BlendAdd);
 //////////////////////
 
+    //make shadow
+    /*bufferTex.clear();
+    bufferTex.draw(tempSprite);
+    //bufferTex.setActive(true);
+    bufferTex.draw(tempSprite, getStatesShadow(20000, 20000));
+    bufferTex.setSmooth(true);
+    bufferTex.display();
+    //draw to screen from buffer
+    window.draw(bufferSprite, BlendMultiply);*/
+
+
     //draw all tiles
-    RenderStates states = getStatesShadow(30000, 3000);
+    RenderStates states;// = getStatesShadow(30000, 3000);
     states.blendMode = BlendAdd;
     for (int i = 0; i < field_x*field_y; ++i) {
         if (level.getState() == Blue) {
@@ -229,20 +191,6 @@ void Game::draw(Level level, RayTracing rayTracing) {
         else if (level.getState() == Red) {
             if (level.getField()->tiles[i].isRed) {
                 window.draw(level.getField()->tiles[i].physForm, states);
-            }
-        }
-    }
-
-    //draw start and finish
-    for (int i = 0; i < field_x*field_y; ++i) {
-        if (level.getState() == Blue) {
-            if (level.getField()->tiles[i].typeBlue == 1 || level.getField()->tiles[i].typeBlue == 2) {
-                window.draw(level.getField()->tiles[i].physForm, BlendMultiply);
-            }
-        }
-        else if (level.getState() == Red) {
-            if (level.getField()->tiles[i].typeRed == 1 || level.getField()->tiles[i].typeRed == 2) {
-                window.draw(level.getField()->tiles[i].physForm, BlendMultiply);
             }
         }
     }
@@ -291,26 +239,6 @@ void Game::draw(Level level, RayTracing rayTracing) {
     window.display();    
 }
 
-bool Game::setShaders() {
-    if(DOSHADOW) {
-        if(!shaderShadow.loadFromFile("../shaders/shadow.frag", sf::Shader::Fragment)) {
-            return false;
-        }
-        shaderShadow.setParameter("frag_ScreenResolution", Vector2f(field_x*scale, field_y*scale));
-        shaderShadow.setParameter("frag_LightColor", Vector3f(255, 255, 255));
-    }
-
-    if(DOBLUR) {
-        if(!shaderBlur.loadFromFile("../shaders/blur.frag", sf::Shader::Fragment)) {
-            window.close();
-        }
-        shaderBlur.setParameter("resolution", sf::Vector2f(field_x*scale, field_y*scale));
-    }
-
-
-    return true;
-}
-
 //Note: param1 must be about 20000-30000 to make smooth light
 //      param2 is inverse to the size of the light circle
 //This shader uses kind of gaussian distribution function with different sigmas
@@ -320,9 +248,9 @@ RenderStates Game::getStatesShadow(float param1, float param2) {
     if (!DOSHADOW)
         return states;
 
-    shaderShadow.setParameter("frag_LightOrigin", hero.getPos());
-    shaderShadow.setParameter("frag_ShadowParam1", param1);
-    shaderShadow.setParameter("frag_ShadowParam2", param2);
+    shaderShadow.setUniform("frag_LightOrigin", hero.getPos());
+    shaderShadow.setUniform("frag_ShadowParam1", param1);
+    shaderShadow.setUniform("frag_ShadowParam2", param2);
     states.shader = &shaderShadow;
     
     return states;
@@ -334,8 +262,8 @@ RenderStates Game::getStatesBlur(Vector2f dir, Texture buffer) {
     if (!DOBLUR)
         return states;
 
-    shaderBlur.setParameter("dir", dir);
-    shaderBlur.setParameter("image", buffer);
+    shaderBlur.setUniform("dir", dir);
+    shaderBlur.setUniform("image", buffer);
     states.shader = &shaderBlur;
     
     return states;
@@ -370,8 +298,8 @@ MouseState Game::input() {
                         ///rayTracing.changeLightColor();
                         rayTracing.convertTileMapToPolyMap(&level);
                         rayTracing.convertPolyMapToVertices();
-                            lightScene.updateObstacles(&level);//////////
-                            lightScene.updateEmittersRayTracing();///////
+
+                            lightScene.updateEmittersRayTracing(&level);///////
 
                     }
                     else {
@@ -437,8 +365,7 @@ MouseState Game::input() {
                     level.addTile(mouseState.pos);
                     rayTracing.convertTileMapToPolyMap(&level);
                     rayTracing.convertPolyMapToVertices();
-                        lightScene.updateObstacles(&level);//////////
-                        lightScene.updateEmittersRayTracing();///////
+                        lightScene.updateEmittersRayTracing(&level);///////
         }
         if (Mouse::isButtonPressed(sf::Mouse::Right)) {
             mouseState.pos = (Vector2f)Mouse::getPosition(window);
@@ -446,8 +373,7 @@ MouseState Game::input() {
             level.removeTile(mouseState.pos);
             rayTracing.convertTileMapToPolyMap(&level);
             rayTracing.convertPolyMapToVertices();
-                lightScene.updateObstacles(&level);//////////
-                lightScene.updateEmittersRayTracing();///////
+                lightScene.updateEmittersRayTracing(&level);///////
         }
 
         if (Mouse::getPosition(window).x > window.getSize().x)
@@ -566,4 +492,24 @@ void Game::logic() {
     else {
         keys.isOnFinish = false;///!!!
     }
+}
+
+bool Game::setShaders() {
+    if(DOSHADOW) {
+        if(!shaderShadow.loadFromFile("../shaders/shadow.frag", sf::Shader::Fragment)) {
+            return false;
+        }
+        shaderShadow.setParameter("frag_ScreenResolution", Vector2f(field_x*scale, field_y*scale));
+        shaderShadow.setParameter("frag_LightColor", Vector3f(255, 255, 255));
+    }
+
+    if(DOBLUR) {
+        if(!shaderBlur.loadFromFile("../shaders/blur.frag", sf::Shader::Fragment)) {
+            window.close();
+        }
+        shaderBlur.setParameter("resolution", sf::Vector2f(field_x*scale, field_y*scale));
+    }
+
+
+    return true;
 }
