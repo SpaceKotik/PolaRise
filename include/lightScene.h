@@ -22,6 +22,7 @@ private:
     bool doShadow;          ///
 
     RenderTexture targetTex;///RenderTexture, where all lights are drawn to
+    RenderTexture bufferTex;///RenderTexture for temporal drawing to apply shadow shader
     void doRayTracing(Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock);  ///The function passed to thread in draw()
 public:
     LightScene();

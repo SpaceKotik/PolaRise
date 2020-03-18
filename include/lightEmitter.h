@@ -23,6 +23,7 @@ public:
     void updateLightMap(const RayTracing* _rayTracing); ///sets RayTracing equal to lightScene RayTracing (basically all obstacles)
 
     void setPosition(eVector2f);
+    Vector2f getPosition();
     void setView(eVector2f);
     void setColor(Color);
     void setRestricted(bool);

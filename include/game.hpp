@@ -63,9 +63,8 @@ public:
     void run();
     MouseState input();
     void update();
-    void draw(Level level, RayTracing rayTracing);
+    void draw();
     void logic();
-    void doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, float lineOfSight, Color, std::mutex *rtLock);
     bool setShaders();
     RenderStates getStatesShadow(float param1, float param2);
     RenderStates getStatesBlur(Vector2f dir, Texture buffer);

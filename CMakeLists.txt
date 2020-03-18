@@ -26,5 +26,5 @@ add_executable(PolaRise
         src/tile.cpp
         SmartVector2/SmartVector2f.cpp
         SmartVector2/SmartVector2f.h
-        Textures/lightMask.png src/lightEmitter.cpp include/lightEmitter.h include/lightScene.h src/lightScene.cpp)
+        Textures/lightMask.png src/lightEmitter.cpp include/lightEmitter.h include/lightScene.h src/lightScene.cpp include/consts.h)
 target_link_libraries(PolaRise sfml-graphics sfml-window sfml-system)

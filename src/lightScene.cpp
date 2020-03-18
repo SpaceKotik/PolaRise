@@ -19,6 +19,7 @@ LightScene::LightScene() {
     doShadow = true;
     setShaders(doBlur, doShadow);
     targetTex.create(field_x*scale, field_y*scale);
+    bufferTex.create(field_x*scale, field_y*scale);
     targetTex.setSmooth(true);
 }
 
@@ -89,15 +90,13 @@ bool LightScene::draw() {
 
     //targetTex.display();
 
-
+    Sprite bufferSprite;
+    RenderStates states;
+    bufferSprite.setTexture(targetTex.getTexture());
+    bufferSprite.setOrigin(field_x * scale / 2.f, field_y * scale / 2.f);
+    bufferSprite.setPosition(field_x * scale / 2.f, field_y * scale / 2.f);
     //blur all light
     if (doBlur) {
-        Sprite bufferSprite;
-        RenderStates states;
-        bufferSprite.setTexture(targetTex.getTexture());
-        bufferSprite.setOrigin(field_x * scale / 2.f, field_y * scale / 2.f);
-        bufferSprite.setPosition(field_x * scale / 2.f, field_y * scale / 2.f);
-
         shaderBlur.setUniform("image", targetTex.getTexture());
 
         for (int i = 0; i < 1; ++i) {
@@ -123,22 +122,13 @@ bool LightScene::draw() {
 
     ;
     //make shadow
-    if (!doShadow) {///
-        Sprite bufferSprite;
-        RenderStates states;
-        bufferSprite.setTexture(targetTex.getTexture());
-        bufferSprite.setOrigin(field_x * scale / 2.f, field_y * scale / 2.f);
-        bufferSprite.setPosition(field_x * scale / 2.f, field_y * scale / 2.f);
-
+    if (doShadow) {///
         states.blendMode = BlendMultiply;
-        shaderShadow.setUniform("frag_ScreenResolution", Vector2f(field_x*scale, field_y*scale));
-        shaderShadow.setUniform("frag_LightColor", Vector3f(255, 255, 255));
-        shaderShadow.setUniform("frag_LightOrigin", Vector2f(100, 100));
-        shaderShadow.setUniform("frag_ShadowParam1", 20000);
-        shaderShadow.setUniform("frag_ShadowParam2", 20000);
+        shaderShadow.setUniform("frag_LightOrigin", scene.at(0).getPosition());
+        shaderShadow.setUniform("frag_ShadowParam1", float(20000));
+        shaderShadow.setUniform("frag_ShadowParam2", float(20000));
         states.shader = &shaderShadow;
 
-        //targetTex.setActive(true);
         targetTex.draw(bufferSprite, states);
         targetTex.setSmooth(true);
         targetTex.display();

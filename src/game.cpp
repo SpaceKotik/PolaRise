@@ -17,7 +17,7 @@ using namespace sf;
 #define NDEBUG true   //show rays, obstacles, etc
 #define UPDATESHADERS false //update changes in shaders in real time
 #define DOBLUR true
-#define DOSHADOW true
+#define DOSHADOW false
 #define DUMP false
 
 extern const int scale;
@@ -75,7 +75,7 @@ Game::Game() {
     window.create(VideoMode(field_x*scale, (field_y)*scale), "PolaRise",
                   Style::Titlebar | Style::Close, settings);
     window.setKeyRepeatEnabled(false);
-    window.setFramerateLimit(120);
+    window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(true);
     window.setPosition(Vector2i(0, 0));
     window.setMouseCursorGrabbed(false);
@@ -91,18 +91,12 @@ Game::Game() {
     bufferSprite.setOrigin(field_x*scale / 2.f, field_y*scale / 2.f);
     bufferSprite.setPosition(field_x*scale / 2.f, field_y*scale / 2.f);
 
-
-    /*if(!setShaders()) {
-        window.close();
-    }*/
-
-    srand(time(NULL));
-
-
+    if(!lightScene.setShaders(DOBLUR, DOSHADOW))
+       window.close();
     lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1), false);
     lightScene.addEmitter(eVector2f(900, 100), eVector2f(-1, 1), false);
-    //lightScene.addEmitter(eVector2f(200, 100), eVector2f(-1, 1), false);
-    //lightScene.addEmitter(eVector2f(700, 100), eVector2f(-1, 1), false);
+    lightScene.addEmitter(eVector2f(200, 100), eVector2f(-1, 1), false);
+    lightScene.addEmitter(eVector2f(700, 100), eVector2f(-1, 1), false);
 
     /*lightScene.addEmitter(eVector2f(200, 200), eVector2f(0,1), false);
     lightScene.addEmitter(eVector2f(300, 200), eVector2f(0,1), false);
@@ -110,10 +104,6 @@ Game::Game() {
     lightScene.addEmitter(eVector2f(500, 200), eVector2f(0,1), false);*/
 
     lightScene.updateEmittersRayTracing(&level);
-    //if(!lightScene.setShaders(DOBLUR, DOSHADOW))
-     //   window.close();
-
-
 }
 
 RenderWindow* Game::getHandle() {   
@@ -128,24 +118,13 @@ void Game::run() {
         window.setTitle("Polarise" + fpsCounter.update());
         input();
         logic();
-        draw(level, rayTracing);
+        draw();
         if(DUMP)
             dump.display();
     }
 }
 
-void Game::doRayTracing(RayTracing rayTracing, Vector2f pos, Vector2f view, float lineOfSight, Color color, std::mutex *rtLock) {
-    
-    rayTracing.update(pos, true, view, lineOfSight);
-    rtLock->lock();
-    //window.setActive(true);
-    //bufferTex.setActive(true);
-    bufferTex.draw(rayTracing.createMesh(color), BlendAdd);
-    bufferTex.display();
-    rtLock->unlock();
-}
-
-void Game::draw(Level level, RayTracing rayTracing) {
+void Game::draw() {
 
     window.clear(backgorundColor);
     bufferTex.clear(backgorundColor);
@@ -155,8 +134,8 @@ void Game::draw(Level level, RayTracing rayTracing) {
     window.setActive(false);
     lightScene.updateEmitter(0, eVector2f(hero.getPos()), hero.view, false);
     lightScene.updateEmitter(1, eVector2f(Vector2f(1200, 900) - hero.getPos()), -hero.view, false);
-    //lightScene.updateEmitter(2, eVector2f(200, 100), view, false);
-    //lightScene.updateEmitter(3, eVector2f(1000, 100), view, false);
+    lightScene.updateEmitter(2, eVector2f(200, 100), view, false);
+    lightScene.updateEmitter(3, eVector2f(1000, 100), view, false);
     /*lightScene.updateEmitter(4, eVector2f(200, 200), view, false);
     lightScene.updateEmitter(5, eVector2f(300, 300), view, false);
     lightScene.updateEmitter(6, eVector2f(400, 400), view, false);*/
@@ -167,17 +146,6 @@ void Game::draw(Level level, RayTracing rayTracing) {
     tempSprite.setPosition(field_x*scale / 2.f, field_y*scale / 2.f);
     window.draw(tempSprite, BlendAdd);
 //////////////////////
-
-    //make shadow
-    /*bufferTex.clear();
-    bufferTex.draw(tempSprite);
-    //bufferTex.setActive(true);
-    bufferTex.draw(tempSprite, getStatesShadow(20000, 20000));
-    bufferTex.setSmooth(true);
-    bufferTex.display();
-    //draw to screen from buffer
-    window.draw(bufferSprite, BlendMultiply);*/
-
 
     //draw all tiles
     RenderStates states;// = getStatesShadow(30000, 3000);
@@ -232,11 +200,17 @@ void Game::draw(Level level, RayTracing rayTracing) {
 
     //draw player
     window.draw(*hero.getPhysForm());
+    window.display();
 
-
-
-
-    window.display();    
+    //make shadow
+    /*bufferTex.clear();
+    bufferTex.draw(tempSprite);
+    //bufferTex.setActive(true);
+    bufferTex.draw(tempSprite, getStatesShadow(20000, 20000));
+    bufferTex.setSmooth(true);
+    bufferTex.display();
+    //draw to screen from buffer
+    window.draw(bufferSprite, BlendMultiply);*/
 }
 
 //Note: param1 must be about 20000-30000 to make smooth light

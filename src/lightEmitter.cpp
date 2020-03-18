@@ -42,6 +42,10 @@ void Emitter::setPosition(eVector2f pos) {
     position = pos;
 }
 
+Vector2f Emitter::getPosition() {
+    return position;
+}
+
 void Emitter::setView(eVector2f _view) {
     view = _view;
 }
