@@ -7,9 +7,8 @@
 #include "level.hpp"
 
 
-extern const int scale;
-extern const int field_x;
-extern const int field_y;
+#include "consts.h"
+using namespace consts;
 
 #define DOWN 0
 #define LEFT 1
@@ -36,7 +35,7 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 	edges.clear();
 
 	//Set borders
-	Vector2f windowSize = Vector2f(field_x*scale, field_y*scale);
+	Vector2f windowSize = Vector2f(window_x, window_y);
 
 	Line newBorder;
 	newBorder.startCoord = Vector2f(0, 0);
@@ -215,52 +214,53 @@ void RayTracing::convertPolyMapToVertices() {
 	}
 }
 
-void RayTracing::update(Vector2f mousePos, bool _isRestricted, Vector2f view, float viewAngle) {
+///calculate intersections for current position and view
+void RayTracing::update(Vector2f pos, bool _isRestricted, Vector2f view, float viewAngle) {
 
 	isRestricted = _isRestricted;
 
 	raysVertex.clear();
 
-	//set raysVertex for main rays
+	///set raysVertex for main rays
 	for (int i = 0; i < vertices.size(); ++i) {
 		std::array<Vertex, 2> currRay;
-		currRay[0] = Vertex(mousePos, Color::Blue);
+		currRay[0] = Vertex(pos, Color::Blue);
 		currRay[1] = vertices.at(i);
 		raysVertex.push_back(currRay);
     }
 
 
-    //set raysVertex for assisting rays
+    ///set raysVertex for assisting rays
     for (int i = 0; i < vertices.size(); ++i) {
     	std::array<Vertex, 2> currRay;
-    	currRay[0] = Vertex(mousePos, Color::Blue);
+    	currRay[0] = Vertex(pos, Color::Blue);
 
     	Transform rotation1;
-    	rotation1.rotate(-angle, mousePos).scale(1000, 1000, mousePos.x, mousePos.y);
-    	//rotate
+    	rotation1.rotate(-angle, pos).scale(1000, 1000, pos.x, pos.y);
+    	///rotate
     	currRay[1] = Vertex(vertices[i], Color::Blue);
 
     	currRay[1].position = rotation1.transformPoint(currRay[1].position);
     	raysVertex.push_back(currRay);
 
     	Transform rotation2;
-    	rotation2.rotate(angle, mousePos).scale(1000, 1000, mousePos.x, mousePos.y);
-    	//rotate
+    	rotation2.rotate(angle, pos).scale(1000, 1000, pos.x, pos.y);
+    	///rotate
     	currRay[1] = Vertex(vertices[i], Color::Blue);
     	currRay[1].position = rotation2.transformPoint(currRay[1].position);
     	raysVertex.push_back(currRay);
     }
 
-    // making vector from player to it's view angle
+    ///making vector from player to it's view angle
 	std::array<Vertex, 2> viewVec;
-	viewVec[0] = mousePos;
-	viewVec[1] = mousePos + view;
+	viewVec[0] = pos;
+	viewVec[1] = pos + view;
 
-    // erasing all rays that are not in line of sight (lambda function as bool expression)
+    ///erasing all rays that are not in line of sight (lambda function as bool expression)
 	if(isRestricted) {
         raysVertex.erase(std::remove_if(raysVertex.begin(), raysVertex.end(),
                                         [viewVec, viewAngle](std::array<Vertex, 2> const &a) -> bool {
-                                            // representing current ray and view vector as lines and checking if current ray is in line of sight
+                                            ///representing current ray and view vector as lines and checking if current ray is in line of sight
                                             Line curLine, viewLine;
 
                                             curLine.startCoord = a[0].position;
@@ -288,27 +288,26 @@ void RayTracing::update(Vector2f mousePos, bool _isRestricted, Vector2f view, fl
                                         }), raysVertex.end());
     }
 
-	// adding restricting rays
+	///adding restricting rays
 	Transform rotationLeft;
-	rotationLeft.rotate(-viewAngle/2, mousePos).scale(10000, 10000, mousePos.x, mousePos.y);
+	rotationLeft.rotate(-viewAngle/2, pos).scale(10000, 10000, pos.x, pos.y);
 	std::array<Vertex, 2> viewRayLeft;
-	viewRayLeft[0] = mousePos;
-	viewRayLeft[1] = rotationLeft.transformPoint(mousePos + view);
+	viewRayLeft[0] = pos;
+	viewRayLeft[1] = rotationLeft.transformPoint(pos + view);
 	raysVertex.push_back(viewRayLeft);
-	
 
 	Transform rotationRight;
-    rotationRight.rotate(viewAngle/2, mousePos).scale(10000, 10000, mousePos.x, mousePos.y);
+    rotationRight.rotate(viewAngle/2, pos).scale(10000, 10000, pos.x, pos.y);
     std::array<Vertex, 2> viewRayRight;
-	viewRayRight[0] = mousePos;
-	viewRayRight[1] = rotationRight.transformPoint(mousePos + view);
+	viewRayRight[0] = pos;
+	viewRayRight[1] = rotationRight.transformPoint(pos + view);
 	raysVertex.push_back(viewRayRight);
 
 
-	//calculating intersections before sorting
+	///calculating intersections before sorting
 	calculateIntersections();
 	
-    //Sorting array of rays to make light mesh;
+    ///Sorting array of rays to make light mesh;
     if (isRestricted) {
         std::sort(raysVertex.begin(), raysVertex.end(),
                   [viewRayRight](std::array<Vertex, 2> const &a, std::array<Vertex, 2> const &b) -> bool {
@@ -349,20 +348,17 @@ void RayTracing::update(Vector2f mousePos, bool _isRestricted, Vector2f view, fl
             aLine.dirX = a[1].position.x - a[0].position.x;
             aLine.dirY = a[1].position.y - a[0].position.y;
 
-
             bLine.startCoord = b[0].position;
             bLine.dirX = b[1].position.x - b[0].position.x;
             bLine.dirY = b[1].position.y - b[0].position.y;
 
-
-            if ((atan2(aLine.dirY, aLine.dirX) - atan2(bLine.dirY, bLine.dirX)) < 0) {
+            if ((atan2(aLine.dirY, aLine.dirX) - atan2(bLine.dirY, bLine.dirX)) < 0)
                 return true;
-            }
-            else {
+            else
                 return false;
-            }
         });
     }
+    ///may be the way to show walls better
 	/*for (auto &e : raysVertex) {
         Transform transform;
         transform.scale(1.1, 1.1, mousePos.x, mousePos.y);
@@ -371,11 +367,9 @@ void RayTracing::update(Vector2f mousePos, bool _isRestricted, Vector2f view, fl
 
 }
 
-float getLen(Line line) {
-	return sqrt((line.startCoord.x - line.dirX)*(line.startCoord.x - line.dirX) + (line.startCoord.y - line.dirY)*(line.startCoord.y - line.dirY));
-}
-
 Line RayTracing::getPartIntersection(Line ray, Line line) {
+    ///Seems like it causes weird glitches
+    /*
     // Are they parallel? If so, no intersect
     float r_mag = sqrt(ray.dirX*ray.dirX+ray.dirY*ray.dirY);
     float s_mag = sqrt(line.dirX*line.dirX+line.dirY*line.dirY);
@@ -383,7 +377,6 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
     float distance1 = sqrt ((line.startCoord.x-ray.startCoord.x)*(line.startCoord.x-ray.startCoord.x) + (line.startCoord.y-ray.startCoord.y)*(line.startCoord.y-ray.startCoord.y));
     float distance2 = sqrt ((line.startCoord.x + line.dirX-ray.startCoord.x)*(line.startCoord.x + line.dirX-ray.startCoord.x)
      + (line.startCoord.y + line.dirY-ray.startCoord.y)*(line.startCoord.y + line.dirY-ray.startCoord.y));
-
 
 
 
@@ -414,30 +407,30 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
        // tempLine.param = 100000;
         return tempLine;
 	}
+    */
+    ///
 
-    // SOLVE FOR T1 & T2
-    // ray.startCoord.x+ray.dirX*T1 = s_px+line.startCoord.x*T2 && ray.startCoord.y+ray.dirY*T1 = line.startCoord.y+line.startCoord.y*T2
-    // ==> T1 = (s_px+line.startCoord.x*T2-ray.startCoord.x)/ray.dirX = (line.startCoord.y+line.startCoord.y*T2-ray.startCoord.y)/ray.dirY
-    // ==> s_px*ray.dirY + line.startCoord.x*T2*ray.dirY - ray.startCoord.x*ray.dirY = line.startCoord.y*ray.dirX + line.startCoord.y*T2*ray.dirX - ray.startCoord.y*ray.dirX
-    // ==> T2 = (ray.dirX*(line.startCoord.y-ray.startCoord.y) + ray.dirY*(ray.startCoord.x-s_px))/(line.startCoord.x*ray.dirY - line.startCoord.y*ray.dirX)
+    /// SOLVE FOR T1 & T2
+    /// ray.startCoord.x+ray.dirX*T1 = s_px+line.startCoord.x*T2 && ray.startCoord.y+ray.dirY*T1 = line.startCoord.y+line.startCoord.y*T2
+    /// ==> T1 = (s_px+line.startCoord.x*T2-ray.startCoord.x)/ray.dirX = (line.startCoord.y+line.startCoord.y*T2-ray.startCoord.y)/ray.dirY
+    /// ==> s_px*ray.dirY + line.startCoord.x*T2*ray.dirY - ray.startCoord.x*ray.dirY = line.startCoord.y*ray.dirX + line.startCoord.y*T2*ray.dirX - ray.startCoord.y*ray.dirX
+    /// ==> T2 = (ray.dirX*(line.startCoord.y-ray.startCoord.y) + ray.dirY*(ray.startCoord.x-s_px))/(line.startCoord.x*ray.dirY - line.startCoord.y*ray.dirX)
 	float T2 = (ray.dirX*(line.startCoord.y-ray.startCoord.y) + ray.dirY*(ray.startCoord.x-line.startCoord.x))/(line.dirX*ray.dirY - line.dirY*ray.dirX);
     float T1 = (line.startCoord.x+line.dirX*T2-ray.startCoord.x)/ray.dirX;
-    // Must be within parametic whatevers for RAY/SEGMENT
+    /// Must be within parametic whatevers for RAY/SEGMENT
     if(T1<0) {
         Line tempLine;
         tempLine.startCoord = NO_INTERSECTION;
-        //tempLine.param = 100000;
         return tempLine;
     }
     if(T2<-0.0 || T2>1.0) {
         Line tempLine;
         tempLine.startCoord = NO_INTERSECTION;
-        //tempLine.param = 100000;
         return tempLine;
     }
         
 
-    // Return the POINT OF INTERSECTION
+    /// Return the POINT OF INTERSECTION
     Line tempLine;
     tempLine.startCoord = Vector2f(ray.startCoord.x+ray.dirX*T1, ray.startCoord.y+ray.dirY*T1);
     tempLine.param = T1;
@@ -445,8 +438,8 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
 }
 
 VertexArray RayTracing::createMesh(Color color) {
-	//make orderArray
-	float meshSize;
+	///make orderArray
+	int meshSize;
 	if (isRestricted)
 		meshSize = raysVertex.size() + 1;
 	else 
@@ -454,16 +447,16 @@ VertexArray RayTracing::createMesh(Color color) {
 
 	VertexArray lightMesh(TriangleFan, meshSize);
 
-	//add central point
+	///add central point
 	lightMesh[0].position = raysVertex[0][0].position; 
 	lightMesh[0].color = color;
-	//add points clockwise/counter-clockwise
+	///add points clockwise/counter-clockwise
 	for (int i = 1; i < raysVertex.size() + 1; ++i) {
 		(lightMesh)[i].position = raysVertex[i-1][1].position;
 		(lightMesh)[i].color = color;
 
 	}
-	//add closing vertex if not restricted
+	///add closing vertex if not restricted
 	if (!isRestricted) {
 		(lightMesh)[raysVertex.size() + 1].position = raysVertex[0][1].position;
 		(lightMesh)[raysVertex.size() + 1].color = color;
@@ -473,15 +466,16 @@ VertexArray RayTracing::createMesh(Color color) {
 }
 
 void RayTracing::calculateIntersections() {
+    ///for each ray
 	for (auto &e : raysVertex) {
 		Line prevIntersection;
-        prevIntersection.param = 1; //set to -10 if some problems with rays length occur
+        prevIntersection.param = 1; ///set to -10 if some problems with rays length occur
         Line ray;
 		ray.startCoord = e[0].position;
 		ray.dirX = e[1].position.x - ray.startCoord.x;
 		ray.dirY = e[1].position.y - ray.startCoord.y;
+		///for each edge
 		for (auto k : edges) {
-
 			Line tempLine = getPartIntersection(ray, k);
 	    	
 			if (tempLine.startCoord.x != -10 && tempLine.startCoord.y != -10) { 
@@ -494,6 +488,7 @@ void RayTracing::calculateIntersections() {
 	}
 }
 
+///set new obstacles if level changed
 void RayTracing::updateObstacles(Level *level) {
     convertTileMapToPolyMap(level);
     convertPolyMapToVertices();

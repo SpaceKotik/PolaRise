@@ -59,13 +59,13 @@ public:
 //  ~Game();
     RenderWindow* getHandle();
 
-    void setup();
+    //void setup();
     void run();
     MouseState input();
-    void update();
+   //void update();
     void draw();
     void logic();
-    bool setShaders();
-    RenderStates getStatesShadow(float param1, float param2);
-    RenderStates getStatesBlur(Vector2f dir, Texture buffer);
+    //bool setShaders();
+    //RenderStates getStatesShadow(float param1, float param2);
+    //RenderStates getStatesBlur(Vector2f dir, Texture buffer);
 };

@@ -23,7 +23,7 @@ private:
 
     RenderTexture targetTex;///RenderTexture, where all lights are drawn to
     RenderTexture bufferTex;///RenderTexture for temporal drawing to apply shadow shader
-    void doRayTracing(Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock);  ///The function passed to thread in draw()
+    void doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock);  ///The function passed to thread in draw()
 public:
     LightScene();
     ~LightScene();
@@ -31,7 +31,8 @@ public:
     bool setShaders(bool doBlur, bool doShadow);
     bool updateEmitter(int i, eVector2f pos, eVector2f _view, bool updateObstacles = false);
     void updateEmittersRayTracing(Level *level);     ///Updates obstacles in lightScene rayTracing, then applied to all Emitters
-    void addEmitter(eVector2f _position, eVector2f _view, bool updateOnDemand = true);
+    void addEmitter(eVector2f _position, eVector2f _view, bool _isRestricted = true, bool updateOnDemand = true);
+    void deleteEmitter(eVector2f coord);
 
     bool draw();    ///Draws all Emitters to targetTex
 

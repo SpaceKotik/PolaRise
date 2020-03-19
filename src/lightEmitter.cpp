@@ -4,9 +4,8 @@
 #include "../SmartVector2/SmartVector2f.h"
 #include "lightEmitter.h"
 
-extern const float viewAngle;
-extern const Color lightColorBlue;
-extern const Color lightColorRed;
+#include "consts.h"
+using namespace consts;
 
 #define DEFAULTEMITTER_POS eVector2f(-100, -100)
 #define DEFAULTEMITTER_VIEW eVector2f(-100, -100)
@@ -20,11 +19,11 @@ Emitter::Emitter() {
     color = lightColorRed;
 }
 
-Emitter::Emitter(const eVector2f _position, const eVector2f _view, bool _updateOnDemand, Color _color) {
+Emitter::Emitter(const eVector2f _position, const eVector2f _view, bool _updateOnDemand, Color _color, bool _isRestricted) {
     position = _position;
     view = _view;
 
-    isRestricted = true;
+    isRestricted = _isRestricted;
     lineOfSight = viewAngle;
     updateOnDemand = _updateOnDemand;
     color = _color;
@@ -42,7 +41,7 @@ void Emitter::setPosition(eVector2f pos) {
     position = pos;
 }
 
-Vector2f Emitter::getPosition() {
+Vector2f Emitter::getPosition() const {
     return position;
 }
 
@@ -65,6 +64,7 @@ bool Emitter::setLineOfSight(float _viewAngle) {
     return true;
 }
 
+///calculcates new VertexArray only if is needed
 void Emitter::updateRayTracing(bool update) {
     if (!updateOnDemand || update)
         rayTracing.update(position, isRestricted, view, lineOfSight);

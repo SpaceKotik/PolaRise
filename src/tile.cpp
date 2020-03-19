@@ -5,16 +5,13 @@
 #include "game.hpp"
 #include "tile.hpp"
 
-
-extern const int scale;
-extern const int field_x;
-extern const int field_y;
-extern const Color tileDefaultColor;
+#include "consts.h"
 
 using namespace sf;
+using namespace consts;
 
 Tile::Tile() {
-	physForm.setPosition(field_x*scale/2.f, field_y*scale/2.f);
+	physForm.setPosition(window_x/2.f, window_y/2.f);
 	physForm.setSize(Vector2f(scale*6, scale*3));
 	physForm.setOrigin(Vector2f(physForm.getSize().x/2.f, physForm.getSize().y/2.f));
 	physForm.setFillColor(Color::White);

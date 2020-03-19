@@ -7,9 +7,8 @@
 #include <iostream>
 #include <stdlib.h>
 
-extern const int scale;
-extern const int field_x;
-extern const int field_y;
+#include "consts.h"
+using namespace consts;
 
 using namespace sf;
 
@@ -24,7 +23,7 @@ Level::Level() {
 void Level::setField() {
 	
 	loadFromFile();
-
+    /*
 	Vector2f pos = Vector2f (100, 100);
 	pos = Vector2f (((int)pos.x/(int)scale)*scale,((int)pos.y/(int)scale)*scale);
 	//field.tiles.push_back(Tile(pos, false, false));
@@ -51,10 +50,10 @@ void Level::setField() {
 	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidRed = false;
 	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidBlue = false;
 	tileCount ++;
-	}
+	}*/
 
-	loadToFile();
-	loadFromFile();
+	//loadToFile();
+	//loadFromFile();
 }
 
 Field* Level::getField() {

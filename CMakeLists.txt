@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(PolaRise)
 
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 SET(PLATFORM_SPECIFIC_LIBS "-lpthread")
 find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 

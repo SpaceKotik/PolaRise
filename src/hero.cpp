@@ -4,13 +4,8 @@
 #include "hero.hpp"
 #include <iostream>
 #include <stdlib.h>
-
-extern const int scale;
-extern const int field_x;
-extern const int field_y;
-extern const float heroRadius;
-extern const Color heroColor;
-extern const float viewAngle;
+#include "consts.h"
+using namespace consts;
 
 
 Hero::Hero() {
