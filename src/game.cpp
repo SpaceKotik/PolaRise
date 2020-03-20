@@ -1,8 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <fstream>
-#include <thread>
-#include <mutex>
+s#include <mutex>
 #include <chrono>
 #include <math.h>
 #include <unistd.h>
