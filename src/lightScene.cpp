@@ -35,7 +35,7 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
     shaderShadow.setUniform("frag_LightOrigin", scene.at(i).getPosition());
     shaderShadow.setUniform("frag_ShadowParam1", float(20000));
     shaderShadow.setUniform("frag_ShadowParam2", float(20000));
-    shaderShadow.setUniform("frag_LightColor", Vector3f(80, 80, 230));
+    shaderShadow.setUniform("frag_LightColor", Vector3f(180, 80, 230));
     //shaderShadow.setUniform("frag_LightColor", Vector3f(250, 245, 245));
     states.shader = &shaderShadow;
     }
@@ -90,7 +90,7 @@ void LightScene::addEmitter(eVector2f _position, eVector2f _view, bool _isRestri
 
 void LightScene::deleteEmitter(eVector2f coord) {
 
-        scene.erase(std::remove_if(scene.begin(), scene.end(), [coord](Emitter const &emitter)-> bool {
+        scene.erase(std::remove_if(scene.begin() + 1, scene.end(), [coord](Emitter const &emitter)-> bool {
             eVector2f diff = emitter.getPosition() - coord;
             if (diff.len() < 50)
                 return true;

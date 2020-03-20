@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
-s#include <mutex>
+#include <mutex>
 #include <chrono>
 #include <math.h>
 #include <unistd.h>
@@ -15,10 +15,12 @@ using namespace sf;
 using namespace consts;
 
 //#define NDEBUG true         ///show rays, obstacles, etc
-#define UPDATESHADERS false ///update changes in shaders in real time
-#define DOBLUR false
+//#define UPDATESHADERS false ///update changes in shaders in real time
+//#define DUMP false
+
+#define DOBLUR true
 #define DOSHADOW true
-#define DUMP false
+
 
 #define NO_INTERSECTION Vector2f(-10, -10)
 
@@ -26,19 +28,11 @@ eVector2f view(10, 0);
 
 class FPScounter {
     public:
-        //FPSCounter();
         std::string update();
-        //std::string draw();
-
     private:
-        //sf::Text text;
-        //sf::Font font;
-
         sf::Clock delayTimer;
         sf::Clock fpsTimer;
-
         float fps = 0;
-
         int frameCount = 0;
 };
 
@@ -71,8 +65,6 @@ Game::Game() {
 
     level.setField();
 
-    //updateObstacles(&level)
-
     bufferTex.create(window_x, window_y);
     bufferTex.setSmooth(true);
     bufferSprite.setTexture(bufferTex.getTexture());
@@ -104,8 +96,6 @@ void Game::run() {
         input();
         logic();
         draw();
-        if(DUMP)
-            dump.display();
     }
 }
 
@@ -131,15 +121,16 @@ void Game::draw() {
 //////////////////////
 
     ///pixelate everyrhing
-    if(!shaderShadow.loadFromFile("../shaders/pixelate.frag", sf::Shader::Fragment)) {
-        window.close();
+    if (true) {
+        if (!shaderShadow.loadFromFile("../shaders/pixelate.frag", sf::Shader::Fragment)) {
+            window.close();
+        }
+        RenderStates states;
+        shaderShadow.setUniform("image", lightScene.getTexture());
+        states.blendMode = BlendNone;
+        states.shader = &shaderShadow;
+        window.draw(tempSprite, states);
     }
-    RenderStates states;
-    shaderShadow.setUniform("image", lightScene.getTexture());
-    states.blendMode = BlendNone;
-    states.shader = &shaderShadow;
-    window.draw(tempSprite, states);
-
 
     ///draw all tiles
     for (int i = 0; i < field_x*field_y; ++i) {
@@ -334,7 +325,6 @@ void Game::logic() {
         hero.velocity.y -= heroAcceleration;
     if (keys.down == true) 
         hero.velocity.y += heroAcceleration;
-
     
 
     //process right moving if player moves right
