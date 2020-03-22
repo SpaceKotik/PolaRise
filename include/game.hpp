@@ -5,7 +5,7 @@
 #include "tile.hpp"
 #include "rayTracing.hpp"
 #include "level.hpp"
-#include "hero.hpp"
+#include "player.hpp"
 #include "dump.hpp"
 #include "lightScene.h"
 
@@ -31,9 +31,9 @@ class Game {
 private:
     GameState gameState;
     RenderWindow window;
-    Hero hero;
-    Level level;
 
+    Level level;
+    Player player;
 
     LightScene lightScene;
 

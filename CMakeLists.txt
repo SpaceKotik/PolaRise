@@ -12,7 +12,7 @@ include_directories(include)
 add_executable(PolaRise
         include/dump.hpp
         include/game.hpp
-        include/hero.hpp
+        include/player.hpp
         src/level.cpp
         include/level.hpp
         include/rayTracing.hpp
@@ -20,7 +20,7 @@ add_executable(PolaRise
         src/consts.cpp
         src/dump.cpp
         src/game.cpp
-        src/hero.cpp
+        src/player.cpp
         src/main.cpp
         src/rayTracing.cpp
         src/tile.cpp

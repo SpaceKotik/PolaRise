@@ -1,19 +1,42 @@
 #include "playerState.h"
+#include "player.hpp"
+#include <iostream>
 
-void StandState::input(Hero &player, Input input) {
+class StandState;
+class OnAirState;
 
-}
-
-void StandState::update(Hero &player) {
-
-}
-
-void OnAirState::input(Hero &player, Input input) {
+StandState::StandState() {
 
 }
 
-void OnAirState::update(Hero &player) {
+PlayerState* StandState::input(Player &player, Keyboard::Key input, TypeInput typeInput) {
+    if(input == Keyboard::Key::Space && typeInput == Pressed) {
+        return new OnAirState();
+    }
+    else
+        return nullptr;
+}
+
+PlayerState* StandState::update(Player &player) {
+    return nullptr;
+}
+
+OnAirState::OnAirState() {
 
 }
+
+PlayerState* OnAirState::input(Player &player, Keyboard::Key input, TypeInput typeInput) {
+    return nullptr;
+    if(input == Keyboard::Key::Space && typeInput == Pressed) {
+        return new OnAirState();
+    }
+    else
+        return nullptr;
+}
+
+PlayerState* OnAirState::update(Player &player) {
+    return nullptr;
+}
+
 
 

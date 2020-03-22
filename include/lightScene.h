@@ -7,7 +7,7 @@
 #include "rayTracing.hpp"
 #include "lightEmitter.h"
 #include "level.hpp"
-#include "hero.hpp"
+#include "player.hpp"
 #include "dump.hpp"
 #include "../SmartVector2/SmartVector2f.h"
 

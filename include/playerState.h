@@ -1,27 +1,38 @@
 #pragma once
 
-#include "hero.hpp"
+#include "player.hpp"
 
-enum Input {UP, DOWN, LEFT, RIGHT, SPACE};
+
+//enum Input {UP, DOWN, LEFT, RIGHT, SPACE};
+
+
+class StandState;
+class OnAirState;
 
 
 class PlayerState {
 public:
-    //virtual ~PlayerState();
-    virtual void input(Hero& player, Input input) = 0;
-    virtual void update(Hero& player) = 0;
+    static StandState standing;
+    static OnAirState onAir;
+
+    virtual ~PlayerState() {};
+    virtual PlayerState* input(Player& player, Keyboard::Key input, TypeInput typeInput) = 0;
+    virtual PlayerState* update(Player& player) = 0;
+
 };
 
 class StandState : public PlayerState {
 public:
     StandState();
-    void input(Hero& player, Input input) override;
-    void update(Hero& player) override;
+    PlayerState* input(Player& player, Keyboard::Key input, TypeInput typeInput) override;
+    PlayerState* update(Player& player) override;
 };
 
 class OnAirState : public PlayerState {
+private:
+    bool spacePressed = false;
 public:
     OnAirState();
-    void input(Hero& player, Input input) override;
-    void update(Hero& player) override;
+    PlayerState* input(Player& player, Keyboard::Key input, TypeInput typeInput) override;
+    PlayerState* update(Player& player) override;
 };
