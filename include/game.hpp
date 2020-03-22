@@ -13,12 +13,6 @@ using namespace sf;
 
 enum GameState {Menu, Menu_2, Gameplay, Leaderboard};
 
-struct MouseState{
-    Vector2f pos;
-    bool RightButtonPressed = false;
-    bool LeftButtonPressed = false;
-};
-
 
 struct States {
     bool right = 0;
@@ -36,11 +30,8 @@ struct States {
 class Game {
 private:
     GameState gameState;
-    Event event;
     RenderWindow window;
-    Vector2f mousePos;
     Hero hero;
-    RayTracing rayTracing;
     Level level;
 
 
@@ -61,7 +52,7 @@ public:
 
     //void setup();
     void run();
-    MouseState input();
+    void input();
    //void update();
     void draw();
     void logic();

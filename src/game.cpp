@@ -1,14 +1,11 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <mutex>
-#include <chrono>
 #include <math.h>
-#include <unistd.h>
 
 #include "../SmartVector2/SmartVector2f.h"
 #include "game.hpp"
 #include "level.hpp"
-#include "rayTracing.hpp"
 #include "consts.h"
 
 using namespace sf;
@@ -21,10 +18,8 @@ using namespace consts;
 #define DOBLUR true
 #define DOSHADOW true
 
-
 #define NO_INTERSECTION Vector2f(-10, -10)
 
-eVector2f view(10, 0);
 
 class FPScounter {
     public:
@@ -92,7 +87,7 @@ void Game::run() {
     FPScounter fpsCounter;
 
     while(window.isOpen()) {
-        window.setTitle("Polarise" + fpsCounter.update());
+        window.setTitle("PolaRise" + fpsCounter.update());
         input();
         logic();
         draw();
@@ -104,13 +99,9 @@ void Game::draw() {
     window.clear(backgroundColor);
     bufferTex.clear(backgroundColor);
 
-
-    view.rotate(0.05);
 //////////////////////
     window.setActive(false);
     lightScene.updateEmitter(0, eVector2f(hero.getPos()), hero.view, false);
-    //lightScene.updateEmitter(1, eVector2f(Vector2f(900, 100)), eVector2f(1, 1), false);
-    //lightScene.updateEmitter(2, eVector2f(600, 600), view, true);
 
     lightScene.draw();
     Sprite tempSprite;
@@ -121,7 +112,7 @@ void Game::draw() {
 //////////////////////
 
     ///pixelate everyrhing
-    if (true) {
+    if (!true) {
         if (!shaderShadow.loadFromFile("../shaders/pixelate.frag", sf::Shader::Fragment)) {
             window.close();
         }
@@ -190,151 +181,115 @@ void Game::draw() {
 
 }
 
-MouseState Game::input() {
-    MouseState mouseState;
-    mouseState.pos = NO_INTERSECTION;
-        
-        Vector2f desPos;
-        Event event;
+void Game::input() {
+    Vector2f mouseState;
+    mouseState = (Vector2f)Mouse::getPosition(window);
 
-        while (window.pollEvent(event)) {
+    Event event;
+    while (window.pollEvent(event)) {
 
-            switch (event.type) {
-            case Event::Closed:
-                window.close();
-                break;
-
-            case Event::MouseButtonPressed:
-                
-                break;
-            case Event::KeyPressed:             
-                //if(Keyboard::isKeyPressed(Keyboard::Space)) {
-                if(event.key.code == Keyboard::Space) {
-
-                    level.changeState();
-
-                    if (!level.isOnTile(hero.getPos() + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(hero.getPos() + Vector2f(heroRadius-.1, -heroRadius+.1))
-                        && !level.isOnTile(hero.getPos() + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(hero.getPos() + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
-
-                        ///rayTracing.changeLightColor();
-                        //updateObstacles(&level);
-
-                            lightScene.updateEmittersRayTracing(&level);///////
-                    }
-                    else {
-                        level.changeState();
-                    }
-                    
-                }
-
-                if(event.key.code == Keyboard::LShift) {
-                    lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(1, 1), false, true);
-                    lightScene.updateEmittersRayTracing(&level);
-                }
-                if(event.key.code == Keyboard::LControl) {
-                    lightScene.deleteEmitter(Vector2f(Vector2f(Mouse::getPosition(window))));
-                }
-
-                if(event.key.code == Keyboard::D) {
-                    keys.right = true;
-                }
-
-                if(event.key.code == Keyboard::A) {
-                    keys.left = true;
-                }
-
-                if(event.key.code == Keyboard::W) {
-                    keys.up = true;
-                }
-
-                if(event.key.code == Keyboard::S) {
-                    keys.down= true;
-                }
-                
-                break;
-
-            case Event::KeyReleased:
-                 if(event.key.code == Keyboard::D) {
-                    keys.right = false;
-                }
-
-                if(event.key.code == Keyboard::A) {
-                    keys.left = false;
-                }
-
-                if(event.key.code == Keyboard::W) {
-                    keys.up = false;
-                }
-
-                if(event.key.code == Keyboard::S) {
-                    keys.down= false;
-                }
-
-            default:
-                break;                        
-            }
-        }
-
-        if (Keyboard::isKeyPressed(Keyboard::Escape)) {
+        switch (event.type) {
+        case Event::Closed:
             window.close();
-        }
+            break;
 
+        case Event::MouseButtonPressed:
+            if (event.mouseButton.button == Mouse::Left) {
 
-        Vector2i mousePosition = Mouse::getPosition(window);
-        mousePos = (Vector2f)Mouse::getPosition(window);
+            }
+            break;
 
-        if (mousePosition.x < 0 || mousePosition.x > window.getSize().x || mousePosition.y < 0 || mousePosition.y > window.getSize().y)
-            return mouseState;
+        case Event::KeyPressed:
+            //if(Keyboard::isKeyPressed(Keyboard::Space)) {
+            if(event.key.code == Keyboard::Space) {
 
-        if (Mouse::isButtonPressed(sf::Mouse::Left)) {
-                    mouseState.pos = (Vector2f)Mouse::getPosition(window);
-                    mouseState.LeftButtonPressed = true;
-                    level.addTile(mouseState.pos);
-                    //updateObstacles(&level);
+                level.changeState();
+                if (!level.isOnTile(hero.getPos() + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(hero.getPos() + Vector2f(heroRadius-.1, -heroRadius+.1))
+                    && !level.isOnTile(hero.getPos() + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(hero.getPos() + Vector2f(-heroRadius+.1, -heroRadius+.1))) {
                         lightScene.updateEmittersRayTracing(&level);///////
+                }
+                else {
+                    level.changeState();
+                }
+
+            }
+            if(event.key.code == Keyboard::LShift) {
+                lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(1, 1), false, true);
+                lightScene.updateEmittersRayTracing(&level);
+            }
+            if(event.key.code == Keyboard::LControl) {
+                lightScene.deleteEmitter(Vector2f(Vector2f(Mouse::getPosition(window))));
+            }
+
+            if(event.key.code == Keyboard::D) {
+                keys.right = true;
+            }
+            if(event.key.code == Keyboard::A) {
+                keys.left = true;
+            }
+            if(event.key.code == Keyboard::W) {
+                keys.up = true;
+            }
+            if(event.key.code == Keyboard::S) {
+                keys.down= true;
+            }
+
+            if(event.key.code == Keyboard::Escape) {
+                window.close();
+            }
+            break;
+
+        case Event::KeyReleased:
+            if(event.key.code == Keyboard::D) {
+                keys.right = false;
+            }
+            if(event.key.code == Keyboard::A) {
+                keys.left = false;
+            }
+            if(event.key.code == Keyboard::W) {
+                keys.up = false;
+            }
+            if(event.key.code == Keyboard::S) {
+                keys.down= false;
+            }
+
+        default:
+            break;
         }
-        if (Mouse::isButtonPressed(sf::Mouse::Right)) {
-            mouseState.pos = (Vector2f)Mouse::getPosition(window);
-            mouseState.RightButtonPressed = true;
-            level.removeTile(mouseState.pos);
-            //updateObstacles(&level);
+    }
+
+    if (Mouse::isButtonPressed(sf::Mouse::Left)) {
+                level.addTile(mouseState);
                 lightScene.updateEmittersRayTracing(&level);///////
-        }
-
-        if (Mouse::getPosition(window).x > window.getSize().x)
-            mouseState.pos.x = window.getSize().x-2;
-        if (Mouse::getPosition(window).x < 0)
-            mouseState.pos.x = 2;
-        if (Mouse::getPosition(window).y > window.getSize().y)
-            mouseState.pos.y = window.getSize().y-2;
-        if (Mouse::getPosition(window).y < 0)
-            mouseState.pos.y = 2;
-
-        return mouseState;
+    }
+    if (Mouse::isButtonPressed(sf::Mouse::Right)) {
+        level.removeTile(mouseState);
+        lightScene.updateEmittersRayTracing(&level);///////
+    }
 }
 
 void Game::logic() {
     Vector2f desPos;
 
-    //process input
-    if (keys.right == true) 
+    ///process input
+    if (keys.right)
         hero.velocity.x += heroAcceleration;
-    if (keys.left == true) 
+    if (keys.left)
         hero.velocity.x -= heroAcceleration;
-    if (keys.up == true)
+    if (keys.up)
         hero.velocity.y -= heroAcceleration;
-    if (keys.down == true) 
+    if (keys.down)
         hero.velocity.y += heroAcceleration;
     
 
-    //process right moving if player moves right
+    ///process right moving if player moves right
     desPos = hero.getPos() + Vector2f(hero.velocity.x , 0);
-    //if no intersections, move onle horizontally
+    ///if no intersections, move onle horizontally
     if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1)) && hero.velocity.x >= 0) {
             
         hero.move(Vector2f(hero.velocity.x, 0));
     }
-    //else move right to the obstacle and mirror speed
+    ///else move right to the obstacle and mirror speed
     else {
         if (hero.velocity.x > 0) {
             hero.setPos(Vector2f(((int)hero.getPos().x/(int)scale + 1)*scale - heroRadius , hero.getPos().y));
@@ -343,7 +298,7 @@ void Game::logic() {
     }
 
 
-    //process left moving if player moves left
+    ///process left moving if player moves left
     desPos = hero.getPos() + Vector2f(hero.velocity.x , 0);
 
 
@@ -359,7 +314,7 @@ void Game::logic() {
     }
 
     
-    //process up moving if player moves up
+    ///process up moving if player moves up
     desPos = hero.getPos() + Vector2f(0, hero.velocity.y);
 
     if ( !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1)) && hero.velocity.y <= 0) {
@@ -375,7 +330,7 @@ void Game::logic() {
     }
 
 
-    //process down moving if player moves down
+    ///process down moving if player moves down
     desPos = hero.getPos() + Vector2f(0, hero.velocity.y);
 
     if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1))&& hero.velocity.y >= 0) {
@@ -388,11 +343,11 @@ void Game::logic() {
         }
     }
 
-    //decrease veloicty if no input
+    ///decrease veloicty if no input
     if (keys.right == false && keys.left == false && keys.up == false && keys.down == false)
         hero.velocity = Vector2f(hero.velocity.x * 0.88, hero.velocity.y * 0.88);
 
-    //restrict speed by normalizing velocity vector
+    ///restrict speed by normalizing velocity vector
     float absVelocity = sqrt(hero.velocity.x*hero.velocity.x + hero.velocity.y*hero.velocity.y);
     if (absVelocity > maxVelocity) {
         hero.velocity.x /= absVelocity;
