@@ -10,15 +10,16 @@
 using namespace consts;
 
 Player::Player() {
-	physForm.setRadius(heroRadius);
-	physForm.setOrigin(Vector2f(heroRadius, heroRadius));
+	//physForm.setRadius(heroRadius);
+	physForm.setSize({heroWidth, heroHeight});
+	physForm.setOrigin(Vector2f(heroWidth/2, heroHeight/2));
 	physForm.setPosition(Vector2f(100, 100));
 	//physForm.setFillColor(Color(102, 0, 204));
 	physForm.setFillColor(heroColor);
 	physForm.setOutlineColor(Color(20, 20, 20));
 	physForm.setOutlineThickness(0);
 	lineOfSight = viewAngle;
-	state = new StandState();
+	//state = new WalkState(None);
 }
 
 void Player::setLevel(Level* _level) {
@@ -37,10 +38,10 @@ Vector2f Player::getPos() {
 	return physForm.getPosition();
 }
 
-CircleShape* Player::getPhysForm() {
+RectangleShape* Player::getPhysForm() {
 	return &physForm;
 }
-
+/*
 void Player::input(Keyboard::Key input, TypeInput typeInput) {
     PlayerState* _state = state->input(*this, input, typeInput);
     if (_state != nullptr) {
@@ -48,11 +49,12 @@ void Player::input(Keyboard::Key input, TypeInput typeInput) {
         state = _state;
     }
 }
+
 void Player::update() {
-    state->update(*this);
     PlayerState* _state = state->update(*this);
     if (_state != nullptr) {
         delete state;
         state = _state;
     }
 }
+ */

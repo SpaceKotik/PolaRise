@@ -15,7 +15,8 @@ private:
 	Vector2f view; // angle must be less than 180 
 	float lineOfSight;
 	float health;
-	CircleShape physForm;
+	//CircleShape physForm;
+	RectangleShape physForm;
 	Vector2f velocity = Vector2f(0, 0);
     Level* level;
 
@@ -24,13 +25,16 @@ public:
 	void move(Vector2f dir);
 	void setPos(Vector2f pos);
 	Vector2f getPos();
-	CircleShape* getPhysForm();
+	RectangleShape* getPhysForm();
     void setLevel(Level* _level);
 
-    PlayerState* state;
-	virtual void input(Keyboard::Key _input, TypeInput typeInput);
-	virtual void update();
+    //PlayerState* state;
+	//virtual void input(Keyboard::Key _input, TypeInput typeInput);
+	//virtual void update();
 
 	friend class PlayerState;
+    friend class WalkState;
+    friend class OnAirState;
 	friend class Game;
+
 };

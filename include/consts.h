@@ -9,9 +9,15 @@ namespace consts {
     extern const int window_x;
     extern const int window_y;
     extern const float heroRadius;
+    extern const float heroHeight;
+    extern const float heroWidth;
     extern const float heroAcceleration;
     extern const float maxVelocity;
     extern const float viewAngle;
+
+
+    extern const float jumpGravity;
+    extern const float fallGravity;
 
     //extern const Color tileDefaultColor;
     extern const Color tileDefaultColor;

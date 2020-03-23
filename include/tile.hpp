@@ -15,6 +15,8 @@ private:
 	bool isBlue;
 	bool isSolidRed = false;
 	bool isSolidBlue = false;
+
+	bool isDynamic = true;
 public:
 	Tile();
 	Tile(Vector2f pos, bool isRed, bool isBlue);

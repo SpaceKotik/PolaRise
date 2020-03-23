@@ -20,11 +20,11 @@ struct States {
     bool up = 0;
     bool down = 0;
     bool space = 0;
-    bool mouseLeft = 0;
-    bool mouseRight = 0;
+    bool jumpAble = true;
+    Clock jumpTime;
+
     bool isOnStart = 0;
     bool isOnFinish = 0;
-
 };
 
 class Game {
@@ -44,7 +44,7 @@ private:
     Shader shaderShadow;
     RenderTexture bufferTex;
     Dump dump;
-
+    void logicMovement();
 public:
     Game();
 //  ~Game();
@@ -56,6 +56,7 @@ public:
    //void update();
     void draw();
     void logic();
+
     //bool setShaders();
     //RenderStates getStatesShadow(float param1, float param2);
     //RenderStates getStatesBlur(Vector2f dir, Texture buffer);

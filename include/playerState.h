@@ -3,18 +3,9 @@
 #include "player.hpp"
 
 
-//enum Input {UP, DOWN, LEFT, RIGHT, SPACE};
-
-
-class StandState;
-class OnAirState;
-
 
 class PlayerState {
 public:
-    static StandState standing;
-    static OnAirState onAir;
-
     virtual ~PlayerState() {};
     virtual PlayerState* input(Player& player, Keyboard::Key input, TypeInput typeInput) = 0;
     virtual PlayerState* update(Player& player) = 0;
@@ -33,6 +24,18 @@ private:
     bool spacePressed = false;
 public:
     OnAirState();
+    PlayerState* input(Player& player, Keyboard::Key input, TypeInput typeInput) override;
+    PlayerState* update(Player& player) override;
+};
+
+
+enum Direction {Right, Left, None};
+
+class WalkState : public PlayerState {
+private:
+    Direction direction;
+public:
+    WalkState(Direction _direction);
     PlayerState* input(Player& player, Keyboard::Key input, TypeInput typeInput) override;
     PlayerState* update(Player& player) override;
 };

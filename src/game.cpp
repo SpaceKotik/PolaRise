@@ -18,7 +18,6 @@ using namespace consts;
 #define DOBLUR true
 #define DOSHADOW true
 
-#define NO_INTERSECTION Vector2f(-10, -10)
 
 class FPScounter {
     public:
@@ -54,7 +53,7 @@ Game::Game() {
     window.setKeyRepeatEnabled(false);
     window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(true);
-    window.setPosition(Vector2i(0, 0));
+    window.setPosition(Vector2i(600, 0));
     window.setMouseCursorGrabbed(false);
 
     level.setField();
@@ -196,8 +195,7 @@ void Game::input() {
             break;
 
         case Event::KeyPressed:
-            //if(Keyboard::isKeyPressed(Keyboard::Space)) {
-            if(event.key.code == Keyboard::Space) {
+            if(event.key.code == Keyboard::Q) {
 
                 level.changeState();
                 if (!level.isOnTile(player.getPos() + Vector2f(heroRadius - .1, heroRadius - .1)) && !level.isOnTile(player.getPos() + Vector2f(heroRadius - .1, -heroRadius + .1))
@@ -229,6 +227,13 @@ void Game::input() {
             if(event.key.code == Keyboard::S) {
                 keys.down= true;
             }
+            if(event.key.code == Keyboard::Space) {
+                if (keys.jumpAble) {
+                    player.velocity.y -= maxVelocity;
+                    keys.jumpTime.restart();
+                    keys.space = true;
+                }
+            }
 
             if(event.key.code == Keyboard::Escape) {
                 window.close();
@@ -248,6 +253,10 @@ void Game::input() {
             if(event.key.code == Keyboard::S) {
                 keys.down= false;
             }
+            if(event.key.code == Keyboard::Space) {
+                keys.space = false;
+                keys.jumpAble = false;
+            }
 
         default:
             break;
@@ -262,103 +271,104 @@ void Game::input() {
         level.removeTile(mouseState);
         lightScene.updateEmittersRayTracing(&level);///////
     }
+
+
+    ///normalized view
+    player.view = eVector2f((Vector2f)Mouse::getPosition(window) - player.getPos()).norm();
 }
 
-void Game::logic() {
-    player.input(Keyboard::Key::Space, Pressed);
-    player.update();
+void Game::logicMovement() {
 
-    Vector2f desPos;
+    if (keys.jumpTime.getElapsedTime().asSeconds() > 0.22) {
+        keys.space = false;
+        keys.jumpAble = false;
+        keys.jumpTime.restart();
+    }
 
     ///process input
     if (keys.right)
         player.velocity.x += heroAcceleration;
     if (keys.left)
         player.velocity.x -= heroAcceleration;
-    if (keys.up)
-        player.velocity.y -= heroAcceleration;
-    if (keys.down)
-        player.velocity.y += heroAcceleration;
-    
-
-    ///process right moving if player moves right
-    desPos = player.getPos() + Vector2f(player.velocity.x , 0);
-    ///if no intersections, move onle horizontally
-    if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1)) && player.velocity.x >= 0) {
-            
-        player.move(Vector2f(player.velocity.x, 0));
+    if (keys.space) {
+        player.velocity.y += jumpGravity;
     }
-    ///else move right to the obstacle and mirror speed
     else {
-        if (player.velocity.x > 0) {
-            player.setPos(Vector2f(((int)player.getPos().x / (int)scale + 1) * scale - heroRadius , player.getPos().y));
-            player.velocity.x = -player.velocity.x * 0.2;
-        }
+        player.velocity.y += fallGravity;
+    }
+
+    Vector2f desPos;
+
+    player.move(Vector2f(player.velocity.x, 0));
+    ///process right moving if player moves right
+    desPos = player.getPos() + Vector2f(player.velocity.x, 0);
+    ///if no intersections, move onle horizontally
+    if (level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, heroHeight/2 - .1)) ||
+        level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, -heroHeight/2 + .1)) ||
+        level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, 0))) {
+
+        ///else move right to the obstacle and mirror speed
+        player.setPos(Vector2f(((int) player.getPos().x / (int) scale + 1) * scale - heroWidth/2, player.getPos().y));
+        player.velocity.x = 0;
     }
 
 
     ///process left moving if player moves left
-    desPos = player.getPos() + Vector2f(player.velocity.x , 0);
+    desPos = player.getPos() + Vector2f(player.velocity.x, 0);
 
 
-    if (!level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1)) && player.velocity.x <= 0) {
+    if (level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, heroHeight/2 - .1)) ||
+        level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, -heroHeight/2 + .1)) ||
+        level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, 0))) {
 
-        player.move(Vector2f(player.velocity.x, 0));
-    }
-    else {
-        if (player.velocity.x < 0) {
-            player.setPos(Vector2f(((int)player.getPos().x / (int)scale) * scale + heroRadius , player.getPos().y));
-            player.velocity.x = -player.velocity.x * 0.2;
-        }
+        player.setPos(Vector2f(((int) player.getPos().x / (int) scale) * scale + heroWidth/2, player.getPos().y));
+        player.velocity.x = 0;
     }
 
-    
+    player.move(Vector2f(0, player.velocity.y));
     ///process up moving if player moves up
     desPos = player.getPos() + Vector2f(0, player.velocity.y);
 
-    if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, -heroRadius+.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, -heroRadius+.1)) && player.velocity.y <= 0) {
+    if (level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, -heroHeight/2 + .1)) ||
+        level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, -heroHeight/2 + .1))) {
 
-        player.move(Vector2f(0, player.velocity.y));
-    }
-    else {
-        if (player.velocity.y < 0) {
-            player.setPos(Vector2f(player.getPos().x, ((int)player.getPos().y / (int)scale) * scale + heroRadius ));
-            player.velocity.y = -player.velocity.y * 0.2;
-        }
+        keys.space = false;
+        keys.jumpAble = false;
 
+        player.setPos(Vector2f(player.getPos().x, ((int) player.getPos().y / (int) scale) * scale + heroHeight/2));
+        player.velocity.y = -player.velocity.y * 0.2;
     }
 
 
     ///process down moving if player moves down
     desPos = player.getPos() + Vector2f(0, player.velocity.y);
 
-    if (!level.isOnTile(desPos + Vector2f(heroRadius-.1, heroRadius-.1)) && !level.isOnTile(desPos + Vector2f(-heroRadius+.1, heroRadius-.1)) && player.velocity.y >= 0) {
-        player.move(Vector2f(0, player.velocity.y));
+    if (level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, heroHeight/2 - .1)) ||
+        level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, heroHeight/2 - .1)) ) {
+
+        player.setPos(Vector2f(player.getPos().x, ((int) player.getPos().y / (int) scale + 1) * scale - heroHeight/2));
+        player.velocity.y = 0;
     }
-    else {
-        if (player.velocity.y > 0) {
-            player.setPos(Vector2f(player.getPos().x, ((int)player.getPos().y / (int)scale + 1) * scale - heroRadius ));
-            player.velocity.y = -player.velocity.y * 0.2;
-        }
-    }
+    if (player.velocity.y == 0)
+        keys.jumpAble = true;///////////////
 
     ///decrease veloicty if no input
-    if (keys.right == false && keys.left == false && keys.up == false && keys.down == false)
-        player.velocity = Vector2f(player.velocity.x * 0.88, player.velocity.y * 0.88);
+    if (!keys.right && !keys.left)
+        player.velocity = Vector2f(player.velocity.x * 0.88, player.velocity.y);
 
-    ///restrict speed by normalizing velocity vector
-    float absVelocity = sqrt(player.velocity.x * player.velocity.x + player.velocity.y * player.velocity.y);
-    if (absVelocity > maxVelocity) {
-        player.velocity.x /= absVelocity;
+    if(abs(player.velocity.x) > maxVelocity) {
+        player.velocity.x /= abs(player.velocity.x);
         player.velocity.x *= maxVelocity;
-        player.velocity.y /= absVelocity;
-        player.velocity.y *= maxVelocity;
     }
-    if (absVelocity < 0.001) {
-        player.velocity = Vector2f(0, 0);
+
+    if(abs(player.velocity.y) > 1.5*maxVelocity) {
+        player.velocity.y /= abs(player.velocity.y);
+        player.velocity.y *= 1.5*maxVelocity;
     }
-    player.view = (Vector2f)Mouse::getPosition(window) - player.getPos();
-    player.view = Vector2f(player.view.x / sqrt(player.view.x * player.view.x + player.view.y * player.view.y), player.view.y / sqrt(player.view.x * player.view.x + player.view.y * player.view.y));
+}
+
+void Game::logic() {
+    logicMovement();
 
     dump.add("Velocity: (" + std::to_string(player.velocity.x) + " : " + std::to_string(player.velocity.y) + ")");
     dump.add("View: (" + std::to_string(player.view.x) + " : " + std::to_string(player.view.y) + ")");
@@ -370,6 +380,9 @@ void Game::logic() {
     else {
         keys.isOnFinish = false;///!!!
     }
+
+
+
 }
 
 ///may be useful for applying effects to menu etc.

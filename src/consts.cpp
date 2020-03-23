@@ -8,13 +8,19 @@ namespace consts {
     constexpr int window_x = field_x*scale;
     constexpr int window_y = field_y*scale;
     constexpr float heroRadius = 10;
+    constexpr float heroHeight = 40;
+    constexpr float heroWidth = 20;
+
     constexpr float heroAcceleration = 0.5;
     constexpr float maxVelocity = 5.5;
     constexpr float viewAngle = 70;
 
+    constexpr float jumpGravity = 0.1;
+    constexpr float fallGravity = 0.8;
+
     //extern const Color tileDefaultColor = Color(100, 100, 100);
     const Color tileDefaultColor = Color::White;
-    const Color heroColor = Color::White;
+    const Color heroColor = Color(150, 150, 150);
 
     //extern const Color backgroundColor = Color (50, 50, 50);
     const Color backgroundColor = Color (0, 0, 0);

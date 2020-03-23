@@ -21,48 +21,13 @@ Level::Level() {
 }
 
 void Level::setField() {
-	
 	loadFromFile();
-    /*
-	Vector2f pos = Vector2f (100, 100);
-	pos = Vector2f (((int)pos.x/(int)scale)*scale,((int)pos.y/(int)scale)*scale);
-	//field.tiles.push_back(Tile(pos, false, false));
-	if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed != true  && field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue != true) {
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed = true;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue = true;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).typeRed = StartPos;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).typeBlue = StartPos;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).physForm.setFillColor(Color::Green);
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidRed = false;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidBlue = false;
-	tileCount ++; 
-	}
-
-	pos = Vector2f (500, 100);
-	pos = Vector2f (((int)pos.x/(int)scale)*scale,((int)pos.y/(int)scale)*scale);
-
-	if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed != true  && field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue != true) {
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed = true;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue = true;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).typeRed = FinishPos;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).typeBlue = FinishPos;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).physForm.setFillColor(Color::Red);
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidRed = false;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidBlue = false;
-	tileCount ++;
-	}*/
-
-	//loadToFile();
-	//loadFromFile();
 }
 
 Field* Level::getField() {
 	return &field;
 }
 
-int Level::getTileCount() {
-	return tileCount;
-}
 
 void Level::update() {
 }
