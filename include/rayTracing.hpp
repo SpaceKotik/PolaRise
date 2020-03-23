@@ -36,4 +36,6 @@ public:
 	void update(Vector2f mousePos, bool _isRestricted = true, Vector2f view = Vector2f(-1, 1), float viewAngle = 170);
 	VertexArray createMesh(Color);                  ///get drawable polygon if light
 	void updateObstacles(Level *level);             ///set new obstacles if level has changed
+
+	void setActiveTiles(Level *level);
 };

@@ -359,11 +359,11 @@ void RayTracing::update(Vector2f pos, bool _isRestricted, Vector2f view, float v
         });
     }
     ///may be the way to show walls better
-	/*for (auto &e : raysVertex) {
+	for (auto &e : raysVertex) {
         Transform transform;
-        transform.scale(1.1, 1.1, mousePos.x, mousePos.y);
+        transform.scale(1.01, 1.01, pos.x, pos.y);
         e[1].position = transform.transformPoint(e[1].position);
-	}*/
+	}
 
 }
 
@@ -492,4 +492,18 @@ void RayTracing::calculateIntersections() {
 void RayTracing::updateObstacles(Level *level) {
     convertTileMapToPolyMap(level);
     convertPolyMapToVertices();
+}
+
+void RayTracing::setActiveTiles(Level *level) {
+    std::array<Vertex, 2> currLine;
+    for(int i = 0; i < raysVertex.size()-1; ++i) {
+
+        currLine[0] = raysVertex.at(i)[1];
+        currLine[1] = raysVertex.at(i+1)[1];
+        level->setDynamicTiles(currLine);
+    }
+    currLine[0] = raysVertex.at(0)[1];
+    currLine[1] = raysVertex.at(raysVertex.size() - 1)[1];
+    level->setDynamicTiles(currLine);
+
 }

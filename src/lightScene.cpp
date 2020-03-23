@@ -165,3 +165,9 @@ bool LightScene::draw() {
 Texture& LightScene::getTexture() {
     return const_cast<Texture &>(targetTex.getTexture());
 }
+
+void LightScene::setActiveTiles(Level *level) {
+    for (auto &e : scene) {
+        e.setActiveTiles(level);
+    }
+}

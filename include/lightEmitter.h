@@ -29,6 +29,8 @@ public:
     void setRestricted(bool);
     bool setLineOfSight(float);
 
+    void setActiveTiles(Level *level);
+
     void updateRayTracing(bool update = false);
     VertexArray createMesh();
 };

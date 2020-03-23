@@ -33,4 +33,10 @@ public:
 	LevelState getState();
 	bool isOnTile(Vector2f pos);
 	bool isOnFinish(Vector2f pos);
+
+    void resetActive();
+
+
+	void setActiveTile(Vector2f pos);
+	void setDynamicTiles(std::array<Vertex, 2> Line);
 };

@@ -74,3 +74,7 @@ void Emitter::updateRayTracing(bool update) {
 VertexArray Emitter::createMesh() {
     return rayTracing.createMesh(color);
 }
+
+void Emitter::setActiveTiles(Level *level) {
+    rayTracing.setActiveTiles(level);
+}

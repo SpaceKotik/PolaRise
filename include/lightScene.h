@@ -33,6 +33,7 @@ public:
     void updateEmittersRayTracing(Level *level);     ///Updates obstacles in lightScene rayTracing, then applied to all Emitters
     void addEmitter(eVector2f _position, eVector2f _view, bool _isRestricted = true, bool updateOnDemand = true);
     void deleteEmitter(eVector2f coord);
+    void setActiveTiles(Level *level);
 
     bool draw();    ///Draws all Emitters to targetTex
 

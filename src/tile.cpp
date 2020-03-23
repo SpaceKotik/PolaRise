@@ -17,7 +17,7 @@ Tile::Tile() {
 	physForm.setFillColor(Color::White);
 	physForm.setOutlineColor(Color::Black);
 	physForm.setOutlineThickness(3);
-	isDynamic = false;
+	//isDynamic = false;
 }
 
 Tile::Tile(Vector2f pos, bool isRed, bool isBlue) {
@@ -30,7 +30,8 @@ Tile::Tile(Vector2f pos, bool isRed, bool isBlue) {
 	isBlue = false;
 	isSolidBlue = false;
 	isSolidRed = false;
-	isDynamic = false;
+	isDynamic = true;
+	isSolid = true;
 }
 
 void Tile::rotate(float deg) {

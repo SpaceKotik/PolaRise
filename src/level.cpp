@@ -2,10 +2,12 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
+#include <cmath>
 #include "game.hpp"
 #include "tile.hpp"
 #include <iostream>
 #include <stdlib.h>
+#include "rayTracing.hpp"
 
 #include "consts.h"
 using namespace consts;
@@ -28,8 +30,21 @@ Field* Level::getField() {
 	return &field;
 }
 
-
 void Level::update() {
+    for (auto &e : field.tiles) {
+        if (e.isActive)
+            e.physForm.setFillColor(Color::Green);
+        else
+            e.physForm.setFillColor(Color::Red);
+
+    }
+}
+
+void Level::resetActive() {
+    for (auto &e : field.tiles) {
+        e.isActive = false;
+
+    }
 }
 
 void Level::addTile(Vector2f pos) {
@@ -241,6 +256,14 @@ bool Level::isOnTile(Vector2f pos) {
 	else {
 		return false;
 	}
+
+
+	/////
+	if (currTile.isSolid)
+        return true;
+	else
+        return false;
+	/////
 }
 
 bool Level::isOnFinish(Vector2f pos) {
@@ -255,3 +278,52 @@ bool Level::isOnFinish(Vector2f pos) {
 		return false;
 	}
 }
+
+
+
+void Level::setActiveTile(Vector2f pos) {
+    Tile currTile = field.tiles.at(((int) pos.y / (int) scale) * field_x + (int) pos.x / (int) scale);
+    if (currTile.isSolid && currTile.isDynamic)
+        field.tiles.at(((int) pos.y / (int) scale) * field_x + (int) pos.x / (int) scale).isActive = true;
+
+}
+
+void Level::setDynamicTiles(std::array<Vertex, 2> line) {
+    struct Line currLine;
+
+    currLine.startCoord = line[0].position;
+    currLine.dirX = line[1].position.x - line[0].position.x;
+    currLine.dirY = line[1].position.y - line[0].position.y;
+
+
+    eVector2f currPos = line[1].position;
+    setActiveTile(currPos);
+    currPos = line[0].position;
+    setActiveTile(currPos);
+
+    ///make direction of line
+    float maxLen = sqrt(currLine.dirX*currLine.dirX + currLine.dirY*currLine.dirY);
+    //float currLen = sqrt ((currLine.startCoord.x - currPos.x)*(currLine.startCoord.x - currPos.x) + (currLine.startCoord.y - currPos.y)*(currLine.startCoord.y - currPos.y));
+    float currLen = 0;////////////
+    eVector2f dir = {currLine.dirX, currLine.dirY};
+    dir = dir.norm();
+
+
+    while (currLen <= maxLen) {
+        if(dir.x == 0 && dir.y == 0)
+            break;
+        setActiveTile(currPos);
+        currPos = currPos + dir*scale;
+        currLen = sqrt ((currLine.startCoord.x - currPos.x)*(currLine.startCoord.x - currPos.x) + (currLine.startCoord.y - currPos.y)*(currLine.startCoord.y - currPos.y));
+
+    }
+
+
+}
+
+
+
+
+
+
+

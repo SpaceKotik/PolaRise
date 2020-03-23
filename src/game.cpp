@@ -15,6 +15,7 @@ using namespace consts;
 //#define UPDATESHADERS false ///update changes in shaders in real time
 //#define DUMP false
 
+#define DOPIXEL false
 #define DOBLUR true
 #define DOSHADOW true
 
@@ -107,7 +108,7 @@ void Game::draw() {
 //////////////////////
 
     ///pixelate everyrhing
-    if (true) {
+    if (DOPIXEL) {
         if (!shaderShadow.loadFromFile("../shaders/pixelate.frag", sf::Shader::Fragment)) {
             window.close();
         }
@@ -368,6 +369,10 @@ void Game::logicMovement() {
 }
 
 void Game::logic() {
+    level.resetActive();
+    lightScene.setActiveTiles(&level);
+    level.update();
+
     logicMovement();
 
     dump.add("Velocity: (" + std::to_string(player.velocity.x) + " : " + std::to_string(player.velocity.y) + ")");
