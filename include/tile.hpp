@@ -9,19 +9,19 @@ enum TileType {Standart, StartPos, FinishPos, Lava};
 class Tile {
 private:
 	RectangleShape physForm;
-	TileType typeRed = Standart;
-	TileType typeBlue = Standart;
+
 	bool isRed;
 	bool isBlue;
 	bool isSolidRed = false;
 	bool isSolidBlue = false;
+
+    TileType type = Standart;
     bool isSolid = false;
 	bool isDynamic = true;
 	bool isActive = false;
 public:
 	Tile();
 	Tile(Vector2f pos, bool isRed, bool isBlue);
-	void rotate(float deg);
 	RectangleShape getRect();
 	bool checkIfBlue();
 	bool checkIfRed();

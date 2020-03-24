@@ -85,7 +85,7 @@ int Level::loadToFile() {
     for (int i = 0; i < field_y; ++i) {
     	for (int j = 0; j < field_x; ++j) {
     		if (field.tiles.at(i*field_x + j).isBlue) {
-    			switch (field.tiles.at(i*field_x + j).typeBlue) {
+    			switch (field.tiles.at(i*field_x + j).type) {
     				case Standart:
     					levelFile << 1 << ' ';
     					break;
@@ -112,7 +112,7 @@ int Level::loadToFile() {
     for (int i = 0; i < field_y; ++i) {
     	for (int j = 0; j < field_x; ++j) {
     		if (field.tiles.at(i*field_x + j).isRed) {
-    			switch (field.tiles.at(i*field_x + j).typeRed) {
+    			switch (field.tiles.at(i*field_x + j).type) {
     				case Standart:
     					levelFile << 1 << ' ';
     					break;
@@ -159,7 +159,7 @@ int Level::loadFromFile() {
     		case 1:
     			field.tiles[i*field_x + j].isBlue = true;
     			field.tiles[i*field_x + j].isSolidBlue = true;
-    			field.tiles[i*field_x + j].typeBlue = Standart;
+    			field.tiles[i*field_x + j].type = Standart;
     			tileCount++;
     			break;
     		case 2:
@@ -167,7 +167,7 @@ int Level::loadFromFile() {
     		case 3:
     			field.tiles[i*field_x + j].isBlue = true;
     			field.tiles[i*field_x + j].isSolidBlue = false;
-    			field.tiles[i*field_x + j].typeBlue = StartPos;
+    			field.tiles[i*field_x + j].type = StartPos;
     			field.tiles[i*field_x + j].physForm.setFillColor(Color::Green);
     			field.tiles[i*field_x + j].physForm.setOutlineColor(Color::Black);
 				field.tiles[i*field_x + j].physForm.setOutlineThickness(1);
@@ -176,7 +176,7 @@ int Level::loadFromFile() {
     		case 4:
 	    		field.tiles[i*field_x + j].isBlue = true;
     			field.tiles[i*field_x + j].isSolidBlue = false;
-    			field.tiles[i*field_x + j].typeBlue = FinishPos;
+    			field.tiles[i*field_x + j].type = FinishPos;
     			field.tiles[i*field_x + j].physForm.setFillColor(Color::Red);
     			field.tiles[i*field_x + j].physForm.setOutlineColor(Color::Black);
 				field.tiles[i*field_x + j].physForm.setOutlineThickness(1);
@@ -200,7 +200,7 @@ int Level::loadFromFile() {
     		case 1:
     			field.tiles[i*field_x + j].isRed = true;
     			field.tiles[i*field_x + j].isSolidRed = true;
-    			field.tiles[i*field_x + j].typeRed = Standart;
+    			field.tiles[i*field_x + j].type = Standart;
     			tileCount++;
     			break;
     		case 2:
@@ -208,7 +208,7 @@ int Level::loadFromFile() {
     		case 3:
     			field.tiles[i*field_x + j].isRed = true;
     			field.tiles[i*field_x + j].isSolidRed = false;
-    			field.tiles[i*field_x + j].typeRed = StartPos;
+    			field.tiles[i*field_x + j].type = StartPos;
     			field.tiles[i*field_x + j].physForm.setFillColor(Color::Green);
     			field.tiles[i*field_x + j].physForm.setOutlineColor(Color::Black);
 				field.tiles[i*field_x + j].physForm.setOutlineThickness(1);
@@ -217,7 +217,7 @@ int Level::loadFromFile() {
     		case 4:
 	    		field.tiles[i*field_x + j].isRed = true;
 	    		field.tiles[i*field_x + j].isSolidRed = false;
-	    		field.tiles[i*field_x + j].typeRed = FinishPos;
+	    		field.tiles[i*field_x + j].type = FinishPos;
 	    		field.tiles[i*field_x + j].physForm.setFillColor(Color::Red);
 	    		field.tiles[i*field_x + j].physForm.setOutlineColor(Color::Black);
 				field.tiles[i*field_x + j].physForm.setOutlineThickness(1);
@@ -268,10 +268,10 @@ bool Level::isOnTile(Vector2f pos) {
 
 bool Level::isOnFinish(Vector2f pos) {
 	Tile currTile = field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale);
-	if (currTile.isBlue && levelState == Blue && currTile.typeBlue == FinishPos) {
+	if (currTile.isBlue && levelState == Blue && currTile.type == FinishPos) {
 		return true;
 	}
-	else if (currTile.isRed  && levelState == Red && currTile.typeRed == FinishPos) {
+	else if (currTile.isRed  && levelState == Red && currTile.type == FinishPos) {
 		return true;
 	}
 	else {
@@ -292,9 +292,7 @@ void Level::setDynamicTiles(std::array<Vertex, 2> line) {
     struct Line currLine;
 
     currLine.startCoord = line[0].position;
-    currLine.dirX = line[1].position.x - line[0].position.x;
-    currLine.dirY = line[1].position.y - line[0].position.y;
-
+    currLine.dir = line[1].position - line[0].position;
 
     eVector2f currPos = line[1].position;
     setActiveTile(currPos);
@@ -302,10 +300,10 @@ void Level::setDynamicTiles(std::array<Vertex, 2> line) {
     setActiveTile(currPos);
 
     ///make direction of line
-    float maxLen = sqrt(currLine.dirX*currLine.dirX + currLine.dirY*currLine.dirY);
+    float maxLen = sqrt(currLine.dir.x*currLine.dir.x + currLine.dir.y*currLine.dir.y);
     //float currLen = sqrt ((currLine.startCoord.x - currPos.x)*(currLine.startCoord.x - currPos.x) + (currLine.startCoord.y - currPos.y)*(currLine.startCoord.y - currPos.y));
     float currLen = 0;////////////
-    eVector2f dir = {currLine.dirX, currLine.dirY};
+    eVector2f dir = currLine.dir;
     dir = dir.norm();
 
 
@@ -317,8 +315,6 @@ void Level::setDynamicTiles(std::array<Vertex, 2> line) {
         currLen = sqrt ((currLine.startCoord.x - currPos.x)*(currLine.startCoord.x - currPos.x) + (currLine.startCoord.y - currPos.y)*(currLine.startCoord.y - currPos.y));
 
     }
-
-
 }
 
 

@@ -1,7 +1,4 @@
 #include <SFML/Graphics.hpp>
-#include <iostream>
-#include <fstream>
-#include <unistd.h>
 #include "game.hpp"
 #include "tile.hpp"
 
@@ -17,7 +14,7 @@ Tile::Tile() {
 	physForm.setFillColor(Color::White);
 	physForm.setOutlineColor(Color::Black);
 	physForm.setOutlineThickness(3);
-	//isDynamic = false;
+	isDynamic = false;
 }
 
 Tile::Tile(Vector2f pos, bool isRed, bool isBlue) {
@@ -26,16 +23,10 @@ Tile::Tile(Vector2f pos, bool isRed, bool isBlue) {
 	physForm.setFillColor(tileDefaultColor);
 	physForm.setOutlineColor(Color(190, 190, 190));
 	physForm.setOutlineThickness(0);
-	isRed = false;
-	isBlue = false;
 	isSolidBlue = false;
 	isSolidRed = false;
 	isDynamic = true;
 	isSolid = true;
-}
-
-void Tile::rotate(float deg) {
-	physForm.rotate(deg);
 }
 
 RectangleShape Tile::getRect() {

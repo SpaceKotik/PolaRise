@@ -39,23 +39,20 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 
 	Line newBorder;
 	newBorder.startCoord = Vector2f(0, 0);
-	newBorder.dirX = windowSize.x;
-	newBorder.dirY = 0;
+	newBorder.dir = {windowSize.x, 0};
+
 	edges.push_back(newBorder);
 
 	newBorder.startCoord = Vector2f(windowSize.x, 0);
-	newBorder.dirX = 0;
-	newBorder.dirY = windowSize.y;
+    newBorder.dir = {0, windowSize.y};
 	edges.push_back(newBorder);
 
 	newBorder.startCoord = Vector2f(windowSize.x, windowSize.y);
-	newBorder.dirX = -windowSize.x;
-	newBorder.dirY = 0;
+    newBorder.dir = {-windowSize.x , 0};
 	edges.push_back(newBorder);
 
 	newBorder.startCoord = Vector2f(0, windowSize.y);
-	newBorder.dirX = 0;
-	newBorder.dirY = -windowSize.y;
+    newBorder.dir = {0, -windowSize.y};
 	edges.push_back(newBorder);
 
 	//Reset edges information
@@ -98,7 +95,7 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 					//edge existing?
 					if ( i != 0 && processingCells[up].edgeExist[LEFT]) {
 
-						edges[processingCells[up].edgeId[LEFT]].dirY += scale;
+						edges[processingCells[up].edgeId[LEFT]].dir.y += scale;
 						processingCells[self].edgeId[LEFT] = processingCells[up].edgeId[LEFT];
 						processingCells[self].edgeExist[LEFT] = true;
 					}
@@ -106,8 +103,7 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 					else {
 						Line newEdge;
 						newEdge.startCoord = getRectPointPos(level->getField()->tiles[self], 0);//
-						newEdge.dirX = getRectPointPos(level->getField()->tiles[self], 3).x - newEdge.startCoord.x;
-						newEdge.dirY = getRectPointPos(level->getField()->tiles[self], 3).y - newEdge.startCoord.y;
+						newEdge.dir = getRectPointPos(level->getField()->tiles[self], 3) - newEdge.startCoord;
 
 						int edge_id = edges.size();
 
@@ -124,16 +120,15 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 					//edge existing?
 					if ( i != 0 && processingCells[up].edgeExist[RIGHT]) {
 
-						edges[processingCells[up].edgeId[RIGHT]].dirY += scale;
+						edges[processingCells[up].edgeId[RIGHT]].dir.y += scale;
 						processingCells[self].edgeId[RIGHT] = processingCells[up].edgeId[RIGHT];
 						processingCells[self].edgeExist[RIGHT] = true;
 					}
 					//if not, make one
 					else {
 						Line newEdge;
-						newEdge.startCoord = getRectPointPos(level->getField()->tiles[self], 1);//
-						newEdge.dirX = getRectPointPos(level->getField()->tiles[self], 2).x - newEdge.startCoord.x;
-						newEdge.dirY = getRectPointPos(level->getField()->tiles[self], 2).y - newEdge.startCoord.y;
+						newEdge.startCoord = getRectPointPos(level->getField()->tiles[self], 1);
+						newEdge.dir = getRectPointPos(level->getField()->tiles[self], 2) - newEdge.startCoord;
 
 						int edge_id = edges.size();
 
@@ -151,16 +146,15 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 					//edge existing?
 					if (j != 0 && processingCells[left].edgeExist[UP]) {
 
-						edges[processingCells[left].edgeId[UP]].dirX += scale;
+						edges[processingCells[left].edgeId[UP]].dir.x += scale;
 						processingCells[self].edgeId[UP] = processingCells[left].edgeId[UP];
 						processingCells[self].edgeExist[UP] = true;
 					}
 					//if not, make one
 					else {
 						Line newEdge;
-						newEdge.startCoord = getRectPointPos(level->getField()->tiles[self], 0);//
-						newEdge.dirX = getRectPointPos(level->getField()->tiles[self], 1).x - newEdge.startCoord.x;
-						newEdge.dirY = getRectPointPos(level->getField()->tiles[self], 1).y - newEdge.startCoord.y;
+						newEdge.startCoord = getRectPointPos(level->getField()->tiles[self], 0);
+						newEdge.dir = getRectPointPos(level->getField()->tiles[self], 1) - newEdge.startCoord;
 
 						int edge_id = edges.size();
 
@@ -177,7 +171,7 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 					//edge existing?
 					if (j != 0 && processingCells[left].edgeExist[DOWN]) {
 
-						edges[processingCells[left].edgeId[DOWN]].dirX += scale;
+						edges[processingCells[left].edgeId[DOWN]].dir.x += scale;
 						processingCells[self].edgeId[DOWN] = processingCells[left].edgeId[DOWN];
 						processingCells[self].edgeExist[DOWN] = true;
 					}
@@ -185,8 +179,7 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 					else {
 						Line newEdge;
 						newEdge.startCoord = getRectPointPos(level->getField()->tiles[self], 3);//
-						newEdge.dirX = getRectPointPos(level->getField()->tiles[self], 2).x - newEdge.startCoord.x;
-						newEdge.dirY = getRectPointPos(level->getField()->tiles[self], 2).y - newEdge.startCoord.y;
+						newEdge.dir =  getRectPointPos(level->getField()->tiles[self], 2) - newEdge.startCoord;
 
 						int edge_id = edges.size();
 
@@ -208,7 +201,7 @@ void RayTracing::convertPolyMapToVertices() {
 		if (std::find(vertices.begin(), vertices.end(), e.startCoord) == vertices.end())
 			vertices.push_back(e.startCoord);
 
-		Vector2f tempVertex = e.startCoord + Vector2f(e.dirX, e.dirY);
+		Vector2f tempVertex = e.startCoord + e.dir;
 		if (std::find(vertices.begin(), vertices.end(), tempVertex) == vertices.end())
 			vertices.push_back(tempVertex);
 	}
@@ -264,19 +257,18 @@ void RayTracing::update(Vector2f pos, bool _isRestricted, Vector2f view, float v
                                             Line curLine, viewLine;
 
                                             curLine.startCoord = a[0].position;
-                                            curLine.dirX = a[1].position.x - a[0].position.x;
-                                            curLine.dirY = a[1].position.y - a[0].position.y;
+                                            curLine.dir = a[1].position - a[0].position;
 
                                             viewLine.startCoord = viewVec[0].position;
-                                            viewLine.dirX = viewVec[1].position.x - viewVec[0].position.x;
-                                            viewLine.dirY = viewVec[1].position.y - viewVec[0].position.y;
+                                            viewLine.dir = viewVec[1].position - viewVec[0].position;
+
 
                                             float curLineLen = sqrt(
-                                                    curLine.dirX * curLine.dirX + curLine.dirY * curLine.dirY);
+                                                    curLine.dir.x * curLine.dir.x + curLine.dir.y * curLine.dir.y);
                                             float viewLineLen = sqrt(
-                                                    viewLine.dirX * viewLine.dirX + viewLine.dirY * viewLine.dirY);
+                                                    viewLine.dir.x * viewLine.dir.x + viewLine.dir.y * viewLine.dir.y);
                                             float cosine =
-                                                    (curLine.dirX * viewLine.dirX + curLine.dirY * viewLine.dirY) /
+                                                    (curLine.dir.x * viewLine.dir.x + curLine.dir.y * viewLine.dir.y) /
                                                     (curLineLen * viewLineLen);
 
                                             if (cosine < cos(viewAngle / 2.f / 180.f * PI)) {
@@ -315,23 +307,19 @@ void RayTracing::update(Vector2f pos, bool _isRestricted, Vector2f view, float v
                       Line aLine, bLine, refLine;
 
                       aLine.startCoord = a[0].position;
-                      aLine.dirX = a[1].position.x - a[0].position.x;
-                      aLine.dirY = a[1].position.y - a[0].position.y;
-
+                      aLine.dir = a[1].position - a[0].position;
 
                       bLine.startCoord = b[0].position;
-                      bLine.dirX = b[1].position.x - b[0].position.x;
-                      bLine.dirY = b[1].position.y - b[0].position.y;
+                      bLine.dir = b[1].position - b[0].position;
 
                       refLine.startCoord = viewRayRight[0].position;
-                      refLine.dirX = viewRayRight[1].position.x - viewRayRight[0].position.x;
-                      refLine.dirY = viewRayRight[1].position.y - viewRayRight[0].position.y;
+                      refLine.dir = viewRayRight[1].position - viewRayRight[0].position;
 
-                      float aLineLen = sqrt(aLine.dirX * aLine.dirX + aLine.dirY * aLine.dirY);
-                      float bLineLen = sqrt(bLine.dirX * bLine.dirX + bLine.dirY * bLine.dirY);
-                      float refLineLen = sqrt(refLine.dirX * refLine.dirX + refLine.dirY * refLine.dirY);
-                      float cos1 = (aLine.dirX * refLine.dirX + aLine.dirY * refLine.dirY) / (aLineLen * refLineLen);
-                      float cos2 = (bLine.dirX * refLine.dirX + bLine.dirY * refLine.dirY) / (bLineLen * refLineLen);
+                      float aLineLen = sqrt(aLine.dir.x * aLine.dir.x + aLine.dir.y * aLine.dir.y);
+                      float bLineLen = sqrt(bLine.dir.x * bLine.dir.x + bLine.dir.y * bLine.dir.y);
+                      float refLineLen = sqrt(refLine.dir.x * refLine.dir.x + refLine.dir.y * refLine.dir.y);
+                      float cos1 = (aLine.dir.x * refLine.dir.x + aLine.dir.y * refLine.dir.y) / (aLineLen * refLineLen);
+                      float cos2 = (bLine.dir.x * refLine.dir.x + bLine.dir.y * refLine.dir.y) / (bLineLen * refLineLen);
 
                       if (cos1 - cos2 < 0) {
                           return true;
@@ -345,14 +333,12 @@ void RayTracing::update(Vector2f pos, bool _isRestricted, Vector2f view, float v
             Line aLine, bLine;
             //Vector2f aa =(*((std::array<Vertex, 2>*)a))[0].position;
             aLine.startCoord = a[0].position;
-            aLine.dirX = a[1].position.x - a[0].position.x;
-            aLine.dirY = a[1].position.y - a[0].position.y;
+            aLine.dir = a[1].position - a[0].position;
 
             bLine.startCoord = b[0].position;
-            bLine.dirX = b[1].position.x - b[0].position.x;
-            bLine.dirY = b[1].position.y - b[0].position.y;
+            bLine.dir = b[1].position - b[0].position;
 
-            if ((atan2(aLine.dirY, aLine.dirX) - atan2(bLine.dirY, bLine.dirX)) < 0)
+            if ((atan2(aLine.dir.y, aLine.dir.x) - atan2(bLine.dir.y, bLine.dir.x)) < 0)
                 return true;
             else
                 return false;
@@ -415,8 +401,8 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
     /// ==> T1 = (s_px+line.startCoord.x*T2-ray.startCoord.x)/ray.dirX = (line.startCoord.y+line.startCoord.y*T2-ray.startCoord.y)/ray.dirY
     /// ==> s_px*ray.dirY + line.startCoord.x*T2*ray.dirY - ray.startCoord.x*ray.dirY = line.startCoord.y*ray.dirX + line.startCoord.y*T2*ray.dirX - ray.startCoord.y*ray.dirX
     /// ==> T2 = (ray.dirX*(line.startCoord.y-ray.startCoord.y) + ray.dirY*(ray.startCoord.x-s_px))/(line.startCoord.x*ray.dirY - line.startCoord.y*ray.dirX)
-	float T2 = (ray.dirX*(line.startCoord.y-ray.startCoord.y) + ray.dirY*(ray.startCoord.x-line.startCoord.x))/(line.dirX*ray.dirY - line.dirY*ray.dirX);
-    float T1 = (line.startCoord.x+line.dirX*T2-ray.startCoord.x)/ray.dirX;
+	float T2 = (ray.dir.x*(line.startCoord.y-ray.startCoord.y) + ray.dir.y*(ray.startCoord.x-line.startCoord.x))/(line.dir.x*ray.dir.y - line.dir.y*ray.dir.x);
+    float T1 = (line.startCoord.x+line.dir.x*T2-ray.startCoord.x)/ray.dir.x;
     /// Must be within parametic whatevers for RAY/SEGMENT
     if(T1<0) {
         Line tempLine;
@@ -432,7 +418,7 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
 
     /// Return the POINT OF INTERSECTION
     Line tempLine;
-    tempLine.startCoord = Vector2f(ray.startCoord.x+ray.dirX*T1, ray.startCoord.y+ray.dirY*T1);
+    tempLine.startCoord = Vector2f(ray.startCoord.x+ray.dir.x*T1, ray.startCoord.y+ray.dir.y*T1);
     tempLine.param = T1;
     return tempLine;
 }
@@ -472,8 +458,7 @@ void RayTracing::calculateIntersections() {
         prevIntersection.param = 1; ///set to -10 if some problems with rays length occur
         Line ray;
 		ray.startCoord = e[0].position;
-		ray.dirX = e[1].position.x - ray.startCoord.x;
-		ray.dirY = e[1].position.y - ray.startCoord.y;
+		ray.dir = e[1].position - ray.startCoord;
 		///for each edge
 		for (auto k : edges) {
 			Line tempLine = getPartIntersection(ray, k);
@@ -494,17 +479,21 @@ void RayTracing::updateObstacles(Level *level) {
     convertPolyMapToVertices();
 }
 
+///Pass all lines of light mesh to Level function to set all intersecting tiles as lighted (active)
 void RayTracing::setActiveTiles(Level *level) {
     std::array<Vertex, 2> currLine;
+    /// iterate through all lines in mesh
     for(int i = 0; i < raysVertex.size()-1; ++i) {
-
         currLine[0] = raysVertex.at(i)[1];
         currLine[1] = raysVertex.at(i+1)[1];
+        /// check only horizontal / vertical lines
         if (abs(currLine[0].position.x - currLine[1].position.x) < 0.01 || abs(currLine[0].position.y - currLine[1].position.y) < 0.01)
             level->setDynamicTiles(currLine);
     }
-    currLine[0] = raysVertex.at(0)[1];
-    currLine[1] = raysVertex.at(raysVertex.size() - 1)[1];
-    level->setDynamicTiles(currLine);
-
+    /// check closing line if view angle is 2*PI
+    if(!isRestricted) {
+        currLine[0] = raysVertex.at(0)[1];
+        currLine[1] = raysVertex.at(raysVertex.size() - 1)[1];
+        level->setDynamicTiles(currLine);
+    }
 }

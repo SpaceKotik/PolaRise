@@ -9,8 +9,7 @@ using namespace sf;
 ///struct used for solving linear equations while intersections are calculated
 struct Line {		// line is (x,y)  (x + dirX*param, y + dirY*param)
 	Vector2f startCoord;
-	float dirX;
-	float dirY;
+	Vector2f dir;
 	float param;
 };
 
@@ -37,5 +36,5 @@ public:
 	VertexArray createMesh(Color);                  ///get drawable polygon if light
 	void updateObstacles(Level *level);             ///set new obstacles if level has changed
 
-	void setActiveTiles(Level *level);
+	void setActiveTiles(Level *level);				///Pass all lines of light mesh to Level function to set all intersecting tiles as lighted (active)
 };

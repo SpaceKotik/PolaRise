@@ -1,7 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <mutex>
-#include <math.h>
+#include <cmath>
 
 #include "../SmartVector2/SmartVector2f.h"
 #include "game.hpp"
@@ -16,7 +16,7 @@ using namespace consts;
 //#define DUMP false
 
 #define DOPIXEL false
-#define DOBLUR true
+#define DOBLUR false
 #define DOSHADOW true
 
 
