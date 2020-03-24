@@ -33,9 +33,9 @@ Field* Level::getField() {
 void Level::update() {
     for (auto &e : field.tiles) {
         if (e.isActive)
-            e.physForm.setFillColor(Color::Green);
+            e.physForm.setFillColor(Color(255, 255, 255));
         else
-            e.physForm.setFillColor(Color::Red);
+            e.physForm.setFillColor(Color(80, 80, 80));
 
     }
 }

@@ -500,7 +500,8 @@ void RayTracing::setActiveTiles(Level *level) {
 
         currLine[0] = raysVertex.at(i)[1];
         currLine[1] = raysVertex.at(i+1)[1];
-        level->setDynamicTiles(currLine);
+        if (abs(currLine[0].position.x - currLine[1].position.x) < 0.01 || abs(currLine[0].position.y - currLine[1].position.y) < 0.01)
+            level->setDynamicTiles(currLine);
     }
     currLine[0] = raysVertex.at(0)[1];
     currLine[1] = raysVertex.at(raysVertex.size() - 1)[1];

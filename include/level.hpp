@@ -14,7 +14,6 @@ struct Field {
 class Level {
 private:
 	Field field;
-//	Enemy *enemy;
 	Vector2i fieldSize; //in tile coords
 	Vector2f startPos;
 	Vector2f finishPos;
