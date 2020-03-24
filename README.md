@@ -2,7 +2,7 @@
 
 ### This project aims to create a powerful and optimized ray-tracing interface for 2d tile-based games and make a game using it.
 
-###### Current controls:
+### Current controls:
 A, D, Space - move left, right, jump<br/>
 Shift, Ctrl - place/remove light emitter<br/>
 Mouse left, right - place/remove tile<br/>
