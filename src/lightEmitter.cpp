@@ -22,7 +22,6 @@ Emitter::Emitter() {
 Emitter::Emitter(const eVector2f _position, const eVector2f _view, bool _updateOnDemand, Color _color, bool _isRestricted) {
     position = _position;
     view = _view;
-
     isRestricted = _isRestricted;
     lineOfSight = viewAngle;
     updateOnDemand = _updateOnDemand;

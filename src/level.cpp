@@ -1,24 +1,20 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <fstream>
-#include <unistd.h>
 #include <cmath>
 #include "game.hpp"
 #include "tile.hpp"
-#include <iostream>
-#include <stdlib.h>
 #include "rayTracing.hpp"
-
 #include "consts.h"
-using namespace consts;
 
+using namespace consts;
 using namespace sf;
 
 Level::Level() {
 	tileCount = 0;
 	for (int i = 0; i < field_x*field_y; ++i) {
 		Vector2f pos = Vector2f ((int)(i % field_x)*scale , ((int)i/(int)field_x)*scale);
-		field.tiles.push_back(Tile(pos, false, false));
+		field.tiles.push_back(Tile(pos, Void));
 	}
 }
 
@@ -32,49 +28,40 @@ Field* Level::getField() {
 
 void Level::update() {
     for (auto &e : field.tiles) {
-        if (e.isActive)
+        if (e.type == Dynamic) {
+            if (e.isActive)
+                e.physForm.setFillColor(Color(255, 0, 220));
+            else
+                e.physForm.setFillColor(Color(100, 0, 80));
+        }
+        else {
             e.physForm.setFillColor(Color(255, 255, 255));
-        else
-            e.physForm.setFillColor(Color(80, 80, 80));
+        }
 
     }
 }
 
 void Level::resetActive() {
     for (auto &e : field.tiles) {
-        e.isActive = false;
+        if (e.type == Dynamic) {
+            e.isActive = false;
+        }
 
     }
 }
 
-void Level::addTile(Vector2f pos) {
+void Level::addTile(Vector2f pos, TileType type) {
 	pos = Vector2f (((int)pos.x/(int)scale)*scale,((int)pos.y/(int)scale)*scale);
-	if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue != true && levelState == Blue) {
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue = true;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidBlue = true;
-	tileCount++;
-	}
-	else if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed != true && levelState == Red) {
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed = true;
-	field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidRed = true;
-	tileCount++;
-	}
+    field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).type = type;
+
 	loadToFile();
 }
 
 void Level::removeTile(Vector2f pos) {
 
 	pos = Vector2f (((int)pos.x/(int)scale)*scale + 0*scale,((int)pos.y/(int)scale)*scale + 0*scale);
-	if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue != false && levelState == Blue) {
-		field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isBlue = false;
-		field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidBlue = false;
-		tileCount--;
-	}
-	else if (field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed != false && levelState == Red) {
-		field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isRed = false;
-		field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).isSolidRed = false;
-		tileCount--;
-	}
+    field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).type = Void;
+
 	loadToFile();
 }
 
@@ -84,58 +71,28 @@ int Level::loadToFile() {
         return -1;
     for (int i = 0; i < field_y; ++i) {
     	for (int j = 0; j < field_x; ++j) {
-    		if (field.tiles.at(i*field_x + j).isBlue) {
-    			switch (field.tiles.at(i*field_x + j).type) {
-    				case Standart:
-    					levelFile << 1 << ' ';
-    					break;
-    				case Lava:
-    					levelFile << 2 << ' ';
-    					break;
-    				case StartPos:
-    					levelFile << 3 << ' ';
-    					break;
-    				case FinishPos:
-    					levelFile << 4 << ' ';
-    					break;
-					default:
-						break;
-    			}
-    		}
-    		else {
-    			levelFile << 0 << ' ';
-    		}
+            switch (field.tiles.at(i*field_x + j).type) {
+                case Standart:
+                    levelFile << 1 << ' ';
+                    break;
+                case Dynamic:
+                    levelFile << 2 << ' ';
+                    break;
+                case StartPos:
+                    levelFile << 3 << ' ';
+                    break;
+                case FinishPos:
+                    levelFile << 4 << ' ';
+                    break;
+                case Void:
+                    levelFile << 0 << ' ';
+                    break;
+                default:
+                    break;
+            }
     	}
     	levelFile << std::endl;
     }
-    levelFile << std::endl;
-    for (int i = 0; i < field_y; ++i) {
-    	for (int j = 0; j < field_x; ++j) {
-    		if (field.tiles.at(i*field_x + j).isRed) {
-    			switch (field.tiles.at(i*field_x + j).type) {
-    				case Standart:
-    					levelFile << 1 << ' ';
-    					break;
-    				case Lava:
-    					levelFile << 2 << ' ';
-    					break;
-    				case StartPos:
-    					levelFile << 3 << ' ';
-    					break;
-    				case FinishPos:
-    					levelFile << 4 << ' ';
-    					break;
-					default:
-						break;
-    			}
-    		}
-    		else {
-    			levelFile << 0 << ' ';
-    		}
-    	}
-    	levelFile << std::endl;
-    }
-
     levelFile.close();
     return 0;
 }
@@ -145,37 +102,28 @@ int Level::loadFromFile() {
     if(!levelFile.is_open())
         return -1;
 
-    tileCount = 0;
     for (int i = 0; i < field_y; ++i) {
     	for (int j = 0; j < field_x; ++j) {
     		int currTile;
     		levelFile >> currTile;
     		switch(currTile) {
     		case 0:
-    			field.tiles[i*field_x + j].isBlue = false;
-    			field.tiles[i*field_x + j].isSolidBlue = false;
+    			field.tiles[i*field_x + j].type = Void;
     			break;
 
     		case 1:
-    			field.tiles[i*field_x + j].isBlue = true;
-    			field.tiles[i*field_x + j].isSolidBlue = true;
     			field.tiles[i*field_x + j].type = Standart;
-    			tileCount++;
     			break;
     		case 2:
+                field.tiles[i*field_x + j].type = Dynamic;
     			break;
     		case 3:
-    			field.tiles[i*field_x + j].isBlue = true;
-    			field.tiles[i*field_x + j].isSolidBlue = false;
     			field.tiles[i*field_x + j].type = StartPos;
     			field.tiles[i*field_x + j].physForm.setFillColor(Color::Green);
     			field.tiles[i*field_x + j].physForm.setOutlineColor(Color::Black);
 				field.tiles[i*field_x + j].physForm.setOutlineThickness(1);
-    			//tileCount++;
     			break;
     		case 4:
-	    		field.tiles[i*field_x + j].isBlue = true;
-    			field.tiles[i*field_x + j].isSolidBlue = false;
     			field.tiles[i*field_x + j].type = FinishPos;
     			field.tiles[i*field_x + j].physForm.setFillColor(Color::Red);
     			field.tiles[i*field_x + j].physForm.setOutlineColor(Color::Black);
@@ -187,139 +135,59 @@ int Level::loadFromFile() {
     	}
     }
 
-    for (int i = 0; i < field_y; ++i) {
-    	for (int j = 0; j < field_x; ++j) {
-    		int currTile;
-    		levelFile >> currTile;
-    		switch(currTile) {
-    		case 0:
-    			field.tiles[i*field_x + j].isRed = false;
-    			field.tiles[i*field_x + j].isSolidRed = false;
-    			break;
-
-    		case 1:
-    			field.tiles[i*field_x + j].isRed = true;
-    			field.tiles[i*field_x + j].isSolidRed = true;
-    			field.tiles[i*field_x + j].type = Standart;
-    			tileCount++;
-    			break;
-    		case 2:
-    			break;
-    		case 3:
-    			field.tiles[i*field_x + j].isRed = true;
-    			field.tiles[i*field_x + j].isSolidRed = false;
-    			field.tiles[i*field_x + j].type = StartPos;
-    			field.tiles[i*field_x + j].physForm.setFillColor(Color::Green);
-    			field.tiles[i*field_x + j].physForm.setOutlineColor(Color::Black);
-				field.tiles[i*field_x + j].physForm.setOutlineThickness(1);
-    			//tileCount++;
-    			break;
-    		case 4:
-	    		field.tiles[i*field_x + j].isRed = true;
-	    		field.tiles[i*field_x + j].isSolidRed = false;
-	    		field.tiles[i*field_x + j].type = FinishPos;
-	    		field.tiles[i*field_x + j].physForm.setFillColor(Color::Red);
-	    		field.tiles[i*field_x + j].physForm.setOutlineColor(Color::Black);
-				field.tiles[i*field_x + j].physForm.setOutlineThickness(1);
-	    		break;
-	    	default:
-	    		break;
-	    	}
-    	}
-    }
-
-
-
     levelFile.close();
     return 0;
 }
 
-void Level::changeState() {
-	if (levelState == Blue)
-		levelState = Red;
-	else
-		levelState = Blue;
-}
-
-LevelState Level::getState() {
-	return levelState;
-}
 
 bool Level::isOnTile(Vector2f pos) {
 	Tile currTile = field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale);
-	if (currTile.isBlue && levelState == Blue && currTile.isSolidBlue) {
-		return true;
-	}
-	else if (currTile.isRed  && levelState == Red && currTile.isSolidRed) {
-		return true;
-	}
-	else {
-		return false;
-	}
-
-
-	/////
-	if (currTile.isSolid)
-        return true;
-	else
-        return false;
-	/////
+    return currTile.checkIfSolid();
 }
 
 bool Level::isOnFinish(Vector2f pos) {
 	Tile currTile = field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale);
-	if (currTile.isBlue && levelState == Blue && currTile.type == FinishPos) {
+	if (currTile.type == FinishPos)
 		return true;
-	}
-	else if (currTile.isRed  && levelState == Red && currTile.type == FinishPos) {
-		return true;
-	}
-	else {
+	else
 		return false;
-	}
 }
 
-
-
+// TODO: Maybe do something with indexes of tiles to make it look cleaner
 void Level::setActiveTile(Vector2f pos) {
     Tile currTile = field.tiles.at(((int) pos.y / (int) scale) * field_x + (int) pos.x / (int) scale);
-    if (currTile.isSolid && currTile.isDynamic)
+    if (currTile.type == Dynamic) {
         field.tiles.at(((int) pos.y / (int) scale) * field_x + (int) pos.x / (int) scale).isActive = true;
+    }
 
 }
 
+// TODO: disallow changing active/inactive state if player is on a tile
 void Level::setDynamicTiles(std::array<Vertex, 2> line) {
-    struct Line currLine;
-
+    ///representing mesh edge sa Line
+    Line currLine;
     currLine.startCoord = line[0].position;
     currLine.dir = line[1].position - line[0].position;
 
+    ///make direction of line
+    float maxLen = sqrt(currLine.dir.x*currLine.dir.x + currLine.dir.y*currLine.dir.y); ///length of the line
+    float currLen = 0;  ///current distance from starting end of the line
+    eVector2f dir = currLine.dir;
+    dir = dir.norm();
+
+    ///check the ends of the line first
     eVector2f currPos = line[1].position;
     setActiveTile(currPos);
     currPos = line[0].position;
     setActiveTile(currPos);
 
-    ///make direction of line
-    float maxLen = sqrt(currLine.dir.x*currLine.dir.x + currLine.dir.y*currLine.dir.y);
-    //float currLen = sqrt ((currLine.startCoord.x - currPos.x)*(currLine.startCoord.x - currPos.x) + (currLine.startCoord.y - currPos.y)*(currLine.startCoord.y - currPos.y));
-    float currLen = 0;////////////
-    eVector2f dir = currLine.dir;
-    dir = dir.norm();
-
-
+    // TODO: the length of the step must be varied depending on direction
+    ///then step by 1 tile witdh every iteration
     while (currLen <= maxLen) {
         if(dir.x == 0 && dir.y == 0)
             break;
         setActiveTile(currPos);
         currPos = currPos + dir*scale;
         currLen = sqrt ((currLine.startCoord.x - currPos.x)*(currLine.startCoord.x - currPos.x) + (currLine.startCoord.y - currPos.y)*(currLine.startCoord.y - currPos.y));
-
     }
 }
-
-
-
-
-
-
-

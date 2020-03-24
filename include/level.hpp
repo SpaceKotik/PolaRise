@@ -18,18 +18,16 @@ private:
 	Vector2f startPos;
 	Vector2f finishPos;
 	int tileCount;
-	LevelState levelState = Blue;
+	//LevelState levelState = Blue;
 public:
 	Level();
 	void setField();
 	Field* getField();
 	void update();
-	void addTile(Vector2f);
+	void addTile(Vector2f, TileType type);
 	void removeTile(Vector2f);
 	int loadToFile();
 	int loadFromFile();
-	void changeState();
-	LevelState getState();
 	bool isOnTile(Vector2f pos);
 	bool isOnFinish(Vector2f pos);
 

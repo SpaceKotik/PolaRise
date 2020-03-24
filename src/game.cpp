@@ -3,6 +3,7 @@
 #include <mutex>
 #include <cmath>
 
+#include "../FpsCounter/fpsCounter.h"
 #include "../SmartVector2/SmartVector2f.h"
 #include "game.hpp"
 #include "level.hpp"
@@ -16,31 +17,12 @@ using namespace consts;
 //#define DUMP false
 
 #define DOPIXEL false
-#define DOBLUR false
+#define DOBLUR true
 #define DOSHADOW true
 
-
-class FPScounter {
-    public:
-        std::string update();
-    private:
-        sf::Clock delayTimer;
-        sf::Clock fpsTimer;
-        float fps = 0;
-        int frameCount = 0;
-};
-
-std::string FPScounter::update() {
-    frameCount++;
-
-    if (delayTimer.getElapsedTime().asSeconds() > 0.2) {
-        fps = frameCount / fpsTimer.restart().asSeconds();
-        frameCount = 0;
-        delayTimer.restart();
-
-    }
-    return " FPS: " + std::to_string((int)fps);
-}
+// TODO: solve edge cases for emitters, player, etc.
+// TODO: fix freezes, maybe make movement fps invariant
+// TODO: make lightScene more flexible (for rotating and moving emitters, like emitterRotate() and emitterMove())
 
 Game::Game() {
     gameState = Gameplay;
@@ -67,8 +49,9 @@ Game::Game() {
 
     if(!lightScene.setShaders(DOBLUR, DOSHADOW))
        window.close();
-    lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1), true, false);
-
+    //lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1), true, false);
+    lightScene.addEmitter(eVector2f(600, 100), eVector2f(1,1), true, false);
+    lightScene.addEmitter(eVector2f(900, 100), eVector2f(1,1), true, false);
 
 
     lightScene.updateEmittersRayTracing(&level);
@@ -81,9 +64,8 @@ RenderWindow* Game::getHandle() {
 void Game::run() {
     Clock clock;
     FPScounter fpsCounter;
-
     while(window.isOpen()) {
-        window.setTitle("PolaRise" + fpsCounter.update());
+        window.setTitle("PolaRise" + fpsCounter.get());
         input();
         logic();
         draw();
@@ -97,7 +79,7 @@ void Game::draw() {
 
 //////////////////////
     window.setActive(false);
-    lightScene.updateEmitter(0, eVector2f(player.getPos()), player.view, false);
+
 
     lightScene.draw();
     Sprite tempSprite;
@@ -121,15 +103,8 @@ void Game::draw() {
 
     ///draw all tiles
     for (int i = 0; i < field_x*field_y; ++i) {
-        if (level.getState() == Blue) {
-            if (level.getField()->tiles[i].isBlue) {
-                window.draw(level.getField()->tiles[i].physForm, BlendAdd);
-            }
-        }
-        else if (level.getState() == Red) {
-            if (level.getField()->tiles[i].isRed) {
-                window.draw(level.getField()->tiles[i].physForm, BlendAdd);
-            }
+        if (level.getField()->tiles[i].checkIfLightAbsorb()) {
+            window.draw(level.getField()->tiles[i].physForm, BlendAdd);
         }
     }
 
@@ -177,9 +152,9 @@ void Game::draw() {
 
 }
 
-void Game::input() {
-    Vector2f mouseState;
-    mouseState = (Vector2f)Mouse::getPosition(window);
+void Game::input()  {
+    Vector2f mousePos;
+    mousePos = (Vector2f)Mouse::getPosition(window);
 
     Event event;
     while (window.pollEvent(event)) {
@@ -188,32 +163,23 @@ void Game::input() {
         case Event::Closed:
             window.close();
             break;
-
-        case Event::MouseButtonPressed:
-            if (event.mouseButton.button == Mouse::Left) {
-
-            }
-            break;
-
         case Event::KeyPressed:
-            if(event.key.code == Keyboard::Q) {
-
-                level.changeState();
-                if (!level.isOnTile(player.getPos() + Vector2f(heroRadius - .1, heroRadius - .1)) && !level.isOnTile(player.getPos() + Vector2f(heroRadius - .1, -heroRadius + .1))
-                    && !level.isOnTile(player.getPos() + Vector2f(-heroRadius + .1, heroRadius - .1)) && !level.isOnTile(player.getPos() + Vector2f(-heroRadius + .1, -heroRadius + .1))) {
-                        lightScene.updateEmittersRayTracing(&level);///////
-                }
-                else {
-                    level.changeState();
-                }
-
-            }
             if(event.key.code == Keyboard::LShift) {
                 lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(1, 1), false, true);
                 lightScene.updateEmittersRayTracing(&level);
             }
             if(event.key.code == Keyboard::LControl) {
                 lightScene.deleteEmitter(Vector2f(Vector2f(Mouse::getPosition(window))));
+            }
+            if(event.key.code == Keyboard::Space) {
+                if (keys.jumpAble) {
+                    player.velocity.y -= maxVelocity;
+                    keys.jumpTime.restart();
+                    keys.space = true;
+                }
+            }
+            if(event.key.code == Keyboard::Escape) {
+                window.close();
             }
 
             if(event.key.code == Keyboard::D) {
@@ -228,17 +194,7 @@ void Game::input() {
             if(event.key.code == Keyboard::S) {
                 keys.down= true;
             }
-            if(event.key.code == Keyboard::Space) {
-                if (keys.jumpAble) {
-                    player.velocity.y -= maxVelocity;
-                    keys.jumpTime.restart();
-                    keys.space = true;
-                }
-            }
 
-            if(event.key.code == Keyboard::Escape) {
-                window.close();
-            }
             break;
 
         case Event::KeyReleased:
@@ -258,18 +214,21 @@ void Game::input() {
                 keys.space = false;
                 keys.jumpAble = false;
             }
-
         default:
             break;
         }
     }
 
     if (Mouse::isButtonPressed(sf::Mouse::Left)) {
-                level.addTile(mouseState);
+                level.addTile(mousePos, Standart);
                 lightScene.updateEmittersRayTracing(&level);///////
     }
+    if (Mouse::isButtonPressed(sf::Mouse::Middle)) {
+        level.addTile(mousePos, Dynamic);
+        lightScene.updateEmittersRayTracing(&level);///////
+    }
     if (Mouse::isButtonPressed(sf::Mouse::Right)) {
-        level.removeTile(mouseState);
+        level.removeTile(mousePos);
         lightScene.updateEmittersRayTracing(&level);///////
     }
 
@@ -279,7 +238,7 @@ void Game::input() {
 }
 
 void Game::logicMovement() {
-
+    // TODO: fix player jumping in air
     if (keys.jumpTime.getElapsedTime().asSeconds() > 0.22) {
         keys.space = false;
         keys.jumpAble = false;
@@ -298,12 +257,13 @@ void Game::logicMovement() {
         player.velocity.y += fallGravity;
     }
 
+    ///set position that player tries to move to
     Vector2f desPos;
-
+    ///first move by x, then apply restrictions
     player.move(Vector2f(player.velocity.x, 0));
     ///process right moving if player moves right
     desPos = player.getPos() + Vector2f(player.velocity.x, 0);
-    ///if no intersections, move onle horizontally
+    ///if no intersections, move only horizontally
     if (level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, heroHeight/2 - .1)) ||
         level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, -heroHeight/2 + .1)) ||
         level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, 0))) {
@@ -317,7 +277,6 @@ void Game::logicMovement() {
     ///process left moving if player moves left
     desPos = player.getPos() + Vector2f(player.velocity.x, 0);
 
-
     if (level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, heroHeight/2 - .1)) ||
         level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, -heroHeight/2 + .1)) ||
         level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, 0))) {
@@ -326,6 +285,7 @@ void Game::logicMovement() {
         player.velocity.x = 0;
     }
 
+    ///first move by y, then apply restrictions
     player.move(Vector2f(0, player.velocity.y));
     ///process up moving if player moves up
     desPos = player.getPos() + Vector2f(0, player.velocity.y);
@@ -340,7 +300,6 @@ void Game::logicMovement() {
         player.velocity.y = -player.velocity.y * 0.2;
     }
 
-
     ///process down moving if player moves down
     desPos = player.getPos() + Vector2f(0, player.velocity.y);
 
@@ -353,10 +312,12 @@ void Game::logicMovement() {
     if (player.velocity.y == 0)
         keys.jumpAble = true;///////////////
 
-    ///decrease veloicty if no input
+
+    ///decrease velocity if no input
     if (!keys.right && !keys.left)
         player.velocity = Vector2f(player.velocity.x * 0.88, player.velocity.y);
 
+    ///restrict speed by x and y
     if(abs(player.velocity.x) > maxVelocity) {
         player.velocity.x /= abs(player.velocity.x);
         player.velocity.x *= maxVelocity;
@@ -368,10 +329,19 @@ void Game::logicMovement() {
     }
 }
 
+eVector2f view1 = {1, 0};
+eVector2f view2 = {-1, 0};
 void Game::logic() {
+
+    lightScene.updateEmitter(0, {500, 100}, view2.rotate(-0.03), false);
+    lightScene.updateEmitter(1, {800, 100}, view1.rotate(0.03), false);
+
     level.resetActive();
     lightScene.setActiveTiles(&level);
     level.update();
+
+
+    //lightScene.updateEmitter(0, eVector2f(player.getPos()), player.view, false);
 
     logicMovement();
 

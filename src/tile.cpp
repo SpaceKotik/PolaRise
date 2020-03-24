@@ -14,37 +14,29 @@ Tile::Tile() {
 	physForm.setFillColor(Color::White);
 	physForm.setOutlineColor(Color::Black);
 	physForm.setOutlineThickness(3);
-	isDynamic = false;
+
+
 }
 
-Tile::Tile(Vector2f pos, bool isRed, bool isBlue) {
+Tile::Tile(Vector2f pos, TileType _type) {
 	physForm.setPosition(pos);
 	physForm.setSize(Vector2f(scale, scale));
 	physForm.setFillColor(tileDefaultColor);
 	physForm.setOutlineColor(Color(190, 190, 190));
 	physForm.setOutlineThickness(0);
-	isSolidBlue = false;
-	isSolidRed = false;
-	isDynamic = true;
-	isSolid = true;
+    type = _type;
+	isActive = false;
 }
 
 RectangleShape Tile::getRect() {
 	return physForm;
 }
 
-bool Tile::checkIfBlue() {
-	return isBlue;
+bool Tile::checkIfSolid() {
+    return (type != Void) && !(type == Dynamic && !isActive);
+
 }
 
-bool Tile::checkIfRed() {
-	return isRed;
-}
-
-bool Tile::checkIfSolidRed() {
-	return isSolidRed;
-}
-
-bool Tile::checkIfSolidBlue() {
-	return isSolidBlue;
+bool Tile::checkIfLightAbsorb() {
+    return (type != Void) ;
 }

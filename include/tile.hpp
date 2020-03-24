@@ -4,30 +4,22 @@
 
 using namespace sf;
 
-enum TileType {Standart, StartPos, FinishPos, Lava};
+enum TileType {Standart, Dynamic, Void, StartPos, FinishPos};
 
 class Tile {
 private:
 	RectangleShape physForm;
-
-	bool isRed;
-	bool isBlue;
-	bool isSolidRed = false;
-	bool isSolidBlue = false;
-
     TileType type = Standart;
-    bool isSolid = false;
-	bool isDynamic = true;
 	bool isActive = false;
 public:
 	Tile();
-	Tile(Vector2f pos, bool isRed, bool isBlue);
+	Tile(Vector2f pos, TileType _type);
 	RectangleShape getRect();
-	bool checkIfBlue();
-	bool checkIfRed();
-	bool checkIfSolidRed();
-	bool checkIfSolidBlue();
+
+	bool checkIfSolid();
+	bool checkIfLightAbsorb();
 
 friend class Game;
 friend class Level;
+friend class RayTracing;
 };

@@ -30,7 +30,6 @@ public:
     bool setLineOfSight(float);
 
     void setActiveTiles(Level *level);
-
     void updateRayTracing(bool update = false);
     VertexArray createMesh();
 };

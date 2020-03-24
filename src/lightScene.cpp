@@ -9,6 +9,7 @@
 #include "consts.h"
 using namespace consts;
 
+// TODO: fix loading shaders
 LightScene::LightScene() {
     doBlur = true;
     doShadow = true;
@@ -18,9 +19,7 @@ LightScene::LightScene() {
     targetTex.setSmooth(true);
 }
 
-LightScene::~LightScene() {
-
-}
+LightScene::~LightScene() {}
 
 ///function passed to threads
 void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock) {
