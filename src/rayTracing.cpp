@@ -335,46 +335,63 @@ void RayTracing::update(Vector2f pos, bool _isRestricted, Vector2f view, float _
 	}
 }
 
+
+bool isNear(float a, float b) {
+    return (a - b) < 0.1 && (a - b) > -0.1;
+}
+
 Line RayTracing::getPartIntersection(Line ray, Line line) {
-    ///Seems like it causes weird glitches
+    // FIXME: this part may cause glitches
+    // FIXME: added offset for all level tiles as fast solution
 /*
     // Are they parallel? If so, no intersect
-    float r_mag = sqrt(ray.dir.x*ray.dir.x+ray.dir.y*ray.dir.y);
-    float s_mag = sqrt(line.dir.x*line.dir.x+line.dir.y*line.dir.y);
+    float rayLen = sqrt(ray.dir.x * ray.dir.x + ray.dir.y * ray.dir.y);
+    float lineLen = sqrt(line.dir.x * line.dir.x + line.dir.y * line.dir.y);
 
     float distance1 = sqrt ((line.startCoord.x-ray.startCoord.x)*(line.startCoord.x-ray.startCoord.x) + (line.startCoord.y-ray.startCoord.y)*(line.startCoord.y-ray.startCoord.y));
     float distance2 = sqrt ((line.startCoord.x + line.dir.x-ray.startCoord.x)*(line.startCoord.x + line.dir.x-ray.startCoord.x)
      + (line.startCoord.y + line.dir.y-ray.startCoord.y)*(line.startCoord.y + line.dir.y-ray.startCoord.y));
 
-    if(abs(ray.dir.x/r_mag) == abs(line.dir.x/s_mag) && abs(ray.dir.y/r_mag) == abs(line.dir.y/s_mag)){ // Directions are the same.
+    if(abs(ray.dir.x / rayLen) == abs(line.dir.x / lineLen) && abs(ray.dir.y / rayLen) == abs(line.dir.y / lineLen) && (ray.startCoord.x == line.startCoord.x || ray.startCoord.y == line.startCoord.y)){ /// Directions are the same.
     	if (distance1 > distance2) {
     		Line tempLine;
 		    tempLine.startCoord = Vector2f(line.startCoord.x + line.dir.x, line.startCoord.y + line.dir.y);
-		    Line tempRay;
-		    tempRay.startCoord = ray.startCoord;
-		    tempRay.dir.x = line.startCoord.x + line.dir.x;
-		    tempRay.dir.y = line.startCoord.y + line.dir.y;
-		    //tempLine.param = getLen(tempRay) / getLen(ray);
+		    tempLine.param = distance2/rayLen;
 		    return tempLine;
     	}
     	else {
     		Line tempLine;
 		    tempLine.startCoord = Vector2f(line.startCoord.x, line.startCoord.y);
-		    Line tempRay;
-		    tempRay.startCoord = ray.startCoord;
-		    tempRay.dir.x = line.startCoord.x + line.dir.x;
-		    tempRay.dir.y = line.startCoord.y + line.dir.y;
-		    //tempLine.param = getLen(tempRay) / getLen(ray);
+            tempLine.param = distance1/rayLen;
 		    return tempLine;
     	}
-
-        Line tempLine;
-        tempLine.startCoord = NO_INTERSECTION;
-       // tempLine.param = 100000;
-        return tempLine;
 	}
 */
-    ///
+///Seems useless
+/*
+    eVector2f point1 = line.startCoord;
+    eVector2f point2 = line.startCoord + line.dir;
+    float rayLen = sqrt(ray.dir.x * ray.dir.x + ray.dir.y * ray.dir.y);
+    float distance1 = sqrt ((point1.x-ray.startCoord.x)*(point1.x-ray.startCoord.x) + (point1.y-ray.startCoord.y)*(point1.y-ray.startCoord.y));
+    float distance2 = sqrt ((point2.x-ray.startCoord.x)*(point2.x-ray.startCoord.x) + (point2.y-ray.startCoord.y)*(point2.y-ray.startCoord.y));
+    if ((isNear(point1.x, ray.startCoord.x) && isNear(point2.x, ray.startCoord.x) && isNear(ray.dir.x, 0)) ||
+            ( isNear(point1.y, ray.startCoord.y) && isNear(point2.y, ray.startCoord.y) && isNear(ray.dir.y, 0))) {
+        if (distance1 > distance2) {
+            Line tempLine;
+            tempLine.startCoord = point2;
+            tempLine.param = distance2/rayLen;
+            return tempLine;
+        }
+        else {
+            Line tempLine;
+            tempLine.startCoord = point1;
+            tempLine.param = distance1/rayLen;
+            return tempLine;
+        }
+
+    }
+*/
+
 
     /// SOLVE FOR T1 & T2
     /// ray.startCoord.x+ray.dirX*T1 = s_px+line.startCoord.x*T2 && ray.startCoord.y+ray.dirY*T1 = line.startCoord.y+line.startCoord.y*T2
@@ -389,7 +406,7 @@ Line RayTracing::getPartIntersection(Line ray, Line line) {
         tempLine.startCoord = NO_INTERSECTION;
         return tempLine;
     }
-    if(T2<-0.0 || T2>1.0) {
+    if(T2 < 0 || T2 > 1) {
         Line tempLine;
         tempLine.startCoord = NO_INTERSECTION;
         return tempLine;

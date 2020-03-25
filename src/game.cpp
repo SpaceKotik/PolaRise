@@ -52,11 +52,11 @@ Game::Game() {
     if(!lightScene.setShaders(DOBLUR, DOSHADOW))
        window.close();
     //lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1), true, false);
-    lightScene.addEmitter(eVector2f(500, 100), eVector2f(1,0), true, false);
-    lightScene.addEmitter(eVector2f(800, 100), eVector2f(-1,0), true, false);
+    lightScene.addEmitter(eVector2f(1000, 750), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(400, 100), eVector2f(0, 1), true, false);
 
-    lightScene.setBehaviour(0, new EmitterBehaviour::Rotate());
-    lightScene.setBehaviour(1, new EmitterBehaviour::Rotate());
+    lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
+    lightScene.setBehaviour(1, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
 
     lightScene.updateEmittersRayTracing(&level);
 }

@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include "../SmartVector2/SmartVector2f.h"
 #pragma once
 
 namespace consts {
@@ -14,7 +15,7 @@ namespace consts {
     extern const float heroAcceleration;
     extern const float maxVelocity;
     extern const float viewAngle;
-
+    extern const eVector2f offset;
 
     extern const float jumpGravity;
     extern const float fallGravity;

@@ -18,6 +18,8 @@ namespace consts {
     constexpr float jumpGravity = 0.1;
     constexpr float fallGravity = 0.8;
 
+
+    const eVector2f offset = eVector2f(0.001, 0.001);
     //extern const Color tileDefaultColor = Color(100, 100, 100);
     const Color tileDefaultColor = Color::White;
     const Color heroColor = Color(150, 150, 150);

@@ -3,6 +3,7 @@
 #include "rayTracing.hpp"
 #include "../SmartVector2/SmartVector2f.h"
 #include "lightEmitter.h"
+#include <algorithm>
 
 #include "consts.h"
 #include <iostream>
@@ -70,11 +71,14 @@ bool Emitter::setLineOfSight(float _viewAngle) {
 }
 
 void Emitter::setBehaviour(EmitterBehaviour::Behaviour* _behaviour) {
-    delete behaviour;
-    if (_behaviour != nullptr)
-        behaviour = _behaviour;
-}
 
+    if (_behaviour != nullptr) {
+        delete behaviour;
+        behaviour = _behaviour;
+    }
+
+
+}
 
 void Emitter::rotate(const float angle) {
     view.rotate(angle);
@@ -106,18 +110,64 @@ void Emitter::update() {
 
 
 
+
+
+
 using namespace EmitterBehaviour;
 Behaviour::Behaviour() = default;
 
 Behaviour::~Behaviour() = default;
 
+MoveByPath::MoveByPath() {
+    dir = (pos2 - pos1);
+    dir = dir.norm();
+}
+
+MoveByPath::MoveByPath(eVector2f _pos1, eVector2f _pos2, float _speed = 1) {
+    speed = _speed;
+    pos1 = _pos1;
+    pos2 = _pos2;
+    dir = (pos2 - pos1);
+    dir = dir.norm();
+}
+
+// FIXME: if emitter's start pos is not on the first point of line, it works incorrectly
 void MoveByPath::update(Emitter* emitter) {
-    emitter->move({1, 0});
+
+    emitter->move(dir*speed);
+
+    eVector2f currPos = emitter->getPosition();
+    bool switched = false;
+    if(currPos.x > std::max(pos1.x, pos2.x)) {
+        currPos.x = std::max(pos1.x, pos2.x);
+        emitter->setPosition(currPos);
+        switched = true;
+    }
+    else if(currPos.x < std::min(pos1.x, pos2.x)) {
+        currPos.x = std::min(pos1.x, pos2.x);
+        emitter->setPosition(currPos);
+        switched = true;
+    }
+    if(currPos.y > std::max(pos1.y, pos2.y)) {
+        currPos.y = std::max(pos1.y, pos2.y);
+        emitter->setPosition(currPos);
+        switched = true;
+    }
+    else if(currPos.y < std::min(pos1.y, pos2.y)) {
+        currPos.y = std::min(pos1.y, pos2.y);
+        emitter->setPosition(currPos);
+        switched = true;
+    }
+
+    if(switched)
+        dir = -dir;
+}
+
+Rotate::Rotate(float _speed) {
+    speed = _speed;
 }
 
 void Rotate::update(Emitter* emitter) {
-    emitter->rotate(0.03);
+    emitter->rotate(speed);
 }
-
-
 

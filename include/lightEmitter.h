@@ -20,14 +20,23 @@ namespace EmitterBehaviour {
     };
 
     class MoveByPath : public Behaviour {
+    private:
+        eVector2f pos1 = {100, 100};
+        eVector2f pos2 = {100, 200};
+        eVector2f dir;
+        float speed = 1;
+
     public:
-        //MoveByPath();
+        MoveByPath();
+        MoveByPath(eVector2f, eVector2f, float);
         void update(Emitter*) override;
     };
 
     class Rotate : public Behaviour {
+        float speed = 0.03;
     public:
         //Rotate();
+        Rotate(float);
         void update(Emitter*) override;
     };
 }

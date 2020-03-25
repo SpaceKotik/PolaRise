@@ -13,7 +13,7 @@ using namespace sf;
 Level::Level() {
 	tileCount = 0;
 	for (int i = 0; i < field_x*field_y; ++i) {
-		Vector2f pos = Vector2f ((int)(i % field_x)*scale , ((int)i/(int)field_x)*scale);
+		Vector2f pos = Vector2f ((int)(i % field_x)*scale , ((int)i/(int)field_x)*scale) + offset;
 		field.tiles.push_back(Tile(pos, Void));
 	}
 }

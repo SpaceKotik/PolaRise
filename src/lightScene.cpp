@@ -91,7 +91,6 @@ bool LightScene::setBehaviour(int i, EmitterBehaviour::Behaviour* _behaviour) {
         std::cout << "Error: invalid emitter index\n";
         return false;
     }
-
     scene.at(i).setBehaviour(_behaviour);
     return true;
 }
