@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <mutex>
 #include <thread>
+#include <iostream>
 #include "level.hpp"
 #include "../SmartVector2/SmartVector2f.h"
 #include "lightEmitter.h"
@@ -19,7 +20,13 @@ LightScene::LightScene() {
     targetTex.setSmooth(true);
 }
 
-LightScene::~LightScene() {}
+LightScene::~LightScene() = default;
+
+void LightScene::update() {
+    for (auto &e : scene) {
+        e.update();
+    }
+}
 
 ///function passed to threads
 void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock) {
@@ -68,10 +75,25 @@ bool LightScene::setShaders(bool _doBlur, bool _doShadow) {
 }
 
 bool LightScene::updateEmitter(int i, eVector2f pos, eVector2f view, bool updateObstacles) {
+    if (i >=scene.size()) {
+        std::cout << "Error: invalid emitter index\n";
+        return false;
+    }
     if (updateObstacles)
         scene.at(i).updateLightMap(&rayTracing);
     scene.at(i).setPosition(pos);
     scene.at(i).setView(view);
+    return true;
+}
+
+bool LightScene::setBehaviour(int i, EmitterBehaviour::Behaviour* _behaviour) {
+    if (i >=scene.size()) {
+        std::cout << "Error: invalid emitter index\n";
+        return false;
+    }
+
+    scene.at(i).setBehaviour(_behaviour);
+    return true;
 }
 
 void LightScene::updateEmittersRayTracing(Level *level) {
@@ -96,6 +118,17 @@ void LightScene::deleteEmitter(eVector2f coord) {
             else
                 return false;
         }), scene.end());
+}
+
+Texture& LightScene::getTexture() {
+    return const_cast<Texture &>(targetTex.getTexture());
+}
+
+
+void LightScene::setActiveTiles(Level *level) {
+    for (auto &e : scene) {
+        e.setActiveTiles(level);
+    }
 }
 
 bool LightScene::draw() {
@@ -161,12 +194,3 @@ bool LightScene::draw() {
     return true;
 }
 
-Texture& LightScene::getTexture() {
-    return const_cast<Texture &>(targetTex.getTexture());
-}
-
-void LightScene::setActiveTiles(Level *level) {
-    for (auto &e : scene) {
-        e.setActiveTiles(level);
-    }
-}

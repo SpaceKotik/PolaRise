@@ -28,14 +28,18 @@ public:
     LightScene();
     ~LightScene();
 
+    void update();
     bool setShaders(bool doBlur, bool doShadow);
     bool updateEmitter(int i, eVector2f pos, eVector2f _view, bool updateObstacles = false);
+
+    bool setBehaviour(int i, EmitterBehaviour::Behaviour*);
     void updateEmittersRayTracing(Level *level);     ///Updates obstacles in lightScene rayTracing, then applied to all Emitters
     void addEmitter(eVector2f _position, eVector2f _view, bool _isRestricted = true, bool updateOnDemand = true);
     void deleteEmitter(eVector2f coord);
+    bool draw();    ///Draws all Emitters to targetTex
+    Texture& getTexture();  ///This texture must be applied to sprite which then drawn to window
+
     void setActiveTiles(Level *level);
 
-    bool draw();    ///Draws all Emitters to targetTex
 
-    Texture& getTexture();  ///This texture must be applied to sprite which then drawn to window
 };

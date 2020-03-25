@@ -8,6 +8,7 @@
 #include "player.hpp"
 #include "dump.hpp"
 #include "lightScene.h"
+#include "lightEmitter.h"
 
 using namespace sf;
 

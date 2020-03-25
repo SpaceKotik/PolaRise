@@ -5,6 +5,7 @@
 #include "lightEmitter.h"
 
 #include "consts.h"
+#include <iostream>
 using namespace consts;
 
 #define DEFAULTEMITTER_POS eVector2f(-100, -100)
@@ -17,6 +18,7 @@ Emitter::Emitter() {
     isRestricted = true;
     lineOfSight = DEFAULTEMITTER_LINEOFSIGHT;
     color = lightColorRed;
+    behaviour = nullptr;
 }
 
 Emitter::Emitter(const eVector2f _position, const eVector2f _view, bool _updateOnDemand, Color _color, bool _isRestricted) {
@@ -26,9 +28,13 @@ Emitter::Emitter(const eVector2f _position, const eVector2f _view, bool _updateO
     lineOfSight = viewAngle;
     updateOnDemand = _updateOnDemand;
     color = _color;
+    behaviour = nullptr;
 }
 
 Emitter::~Emitter() {
+    //std::cout << "Emitter: " << behaviour << std::endl;
+    //if (behaviour != nullptr)
+     //   delete behaviour;
 
 }
 
@@ -63,6 +69,21 @@ bool Emitter::setLineOfSight(float _viewAngle) {
     return true;
 }
 
+void Emitter::setBehaviour(EmitterBehaviour::Behaviour* _behaviour) {
+    delete behaviour;
+    if (_behaviour != nullptr)
+        behaviour = _behaviour;
+}
+
+
+void Emitter::rotate(const float angle) {
+    view.rotate(angle);
+}
+
+void Emitter::move(const eVector2f dir) {
+    position += dir;
+}
+
 ///calculcates new VertexArray only if is needed
 void Emitter::updateRayTracing(bool update) {
     if (!updateOnDemand || update)
@@ -77,3 +98,26 @@ VertexArray Emitter::createMesh() {
 void Emitter::setActiveTiles(Level *level) {
     rayTracing.setActiveTiles(level);
 }
+
+void Emitter::update() {
+    if (behaviour != nullptr)
+        behaviour->update(this);
+}
+
+
+
+using namespace EmitterBehaviour;
+Behaviour::Behaviour() = default;
+
+Behaviour::~Behaviour() = default;
+
+void MoveByPath::update(Emitter* emitter) {
+    emitter->move({1, 0});
+}
+
+void Rotate::update(Emitter* emitter) {
+    emitter->rotate(0.03);
+}
+
+
+

@@ -8,6 +8,8 @@
 #include "game.hpp"
 #include "level.hpp"
 #include "consts.h"
+//#include "emitterBehaviour.h"
+
 
 using namespace sf;
 using namespace consts;
@@ -50,9 +52,11 @@ Game::Game() {
     if(!lightScene.setShaders(DOBLUR, DOSHADOW))
        window.close();
     //lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1), true, false);
-    lightScene.addEmitter(eVector2f(600, 100), eVector2f(1,1), true, false);
-    lightScene.addEmitter(eVector2f(900, 100), eVector2f(1,1), true, false);
+    lightScene.addEmitter(eVector2f(500, 100), eVector2f(1,0), true, false);
+    lightScene.addEmitter(eVector2f(800, 100), eVector2f(-1,0), true, false);
 
+    lightScene.setBehaviour(0, new EmitterBehaviour::Rotate());
+    lightScene.setBehaviour(1, new EmitterBehaviour::Rotate());
 
     lightScene.updateEmittersRayTracing(&level);
 }
@@ -329,17 +333,13 @@ void Game::logicMovement() {
     }
 }
 
-eVector2f view1 = {1, 0};
-eVector2f view2 = {-1, 0};
-void Game::logic() {
 
-    lightScene.updateEmitter(0, {500, 100}, view2.rotate(-0.03), false);
-    lightScene.updateEmitter(1, {800, 100}, view1.rotate(0.03), false);
+void Game::logic() {
+    lightScene.update();
 
     level.resetActive();
     lightScene.setActiveTiles(&level);
     level.update();
-
 
     //lightScene.updateEmitter(0, eVector2f(player.getPos()), player.view, false);
 
