@@ -7,7 +7,6 @@ namespace consts {
     constexpr int field_y = 30;
     constexpr int window_x = field_x*scale;
     constexpr int window_y = field_y*scale;
-    constexpr float heroRadius = 10;
     constexpr float heroHeight = 40;
     constexpr float heroWidth = 20;
 
@@ -27,9 +26,9 @@ namespace consts {
     //extern const Color backgroundColor = Color (50, 50, 50);
     const Color backgroundColor = Color (0, 0, 0);
 
-    //const Color lightColorBlue = Color(102, 102, 255);	//Blue for 1 source
-    //const Color lightColorBlue = Color(250, 236, 130);	//Blue for 1 source
-    const Color lightColorRed = Color(255, 51, 51);		//Red for 1 source
+    //const Color lightColorBlue = Color(102, 102, 255);	                ///Blue for 1 source
+    //const Color lightColorBlue = Color(250, 236, 130                      ///Blue for 1 source
+    const Color lightColorRed = Color(255, 51, 51);		///Red for 1 source
 }
 
 

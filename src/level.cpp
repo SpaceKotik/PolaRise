@@ -33,6 +33,7 @@ void Level::update() {
                 e.physForm.setFillColor(Color(255, 0, 220));
             else
                 e.physForm.setFillColor(Color(100, 0, 80));
+                //e.physForm.setFillColor(Color::Black);
         }
         else {
             e.physForm.setFillColor(Color(255, 255, 255));
@@ -162,7 +163,6 @@ void Level::setActiveTile(Vector2f pos) {
 
 }
 
-// TODO: disallow changing active/inactive state if player is on a tile
 void Level::setDynamicTiles(std::array<Vertex, 2> line) {
     ///representing mesh edge sa Line
     Line currLine;

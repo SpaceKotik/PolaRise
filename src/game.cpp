@@ -8,7 +8,7 @@
 #include "game.hpp"
 #include "level.hpp"
 #include "consts.h"
-//#include "emitterBehaviour.h"
+#include "emitterBehaviour.h"
 
 
 using namespace sf;
@@ -20,7 +20,7 @@ using namespace consts;
 
 #define DOPIXEL false
 #define DOBLUR true
-#define DOSHADOW true
+#define DOSHADOW false
 
 // TODO: solve edge cases for emitters, player, etc.
 // TODO: fix freezes, maybe make movement fps invariant
@@ -51,12 +51,15 @@ Game::Game() {
 
     if(!lightScene.setShaders(DOBLUR, DOSHADOW))
        window.close();
+
     //lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1), true, false);
     lightScene.addEmitter(eVector2f(1000, 750), eVector2f(0, 1), true, false);
     lightScene.addEmitter(eVector2f(400, 100), eVector2f(0, 1), true, false);
 
-    lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
-    lightScene.setBehaviour(1, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
+    //lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
+    //lightScene.setBehaviour(0, new EmitterBehaviour::MoveByCircle({585, 225}, 130, 3));
+    lightScene.setBehaviour(0, new EmitterBehaviour::Flicker(0.02));
+    lightScene.setBehaviour(1, new EmitterBehaviour::MoveByPath({400, 600}, {800, 600}, 5));
 
     lightScene.updateEmittersRayTracing(&level);
 }
@@ -176,47 +179,31 @@ void Game::input()  {
                 lightScene.deleteEmitter(Vector2f(Vector2f(Mouse::getPosition(window))));
             }
             if(event.key.code == Keyboard::Space) {
-                if (keys.jumpAble) {
-                    player.velocity.y -= maxVelocity;
-                    keys.jumpTime.restart();
-                    keys.space = true;
-                }
+                if (player.states.jumpAble)
+                    player.states.jumpMade = true;
             }
             if(event.key.code == Keyboard::Escape) {
                 window.close();
             }
 
             if(event.key.code == Keyboard::D) {
-                keys.right = true;
+                player.states.right = true;
             }
             if(event.key.code == Keyboard::A) {
-                keys.left = true;
+                player.states.left = true;
             }
-            if(event.key.code == Keyboard::W) {
-                keys.up = true;
-            }
-            if(event.key.code == Keyboard::S) {
-                keys.down= true;
-            }
-
             break;
 
         case Event::KeyReleased:
             if(event.key.code == Keyboard::D) {
-                keys.right = false;
+                player.states.right = false;
             }
             if(event.key.code == Keyboard::A) {
-                keys.left = false;
-            }
-            if(event.key.code == Keyboard::W) {
-                keys.up = false;
-            }
-            if(event.key.code == Keyboard::S) {
-                keys.down= false;
+                player.states.left = false;
             }
             if(event.key.code == Keyboard::Space) {
-                keys.space = false;
-                keys.jumpAble = false;
+                player.states.space = false;
+                player.states.jumpAble = false;
             }
         default:
             break;
@@ -241,109 +228,17 @@ void Game::input()  {
     player.view = eVector2f((Vector2f)Mouse::getPosition(window) - player.getPos()).norm();
 }
 
-void Game::logicMovement() {
-    // TODO: fix player jumping in air
-    if (keys.jumpTime.getElapsedTime().asSeconds() > 0.22) {
-        keys.space = false;
-        keys.jumpAble = false;
-        keys.jumpTime.restart();
-    }
-
-    ///process input
-    if (keys.right)
-        player.velocity.x += heroAcceleration;
-    if (keys.left)
-        player.velocity.x -= heroAcceleration;
-    if (keys.space) {
-        player.velocity.y += jumpGravity;
-    }
-    else {
-        player.velocity.y += fallGravity;
-    }
-
-    ///set position that player tries to move to
-    Vector2f desPos;
-    ///first move by x, then apply restrictions
-    player.move(Vector2f(player.velocity.x, 0));
-    ///process right moving if player moves right
-    desPos = player.getPos() + Vector2f(player.velocity.x, 0);
-    ///if no intersections, move only horizontally
-    if (level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, heroHeight/2 - .1)) ||
-        level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, -heroHeight/2 + .1)) ||
-        level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, 0))) {
-
-        ///else move right to the obstacle and mirror speed
-        player.setPos(Vector2f(((int) player.getPos().x / (int) scale + 1) * scale - heroWidth/2, player.getPos().y));
-        player.velocity.x = 0;
-    }
-
-
-    ///process left moving if player moves left
-    desPos = player.getPos() + Vector2f(player.velocity.x, 0);
-
-    if (level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, heroHeight/2 - .1)) ||
-        level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, -heroHeight/2 + .1)) ||
-        level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, 0))) {
-
-        player.setPos(Vector2f(((int) player.getPos().x / (int) scale) * scale + heroWidth/2, player.getPos().y));
-        player.velocity.x = 0;
-    }
-
-    ///first move by y, then apply restrictions
-    player.move(Vector2f(0, player.velocity.y));
-    ///process up moving if player moves up
-    desPos = player.getPos() + Vector2f(0, player.velocity.y);
-
-    if (level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, -heroHeight/2 + .1)) ||
-        level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, -heroHeight/2 + .1))) {
-
-        keys.space = false;
-        keys.jumpAble = false;
-
-        player.setPos(Vector2f(player.getPos().x, ((int) player.getPos().y / (int) scale) * scale + heroHeight/2));
-        player.velocity.y = -player.velocity.y * 0.2;
-    }
-
-    ///process down moving if player moves down
-    desPos = player.getPos() + Vector2f(0, player.velocity.y);
-
-    if (level.isOnTile(desPos + Vector2f(heroWidth/2 - .1, heroHeight/2 - .1)) ||
-        level.isOnTile(desPos + Vector2f(-heroWidth/2 + .1, heroHeight/2 - .1)) ) {
-
-        player.setPos(Vector2f(player.getPos().x, ((int) player.getPos().y / (int) scale + 1) * scale - heroHeight/2));
-        player.velocity.y = 0;
-    }
-    if (player.velocity.y == 0)
-        keys.jumpAble = true;///////////////
-
-
-    ///decrease velocity if no input
-    if (!keys.right && !keys.left)
-        player.velocity = Vector2f(player.velocity.x * 0.88, player.velocity.y);
-
-    ///restrict speed by x and y
-    if(abs(player.velocity.x) > maxVelocity) {
-        player.velocity.x /= abs(player.velocity.x);
-        player.velocity.x *= maxVelocity;
-    }
-
-    if(abs(player.velocity.y) > 1.5*maxVelocity) {
-        player.velocity.y /= abs(player.velocity.y);
-        player.velocity.y *= 1.5*maxVelocity;
-    }
-}
-
-
 void Game::logic() {
     lightScene.update();
 
     level.resetActive();
     lightScene.setActiveTiles(&level);
+    player.disableDynamicTiles();
     level.update();
-
+    player.updateMovement();
     //lightScene.updateEmitter(0, eVector2f(player.getPos()), player.view, false);
 
-    logicMovement();
+    //logicMovement();
 
     dump.add("Velocity: (" + std::to_string(player.velocity.x) + " : " + std::to_string(player.velocity.y) + ")");
     dump.add("View: (" + std::to_string(player.view.x) + " : " + std::to_string(player.view.y) + ")");

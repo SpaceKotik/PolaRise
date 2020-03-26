@@ -18,10 +18,10 @@ enum GameState {Menu, Menu_2, Gameplay, Leaderboard};
 struct States {
     bool right = 0;
     bool left = 0;
-    bool up = 0;
-    bool down = 0;
+
     bool space = 0;
     bool jumpAble = true;
+    bool jumpMade = false;
     Clock jumpTime;
 
     bool isOnStart = 0;

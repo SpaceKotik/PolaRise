@@ -33,14 +33,13 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
     emitter.updateRayTracing();
 
     rtLock.lock();
-    //targetTex.draw(emitter.createMesh(), BlendAdd);
-    RenderStates states;
 
+    RenderStates states;
     states.blendMode = BlendAdd;
     if(doShadow) {
     shaderShadow.setUniform("frag_LightOrigin", scene.at(i).getPosition());
-    shaderShadow.setUniform("frag_ShadowParam1", float(20000));
-    shaderShadow.setUniform("frag_ShadowParam2", float(20000));
+    //shaderShadow.setUniform("frag_ShadowParam1", float(20000));
+    //shaderShadow.setUniform("frag_ShadowParam2", float(20000));
     shaderShadow.setUniform("frag_LightColor", Vector3f(180, 80, 230));
     //shaderShadow.setUniform("frag_LightColor", Vector3f(250, 245, 245));
     states.shader = &shaderShadow;
@@ -126,7 +125,8 @@ Texture& LightScene::getTexture() {
 
 void LightScene::setActiveTiles(Level *level) {
     for (auto &e : scene) {
-        e.setActiveTiles(level);
+        if(e.isActive)
+            e.setActiveTiles(level);
     }
 }
 
@@ -138,8 +138,12 @@ bool LightScene::draw() {
     std::mutex block;
     int index = 0;
     for (auto &e: scene) {
-        drawThreads.emplace_back(std::thread(&LightScene::doRayTracing, this, index, std::ref(e), std::ref(targetTex), std::ref(block))); ///changed from push_back
-        index++;
+        if (e.isActive) {
+            drawThreads.emplace_back(
+                    std::thread(&LightScene::doRayTracing, this, index, std::ref(e), std::ref(targetTex),
+                                std::ref(block))); ///changed from push_back
+            index++;
+        }
     }
     for (auto &e: drawThreads) {
         e.join();

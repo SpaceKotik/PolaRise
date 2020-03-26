@@ -9,7 +9,6 @@ namespace consts {
     extern const int field_y;
     extern const int window_x;
     extern const int window_y;
-    extern const float heroRadius;
     extern const float heroHeight;
     extern const float heroWidth;
     extern const float heroAcceleration;
@@ -20,13 +19,11 @@ namespace consts {
     extern const float jumpGravity;
     extern const float fallGravity;
 
-    //extern const Color tileDefaultColor;
     extern const Color tileDefaultColor;
     extern const Color heroColor;
 
-    //extern const Color backgroundColor;
     extern const Color backgroundColor;
 
-    extern const Color lightColorBlue;	//Blue for 1 source
-    extern const Color lightColorRed;    //Red for 1 source
+    extern const Color lightColorBlue;	    ///Blue for 1 source
+    extern const Color lightColorRed;       ///Red for 1 source
 }

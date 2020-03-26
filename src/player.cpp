@@ -2,24 +2,18 @@
 #include "tile.hpp"
 #include "level.hpp"
 #include "player.hpp"
-#include <iostream>
-#include <stdlib.h>
 #include "consts.h"
-#include "playerState.h"
 #include "level.hpp"
 using namespace consts;
 
 Player::Player() {
-	//physForm.setRadius(heroRadius);
 	physForm.setSize({heroWidth, heroHeight});
 	physForm.setOrigin(Vector2f(heroWidth/2, heroHeight/2));
 	physForm.setPosition(Vector2f(100, 100));
-	//physForm.setFillColor(Color(102, 0, 204));
 	physForm.setFillColor(heroColor);
 	physForm.setOutlineColor(Color(20, 20, 20));
 	physForm.setOutlineThickness(0);
-	lineOfSight = viewAngle;
-	//state = new WalkState(None);
+	level = nullptr;
 }
 
 void Player::setLevel(Level* _level) {
@@ -41,20 +35,118 @@ Vector2f Player::getPos() {
 RectangleShape* Player::getPhysForm() {
 	return &physForm;
 }
-/*
-void Player::input(Keyboard::Key input, TypeInput typeInput) {
-    PlayerState* _state = state->input(*this, input, typeInput);
-    if (_state != nullptr) {
-        delete state;
-        state = _state;
+
+void Player::disableDynamicTiles() {
+
+    FloatRect playerRect = physForm.getGlobalBounds();
+    ///extending rectangle to apply library logic to detect intersections on rectangle's right and bottom sides
+    playerRect.top += 0.001;
+    playerRect.left += 0.001;
+    playerRect.width -= 0.002;
+    playerRect.height -= 0.002;
+    ///check all tiles and set inactive all intersecting
+    for (auto &e: level->getField()->tiles) {
+        if (e.getRect().getGlobalBounds().intersects(playerRect))
+            e.isActive = false;
     }
 }
 
-void Player::update() {
-    PlayerState* _state = state->update(*this);
-    if (_state != nullptr) {
-        delete state;
-        state = _state;
+void Player::updateMovement() {
+    if (states.jumpMade) {
+        velocity.y -= maxVelocity;
+        states.jumpTime.restart();
+        states.space = true;
+        states.jumpMade = false;
+    }
+
+    // TODO: fix player jumping in air
+    if (states.jumpTime.getElapsedTime().asSeconds() > 0.22) {
+        states.space = false;
+        states.jumpAble = false;
+        states.jumpTime.restart();
+    }
+
+    ///process input
+    if (states.right)
+        velocity.x += heroAcceleration;
+    if (states.left)
+        velocity.x -= heroAcceleration;
+    if (states.space) {
+        velocity.y += jumpGravity;
+    }
+    else {
+        velocity.y += fallGravity;
+    }
+
+    ///set position that player tries to move to
+    Vector2f desPos;
+    ///first move by x, then apply restrictions
+    move(Vector2f(velocity.x, 0));
+    ///process right moving if player moves right
+    desPos = getPos() + Vector2f(velocity.x, 0);
+    ///if no intersections, move only horizontally
+    if (level->isOnTile(desPos + Vector2f(heroWidth/2 - .1, heroHeight/2 - .1)) ||
+        level->isOnTile(desPos + Vector2f(heroWidth/2 - .1, -heroHeight/2 + .1)) ||
+        level->isOnTile(desPos + Vector2f(heroWidth/2 - .1, 0))) {
+
+        ///else move right to the obstacle and mirror speed
+        setPos(Vector2f(((int) getPos().x / (int) scale + 1) * scale - heroWidth/2, getPos().y));
+        velocity.x = 0;
+    }
+
+
+    ///process left moving if player moves left
+    desPos = getPos() + Vector2f(velocity.x, 0);
+
+    if (level->isOnTile(desPos + Vector2f(-heroWidth/2 + .1, heroHeight/2 - .1)) ||
+        level->isOnTile(desPos + Vector2f(-heroWidth/2 + .1, -heroHeight/2 + .1)) ||
+        level->isOnTile(desPos + Vector2f(-heroWidth/2 + .1, 0))) {
+
+        setPos(Vector2f(((int) getPos().x / (int) scale) * scale + heroWidth/2, getPos().y));
+        velocity.x = 0;
+    }
+
+    ///first move by y, then apply restrictions
+    move(Vector2f(0, velocity.y));
+    ///process up moving if player moves up
+    desPos = getPos() + Vector2f(0, velocity.y);
+
+    if (level->isOnTile(desPos + Vector2f(heroWidth/2 - .1, -heroHeight/2 + .1)) ||
+        level->isOnTile(desPos + Vector2f(-heroWidth/2 + .1, -heroHeight/2 + .1))) {
+
+        states.space = false;
+        states.jumpAble = false;
+
+        setPos(Vector2f(getPos().x, ((int)getPos().y / (int) scale) * scale + heroHeight/2));
+        velocity.y = -velocity.y * 0.2;
+    }
+
+    ///process down moving if player moves down
+    desPos = getPos() + Vector2f(0, velocity.y);
+
+    if (level->isOnTile(desPos + Vector2f(heroWidth/2 - .1, heroHeight/2 - .1)) ||
+        level->isOnTile(desPos + Vector2f(-heroWidth/2 + .1, heroHeight/2 - .1)) ) {
+
+        setPos(Vector2f(getPos().x, ((int) getPos().y / (int) scale + 1) * scale - heroHeight/2));
+        velocity.y = 0;
+    }
+    if (velocity.y == 0)
+        states.jumpAble = true;///////////////
+
+
+    ///decrease velocity if no input
+    if (!states.right && !states.left)
+        velocity = Vector2f(velocity.x * 0.83, velocity.y);
+
+    ///restrict speed by x and y
+    if(abs(velocity.x) > maxVelocity) {
+        velocity.x /= abs(velocity.x);
+        velocity.x *= maxVelocity;
+    }
+
+    if(abs(velocity.y) > 1.5*maxVelocity) {
+        velocity.y /= abs(velocity.y);
+        velocity.y *= 1.5*maxVelocity;
     }
 }
- */
+

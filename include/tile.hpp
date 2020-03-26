@@ -22,4 +22,5 @@ public:
 friend class Game;
 friend class Level;
 friend class RayTracing;
+friend class Player;
 };

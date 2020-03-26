@@ -1,12 +1,13 @@
 #include <SFML/Graphics.hpp>
-
-#include "rayTracing.hpp"
-#include "../SmartVector2/SmartVector2f.h"
-#include "lightEmitter.h"
 #include <algorithm>
 
+#include "../SmartVector2/SmartVector2f.h"
+#include "rayTracing.hpp"
 #include "consts.h"
-#include <iostream>
+
+#include "emitterBehaviour.h"
+#include "lightEmitter.h"
+
 using namespace consts;
 
 #define DEFAULTEMITTER_POS eVector2f(-100, -100)
@@ -57,6 +58,10 @@ void Emitter::setView(eVector2f _view) {
 
 void Emitter::setColor(Color _color) {
     color = _color;
+}
+
+void Emitter::setActive(bool _isActive) {
+    isActive = _isActive;
 }
 
 void Emitter::setRestricted(bool _isRestricted) {
@@ -113,61 +118,5 @@ void Emitter::update() {
 
 
 
-using namespace EmitterBehaviour;
-Behaviour::Behaviour() = default;
 
-Behaviour::~Behaviour() = default;
-
-MoveByPath::MoveByPath() {
-    dir = (pos2 - pos1);
-    dir = dir.norm();
-}
-
-MoveByPath::MoveByPath(eVector2f _pos1, eVector2f _pos2, float _speed = 1) {
-    speed = _speed;
-    pos1 = _pos1;
-    pos2 = _pos2;
-    dir = (pos2 - pos1);
-    dir = dir.norm();
-}
-
-// FIXME: if emitter's start pos is not on the first point of line, it works incorrectly
-void MoveByPath::update(Emitter* emitter) {
-
-    emitter->move(dir*speed);
-
-    eVector2f currPos = emitter->getPosition();
-    bool switched = false;
-    if(currPos.x > std::max(pos1.x, pos2.x)) {
-        currPos.x = std::max(pos1.x, pos2.x);
-        emitter->setPosition(currPos);
-        switched = true;
-    }
-    else if(currPos.x < std::min(pos1.x, pos2.x)) {
-        currPos.x = std::min(pos1.x, pos2.x);
-        emitter->setPosition(currPos);
-        switched = true;
-    }
-    if(currPos.y > std::max(pos1.y, pos2.y)) {
-        currPos.y = std::max(pos1.y, pos2.y);
-        emitter->setPosition(currPos);
-        switched = true;
-    }
-    else if(currPos.y < std::min(pos1.y, pos2.y)) {
-        currPos.y = std::min(pos1.y, pos2.y);
-        emitter->setPosition(currPos);
-        switched = true;
-    }
-
-    if(switched)
-        dir = -dir;
-}
-
-Rotate::Rotate(float _speed) {
-    speed = _speed;
-}
-
-void Rotate::update(Emitter* emitter) {
-    emitter->rotate(speed);
-}
 
