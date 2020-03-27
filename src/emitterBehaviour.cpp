@@ -30,27 +30,37 @@ void MoveByPath::update(Emitter* emitter) {
     bool switched = false;
     if(currPos.x > std::max(pos1.x, pos2.x)) {
         currPos.x = std::max(pos1.x, pos2.x);
+        currPos.y = (currPos.x == pos1.x) ? pos1.y : pos2.y;
         emitter->setPosition(currPos);
         switched = true;
     }
     else if(currPos.x < std::min(pos1.x, pos2.x)) {
         currPos.x = std::min(pos1.x, pos2.x);
+        currPos.y = (currPos.x == pos1.x) ? pos1.y : pos2.y;
         emitter->setPosition(currPos);
         switched = true;
     }
     if(currPos.y > std::max(pos1.y, pos2.y)) {
         currPos.y = std::max(pos1.y, pos2.y);
+        currPos.x = (currPos.y == pos1.y) ? pos1.x : pos2.x;
         emitter->setPosition(currPos);
         switched = true;
     }
     else if(currPos.y < std::min(pos1.y, pos2.y)) {
         currPos.y = std::min(pos1.y, pos2.y);
+        currPos.x = (currPos.y == pos1.y) ? pos1.x : pos2.x;
         emitter->setPosition(currPos);
         switched = true;
     }
 
-    if(switched)
-        dir = -dir;
+    if(switched) {
+        if (currPos == pos1)
+            dir = pos2 - pos1;
+        else
+            dir = pos1 - pos2;
+
+    }
+
 }
 
 

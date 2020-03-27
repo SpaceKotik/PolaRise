@@ -15,19 +15,6 @@ using namespace sf;
 enum GameState {Menu, Menu_2, Gameplay, Leaderboard};
 
 
-struct States {
-    bool right = 0;
-    bool left = 0;
-
-    bool space = 0;
-    bool jumpAble = true;
-    bool jumpMade = false;
-    Clock jumpTime;
-
-    bool isOnStart = 0;
-    bool isOnFinish = 0;
-};
-
 class Game {
 private:
     GameState gameState;
@@ -38,8 +25,6 @@ private:
 
     LightScene lightScene;
 
-
-    States keys;
     Sprite bufferSprite;
     Shader shaderBlur;
     Shader shaderShadow;

@@ -22,8 +22,10 @@ using namespace consts;
 #define DOBLUR true
 #define DOSHADOW false
 
-// TODO: solve edge cases for emitters, player, etc.
-// TODO: fix freezes, maybe make movement fps invariant
+// FIXME: solve edge cases for emitters, player, etc.
+// FIXME: fix freezes, maybe make movement fps invariant
+//  Probably have been fixed by not setting framerate limit.
+//  Maybe the monitor's update speed is not exactly 60 Hz which causes glitches every ~4 seconds
 // TODO: make lightScene more flexible (for rotating and moving emitters, like emitterRotate() and emitterMove())
 
 Game::Game() {
@@ -36,7 +38,7 @@ Game::Game() {
     window.create(VideoMode(window_x, window_y), "PolaRise",
                   Style::Titlebar | Style::Close, settings);
     window.setKeyRepeatEnabled(false);
-    window.setFramerateLimit(60);
+    //window.setFramerateLimit(120);
     window.setVerticalSyncEnabled(true);
     window.setPosition(Vector2i(600, 0));
     window.setMouseCursorGrabbed(false);
@@ -54,12 +56,12 @@ Game::Game() {
 
     //lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1), true, false);
     lightScene.addEmitter(eVector2f(1000, 750), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(400, 100), eVector2f(0, 1), true, false);
-
+    lightScene.addEmitter(eVector2f(200, 100), eVector2f(0, 1), true, false);
+    //lightScene.addEmitter(eVector2f(400, 100), eVector2f(0, 1), true, false);
     //lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
     //lightScene.setBehaviour(0, new EmitterBehaviour::MoveByCircle({585, 225}, 130, 3));
-    lightScene.setBehaviour(0, new EmitterBehaviour::Flicker(0.02));
-    lightScene.setBehaviour(1, new EmitterBehaviour::MoveByPath({400, 600}, {800, 600}, 5));
+    lightScene.setBehaviour(0, new EmitterBehaviour::Flicker(2));
+    lightScene.setBehaviour(1, new EmitterBehaviour::MoveByPath({400, 100}, {800, 50}, 5));
 
     lightScene.updateEmittersRayTracing(&level);
 }
@@ -238,19 +240,8 @@ void Game::logic() {
     player.updateMovement();
     //lightScene.updateEmitter(0, eVector2f(player.getPos()), player.view, false);
 
-    //logicMovement();
-
     dump.add("Velocity: (" + std::to_string(player.velocity.x) + " : " + std::to_string(player.velocity.y) + ")");
     dump.add("View: (" + std::to_string(player.view.x) + " : " + std::to_string(player.view.y) + ")");
-
-    if(level.isOnFinish(player.getPos())) {
-        keys.isOnFinish = true;
-        std::cout << "Finish\n";
-    }
-    else {
-        keys.isOnFinish = false;///!!!
-    }
-
 
 
 }
