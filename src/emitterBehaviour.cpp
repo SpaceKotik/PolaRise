@@ -1,5 +1,5 @@
 #include "SFML/Graphics.hpp"
-#include "../util/eMath.h"
+#include "util/eMath/eMath.h"
 #include "emitterBehaviour.h"
 #include "lightEmitter.h"
 

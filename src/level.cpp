@@ -6,6 +6,7 @@
 #include "tile.hpp"
 #include "rayTracing.hpp"
 #include "consts.h"
+#include "util/eMath/eMath.h"
 
 using namespace consts;
 using namespace sf;
@@ -141,13 +142,14 @@ int Level::loadFromFile() {
 }
 
 
+
 bool Level::isOnTile(Vector2f pos) {
-	Tile currTile = field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale);
+	Tile currTile = field.tiles.at((index(pos, {field_x, field_y}, scale)));
     return currTile.checkIfSolid();
 }
 
 bool Level::isOnFinish(Vector2f pos) {
-	Tile currTile = field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale);
+	Tile currTile = field.tiles.at((index(pos, {field_x, field_y}, scale)));
 	if (currTile.type == FinishPos)
 		return true;
 	else

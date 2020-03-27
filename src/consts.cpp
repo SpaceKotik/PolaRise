@@ -7,6 +7,10 @@ namespace consts {
     constexpr int field_y = 30;
     constexpr int window_x = field_x*scale;
     constexpr int window_y = field_y*scale;
+
+   // const Vector2i efieldSize = {40, 30};
+   // const Vector2i ewindowSize = {efieldSize.x*scale, efieldSize.y*scale};
+
     constexpr float heroHeight = 40;
     constexpr float heroWidth = 20;
 

@@ -3,7 +3,7 @@
 #include <mutex>
 #include <cmath>
 
-#include "../FpsCounter/fpsCounter.h"
+#include "../util/FpsCounter/fpsCounter.h"
 #include "../SmartVector2/SmartVector2f.h"
 #include "game.hpp"
 #include "level.hpp"
@@ -23,7 +23,7 @@ using namespace consts;
 #define DOSHADOW false
 
 // FIXME: solve edge cases for emitters, player, etc.
-// FIXME: fix freezes, maybe make movement fps invariant
+// FIXME: FIXED fix freezes, maybe make movement fps invariant
 //  Probably have been fixed by not setting framerate limit.
 //  Maybe the monitor's update speed is not exactly 60 Hz which causes glitches every ~4 seconds
 // TODO: make lightScene more flexible (for rotating and moving emitters, like emitterRotate() and emitterMove())
@@ -56,13 +56,15 @@ Game::Game() {
 
     //lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1), true, false);
     lightScene.addEmitter(eVector2f(1000, 750), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(930, 430), eVector2f(0, 1), true, false);
     lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), true, false);
-    //lightScene.addEmitter(eVector2f(400, 100), eVector2f(0, 1), true, false);
+
 
     //lightScene.setBehaviour(0, new EmitterBehaviour::MoveByCircle({585, 225}, 130, 3));
     //lightScene.setBehaviour(0, new EmitterBehaviour::Flicker(1));
     lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
-    lightScene.setBehaviour(1, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
+    lightScene.setBehaviour(1, new EmitterBehaviour::Flicker(3));
+    lightScene.setBehaviour(2, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
 
     lightScene.updateEmittersRayTracing(&level);
 }

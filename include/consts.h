@@ -5,6 +5,8 @@
 namespace consts {
     using namespace sf;
     extern const int scale;
+    //extern const Vector2i efieldSize;
+    //extern const Vector2i ewindowSize;
     extern const int field_x;
     extern const int field_y;
     extern const int window_x;
