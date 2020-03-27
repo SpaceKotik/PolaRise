@@ -13,8 +13,8 @@ using namespace sf;
 
 Level::Level() {
 	tileCount = 0;
-	for (int i = 0; i < field_x*field_y; ++i) {
-		Vector2f pos = Vector2f ((int)(i % field_x)*scale , ((int)i/(int)field_x)*scale) + offset;
+	for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
+		Vector2f pos = Vector2f ((int)(i % fieldSize.x)*scale , ((int)i/(int)fieldSize.x)*scale) + offset;
 		field.tiles.push_back(Tile(pos, Void));
 	}
 }
@@ -54,7 +54,7 @@ void Level::resetActive() {
 
 void Level::addTile(Vector2f pos, TileType type) {
 	pos = Vector2f (((int)pos.x/(int)scale)*scale,((int)pos.y/(int)scale)*scale);
-    field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).type = type;
+    field.tiles.at(((int)pos.y/(int)scale)*fieldSize.x + (int)pos.x/(int)scale).type = type;
 
 	loadToFile();
 }
@@ -62,7 +62,7 @@ void Level::addTile(Vector2f pos, TileType type) {
 void Level::removeTile(Vector2f pos) {
 
 	pos = Vector2f (((int)pos.x/(int)scale)*scale + 0*scale,((int)pos.y/(int)scale)*scale + 0*scale);
-    field.tiles.at(((int)pos.y/(int)scale)*field_x + (int)pos.x/(int)scale).type = Void;
+    field.tiles.at(((int)pos.y/(int)scale)*fieldSize.x + (int)pos.x/(int)scale).type = Void;
 
 	loadToFile();
 }
@@ -71,9 +71,9 @@ int Level::loadToFile() {
 	std::ofstream levelFile("../Levels/Level_01.txt");
     if(!levelFile.is_open())
         return -1;
-    for (int i = 0; i < field_y; ++i) {
-    	for (int j = 0; j < field_x; ++j) {
-            switch (field.tiles.at(i*field_x + j).type) {
+    for (int i = 0; i < fieldSize.y; ++i) {
+    	for (int j = 0; j < fieldSize.x; ++j) {
+            switch (field.tiles.at(i*fieldSize.x + j).type) {
                 case Standart:
                     levelFile << 1 << ' ';
                     break;
@@ -104,32 +104,32 @@ int Level::loadFromFile() {
     if(!levelFile.is_open())
         return -1;
 
-    for (int i = 0; i < field_y; ++i) {
-    	for (int j = 0; j < field_x; ++j) {
+    for (int i = 0; i < fieldSize.y; ++i) {
+    	for (int j = 0; j < fieldSize.x; ++j) {
     		int currTile;
     		levelFile >> currTile;
     		switch(currTile) {
     		case 0:
-    			field.tiles[i*field_x + j].type = Void;
+    			field.tiles[i*fieldSize.x + j].type = Void;
     			break;
 
     		case 1:
-    			field.tiles[i*field_x + j].type = Standart;
+    			field.tiles[i*fieldSize.x + j].type = Standart;
     			break;
     		case 2:
-                field.tiles[i*field_x + j].type = Dynamic;
+                field.tiles[i*fieldSize.x + j].type = Dynamic;
     			break;
     		case 3:
-    			field.tiles[i*field_x + j].type = StartPos;
-    			field.tiles[i*field_x + j].physForm.setFillColor(Color::Green);
-    			field.tiles[i*field_x + j].physForm.setOutlineColor(Color::Black);
-				field.tiles[i*field_x + j].physForm.setOutlineThickness(1);
+    			field.tiles[i*fieldSize.x + j].type = StartPos;
+    			field.tiles[i*fieldSize.x + j].physForm.setFillColor(Color::Green);
+    			field.tiles[i*fieldSize.x + j].physForm.setOutlineColor(Color::Black);
+				field.tiles[i*fieldSize.x + j].physForm.setOutlineThickness(1);
     			break;
     		case 4:
-    			field.tiles[i*field_x + j].type = FinishPos;
-    			field.tiles[i*field_x + j].physForm.setFillColor(Color::Red);
-    			field.tiles[i*field_x + j].physForm.setOutlineColor(Color::Black);
-				field.tiles[i*field_x + j].physForm.setOutlineThickness(1);
+    			field.tiles[i*fieldSize.x + j].type = FinishPos;
+    			field.tiles[i*fieldSize.x + j].physForm.setFillColor(Color::Red);
+    			field.tiles[i*fieldSize.x + j].physForm.setOutlineColor(Color::Black);
+				field.tiles[i*fieldSize.x + j].physForm.setOutlineThickness(1);
     		
     		default:
 	    		break;
@@ -144,12 +144,12 @@ int Level::loadFromFile() {
 
 
 bool Level::isOnTile(Vector2f pos) {
-	Tile currTile = field.tiles.at((index(pos, {field_x, field_y}, scale)));
+	Tile currTile = field.tiles.at((index(pos, {fieldSize.x, fieldSize.y}, scale)));
     return currTile.checkIfSolid();
 }
 
 bool Level::isOnFinish(Vector2f pos) {
-	Tile currTile = field.tiles.at((index(pos, {field_x, field_y}, scale)));
+	Tile currTile = field.tiles.at((index(pos, {fieldSize.x, fieldSize.y}, scale)));
 	if (currTile.type == FinishPos)
 		return true;
 	else
@@ -158,9 +158,9 @@ bool Level::isOnFinish(Vector2f pos) {
 
 // TODO: Maybe do something with indexes of tiles to make it look cleaner
 void Level::setActiveTile(Vector2f pos) {
-    Tile currTile = field.tiles.at(((int) pos.y / (int) scale) * field_x + (int) pos.x / (int) scale);
+    Tile currTile = field.tiles.at(((int) pos.y / (int) scale) * fieldSize.x + (int) pos.x / (int) scale);
     if (currTile.type == Dynamic) {
-        field.tiles.at(((int) pos.y / (int) scale) * field_x + (int) pos.x / (int) scale).isActive = true;
+        field.tiles.at(((int) pos.y / (int) scale) * fieldSize.x + (int) pos.x / (int) scale).isActive = true;
     }
 
 }

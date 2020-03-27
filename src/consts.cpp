@@ -3,13 +3,13 @@
 namespace consts {
     using namespace sf;
     constexpr int scale = 30;
-    constexpr int field_x = 40;
-    constexpr int field_y = 30;
-    constexpr int window_x = field_x*scale;
-    constexpr int window_y = field_y*scale;
+    //constexpr int field_x = 40;
+    //constexpr int field_y = 30;
+    //constexpr int window_x = field_x*scale;
+    //constexpr int window_y = field_y*scale;
 
-   // const Vector2i efieldSize = {40, 30};
-   // const Vector2i ewindowSize = {efieldSize.x*scale, efieldSize.y*scale};
+    const Vector2i fieldSize = {40, 30};
+    const Vector2i windowSize = {fieldSize.x*scale, fieldSize.y*scale};
 
     constexpr float heroHeight = 40;
     constexpr float heroWidth = 20;
@@ -23,7 +23,8 @@ namespace consts {
 
 
 
-    const eVector2f offset = eVector2f(0.001, 0.001);
+    const eVector2f offset = eVector2f(0.01, 0.01);
+    const float playerOffset = 0.01;
     //extern const Color tileDefaultColor = Color(100, 100, 100);
     const Color tileDefaultColor = Color::White;
     const Color heroColor = Color(150, 150, 150);

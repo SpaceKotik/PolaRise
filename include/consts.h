@@ -5,18 +5,19 @@
 namespace consts {
     using namespace sf;
     extern const int scale;
-    //extern const Vector2i efieldSize;
-    //extern const Vector2i ewindowSize;
-    extern const int field_x;
-    extern const int field_y;
-    extern const int window_x;
-    extern const int window_y;
+    extern const Vector2i fieldSize;
+    extern const Vector2i windowSize;
+    //extern const int field_x;
+    //extern const int field_y;
+    //extern const int window_x;
+    //extern const int window_y;
     extern const float heroHeight;
     extern const float heroWidth;
     extern const float heroAcceleration;
     extern const float maxVelocity;
     extern const float viewAngle;
     extern const eVector2f offset;
+    extern const float playerOffset;
 
     extern const float jumpGravity;
     extern const float fallGravity;

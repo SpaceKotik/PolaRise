@@ -1,3 +1,5 @@
+#include <iostream>
+#include <cmath>
 #include "game.hpp"
 #include "tile.hpp"
 #include "level.hpp"
@@ -40,10 +42,10 @@ void Player::disableDynamicTiles() {
 
     FloatRect playerRect = physForm.getGlobalBounds();
     ///extending rectangle to apply library logic to detect intersections on rectangle's right and bottom sides
-    playerRect.top += 0.001;
-    playerRect.left += 0.001;
-    playerRect.width -= 0.002;
-    playerRect.height -= 0.002;
+    playerRect.top += playerOffset;
+    playerRect.left += playerOffset;
+    playerRect.width -= 2*playerOffset;
+    playerRect.height -= 2*playerOffset;
     ///check all tiles and set inactive all intersecting
     for (auto &e: level->getField()->tiles) {
         if (e.getRect().getGlobalBounds().intersects(playerRect))
@@ -134,9 +136,12 @@ void Player::updateMovement() {
         states.jumpAble = true;///////////////
 
 
+
     ///decrease velocity if no input
     if (!states.right && !states.left)
         velocity = Vector2f(velocity.x * 0.83, velocity.y);
+
+
 
     ///restrict speed by x and y
     if(abs(velocity.x) > maxVelocity) {
@@ -147,6 +152,10 @@ void Player::updateMovement() {
     if(abs(velocity.y) > 1.5*maxVelocity) {
         velocity.y /= abs(velocity.y);
         velocity.y *= 1.5*maxVelocity;
+    }
+    ///set x speed to 0 if it is too small
+    if(fabs(velocity.x) <= 0.01f) {
+        velocity.x = 0;
     }
 }
 

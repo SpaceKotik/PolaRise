@@ -10,7 +10,6 @@
 #include "consts.h"
 #include "emitterBehaviour.h"
 
-
 using namespace sf;
 using namespace consts;
 
@@ -19,13 +18,12 @@ using namespace consts;
 //#define DUMP false
 
 #define DOPIXEL false
-#define DOBLUR true
+#define DOBLUR false
 #define DOSHADOW false
 
 // FIXME: solve edge cases for emitters, player, etc.
-// FIXME: FIXED fix freezes, maybe make movement fps invariant
-//  Probably have been fixed by not setting framerate limit.
-//  Maybe the monitor's update speed is not exactly 60 Hz which causes glitches every ~4 seconds
+// FIXME: fix freezes, maybe make movement fps invariant
+//  Machine-based problem, simple test with moving rectangle also stutters
 // TODO: make lightScene more flexible (for rotating and moving emitters, like emitterRotate() and emitterMove())
 
 Game::Game() {
@@ -33,10 +31,10 @@ Game::Game() {
 
     ContextSettings settings;
     settings.antialiasingLevel = 8;
-
-
-    window.create(VideoMode(window_x, window_y), "PolaRise",
+    
+    window.create(VideoMode(windowSize.x, windowSize.y), "PolaRise",
                   Style::Titlebar | Style::Close, settings);
+    //window.create(VideoMode(windowSize.x/2, windowSize.y/2), "aa", sf::Style::Fullscreen);
     window.setKeyRepeatEnabled(false);
     //window.setFramerateLimit(120);
     window.setVerticalSyncEnabled(true);
@@ -45,11 +43,11 @@ Game::Game() {
 
     level.setField();
     player.setLevel(&level);
-    bufferTex.create(window_x, window_y);
+    bufferTex.create(windowSize.x, windowSize.y);
     bufferTex.setSmooth(true);
     bufferSprite.setTexture(bufferTex.getTexture());
-    bufferSprite.setOrigin(window_x / 2.f, window_y / 2.f);
-    bufferSprite.setPosition(window_x / 2.f, window_y / 2.f);
+    bufferSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
+    bufferSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
 
     if(!lightScene.setShaders(DOBLUR, DOSHADOW))
        window.close();
@@ -96,8 +94,8 @@ void Game::draw() {
     lightScene.draw();
     Sprite tempSprite;
     tempSprite.setTexture(lightScene.getTexture());
-    tempSprite.setOrigin(window_x / 2.f, window_y / 2.f);
-    tempSprite.setPosition(window_x / 2.f, window_y / 2.f);
+    tempSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
+    tempSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
     window.draw(tempSprite, BlendAdd);
 //////////////////////
 
@@ -114,7 +112,7 @@ void Game::draw() {
     }
 
     ///draw all tiles
-    for (int i = 0; i < field_x*field_y; ++i) {
+    for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
         if (level.getField()->tiles[i].checkIfLightAbsorb()) {
             window.draw(level.getField()->tiles[i].physForm, BlendAdd);
         }
@@ -177,7 +175,8 @@ void Game::input()  {
             break;
         case Event::KeyPressed:
             if(event.key.code == Keyboard::LShift) {
-                lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(1, 1), false, true);
+                //lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(1, 1), false, true);
+                lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(1, 1), true, false);
                 lightScene.updateEmittersRayTracing(&level);
             }
             if(event.key.code == Keyboard::LControl) {
@@ -234,6 +233,12 @@ void Game::input()  {
 }
 
 void Game::logic() {
+    /*for (int i = 0; i < 20000; ++i) {
+        lightScene.addEmitter(eVector2f(500, 300), eVector2f(0, 1), true, false);
+        lightScene.setBehaviour(3, new EmitterBehaviour::Rotate(0.04));
+        lightScene.deleteEmitter({500, 300});
+    }*/
+
     lightScene.update();
 
     level.resetActive();
@@ -241,10 +246,9 @@ void Game::logic() {
     player.disableDynamicTiles();
     level.update();
     player.updateMovement();
-    //lightScene.updateEmitter(0, eVector2f(player.getPos()), player.view, false);
 
-    dump.add("Velocity: (" + std::to_string(player.velocity.x) + " : " + std::to_string(player.velocity.y) + ")");
-    dump.add("View: (" + std::to_string(player.view.x) + " : " + std::to_string(player.view.y) + ")");
+    //dump.add("Velocity: (" + std::to_string(player.velocity.x) + " : " + std::to_string(player.velocity.y) + ")");
+    //dump.add("View: (" + std::to_string(player.view.x) + " : " + std::to_string(player.view.y) + ")");
 
 
 }

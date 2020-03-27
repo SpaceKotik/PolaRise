@@ -32,50 +32,50 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 	edges.clear();
 
 	///Set borders
-	Vector2f windowSize = Vector2f(window_x, window_y);
+	Vector2f currWindowSize = Vector2f(windowSize.x, windowSize.y);
 
 	Line newBorder;
 	newBorder.startCoord = {0, 0};
-	newBorder.dir = {windowSize.x, 0};
+	newBorder.dir = {currWindowSize.x, 0};
 
 	edges.push_back(newBorder);
 
-	newBorder.startCoord = {windowSize.x, 0};
-    newBorder.dir = {0, windowSize.y};
+	newBorder.startCoord = {currWindowSize.x, 0};
+    newBorder.dir = {0, currWindowSize.y};
 	edges.push_back(newBorder);
 
-	newBorder.startCoord = {windowSize.x, windowSize.y};
-    newBorder.dir = {-windowSize.x , 0};
+	newBorder.startCoord = {currWindowSize.x, currWindowSize.y};
+    newBorder.dir = {-currWindowSize.x , 0};
 	edges.push_back(newBorder);
 
-	newBorder.startCoord = {0, windowSize.y};
-    newBorder.dir = {0, -windowSize.y};
+	newBorder.startCoord = {0, currWindowSize.y};
+    newBorder.dir = {0, -currWindowSize.y};
 	edges.push_back(newBorder);
 
 	///Reset edges information
-	for (int i = 0; i < field_y; ++i) {
-		for (int j = 0; j < field_x; ++j) {
+	for (int i = 0; i < fieldSize.y; ++i) {
+		for (int j = 0; j < fieldSize.x; ++j) {
 			Cell tempCell;
 			for (int k = 0; k < 4; ++k) {
 				tempCell.edgeExist[k] = false;
 				tempCell.edgeId[k] = -1;
 			}
 
-            tempCell.exist = !(level->getField()->tiles[i * field_x + j].checkIfLightAbsorb());
+            tempCell.exist = !(level->getField()->tiles[i * fieldSize.x + j].checkIfLightAbsorb());
 			processingCells.push_back(tempCell);
 		}
 	}
 
 	///Do logic ad push edges to array
-	for (int i = 0; i < field_y; ++i) {
-		for (int j = 0; j < field_x; ++j) {
+	for (int i = 0; i < fieldSize.y; ++i) {
+		for (int j = 0; j < fieldSize.x; ++j) {
 
 			///indexes for cells
-			int self = i*field_x + j;
-			int left = i*field_x + j - 1;
-			int right = i*field_x + j + 1;
-			int up = (i-1)*field_x + j;
-			int down =(i+1)*field_x + j;
+			int self = i*fieldSize.x + j;
+			int left = i*fieldSize.x + j - 1;
+			int right = i*fieldSize.x + j + 1;
+			int up = (i-1)*fieldSize.x + j;
+			int down =(i+1)*fieldSize.x + j;
 
 			if (processingCells[self].exist) {
 
@@ -105,7 +105,7 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 				}
 
 				///check right neighbour
-				if (j != field_x-1 && !processingCells[right].exist) {
+				if (j != fieldSize.x-1 && !processingCells[right].exist) {
 
 					///edge existing?
 					if ( i != 0 && processingCells[up].edgeExist[RIGHT]) {
@@ -156,7 +156,7 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 				}
 
 				///check down neighbour
-				if (j != field_x-1 && !processingCells[down].exist) {
+				if (j != fieldSize.x-1 && !processingCells[down].exist) {
 
 					///edge existing?
 					if (j != 0 && processingCells[left].edgeExist[DOWN]) {

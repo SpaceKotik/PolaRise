@@ -15,8 +15,8 @@ LightScene::LightScene() {
     doBlur = true;
     doShadow = true;
     setShaders(doBlur, doShadow);
-    targetTex.create(window_x, window_y);
-    bufferTex.create(window_x, window_y);
+    targetTex.create(windowSize.x, windowSize.y);
+    bufferTex.create(windowSize.x, windowSize.y);
     targetTex.setSmooth(true);
 }
 
@@ -25,6 +25,26 @@ LightScene::~LightScene() = default;
 void LightScene::update() {
     for (auto &e : scene) {
         e.update();
+    }
+    while (behaviourPool.size() > scene.size()) {
+
+        for (auto e = behaviourPool.begin() ; e != behaviourPool.end(); ) {
+            bool isOutdated = true;
+            for (const auto& k : scene) {
+                if (k.behaviour == *e) {
+                    isOutdated = false;
+                    break;
+                }
+            }
+            if (isOutdated) {
+                delete *e;
+                e = behaviourPool.erase(e);
+            }
+            else {
+                ++e;
+            }
+
+        }
     }
 }
 
@@ -37,7 +57,7 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
     RenderStates states;
     states.blendMode = BlendAdd;
     if(doShadow) {
-    shaderShadow.setUniform("frag_LightOrigin", scene.at(i).getPosition());
+    shaderShadow.setUniform("frag_LightOrigin", emitter.getPosition());
     //shaderShadow.setUniform("frag_ShadowParam1", float(20000));
     //shaderShadow.setUniform("frag_ShadowParam2", float(20000));
     shaderShadow.setUniform("frag_LightColor", Vector3f(180, 80, 230));
@@ -60,13 +80,13 @@ bool LightScene::setShaders(bool _doBlur, bool _doShadow) {
         if(!shaderBlur.loadFromFile("../shaders/blur.frag", sf::Shader::Fragment)) {
             return false;
         }
-        shaderBlur.setUniform("resolution", Vector2f(window_x, window_y));
+        shaderBlur.setUniform("resolution", Vector2f(windowSize.x, windowSize.y));
     }
     if(doShadow) {
         if(!shaderShadow.loadFromFile("../shaders/shadow.frag", sf::Shader::Fragment)) {
             return false;
         }
-        shaderShadow.setUniform("frag_ScreenResolution", Vector2f(window_x, window_y));
+        shaderShadow.setUniform("frag_ScreenResolution", Vector2f(windowSize.x, windowSize.y));
         shaderShadow.setUniform("frag_LightColor", Vector3f(255, 255, 255));
     }
 
@@ -91,6 +111,7 @@ bool LightScene::setBehaviour(int i, EmitterBehaviour::Behaviour* _behaviour) {
         return false;
     }
     scene.at(i).setBehaviour(_behaviour);
+    behaviourPool.push_back(_behaviour);
     return true;
 }
 
@@ -104,6 +125,9 @@ void LightScene::updateEmittersRayTracing(Level *level) {
 
 void LightScene::addEmitter(eVector2f _position, eVector2f _view, bool _isRestricted, bool updateOnDemand) {
     Emitter emitter(_position, _view, updateOnDemand,Color(80, 80, 230), _isRestricted);
+    //EmitterBehaviour::Behaviour* temp = new EmitterBehaviour::Rotate((rand() % 5 + 1) / 100.f);
+    //emitter.setBehaviour(temp);
+    //behaviourPool.push_back(temp);
     scene.push_back(emitter);
 }
 
@@ -153,8 +177,8 @@ bool LightScene::draw() {
     Sprite bufferSprite;
     RenderStates states;
     bufferSprite.setTexture(targetTex.getTexture());
-    bufferSprite.setOrigin(window_x  / 2.f, window_y / 2.f);
-    bufferSprite.setPosition(window_x / 2.f, window_y / 2.f);
+    bufferSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
+    bufferSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
     //blur all light
     if (doBlur) {
         shaderBlur.setUniform("image", targetTex.getTexture());

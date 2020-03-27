@@ -10,11 +10,13 @@
 #include "player.hpp"
 #include "dump.hpp"
 #include "../SmartVector2/SmartVector2f.h"
+#include "emitterBehaviour.h"
 
 class LightScene {
 private:
     std::vector<Emitter> scene;
     RayTracing rayTracing;
+    std::vector<EmitterBehaviour::Behaviour*> behaviourPool;
 
     Shader shaderBlur;      ///Shaders for enhancing lights
     Shader shaderShadow;    ///
