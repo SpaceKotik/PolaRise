@@ -1,4 +1,5 @@
 #include "SFML/Graphics.hpp"
+#include "../util/eMath.h"
 #include "emitterBehaviour.h"
 #include "lightEmitter.h"
 
@@ -21,6 +22,7 @@ MoveByPath::MoveByPath(const eVector2f _pos1, const eVector2f _pos2, float _spee
     dir = dir.norm();
 }
 
+
 // FIXME: if emitter's start pos is not on the first point of line, it works incorrectly
 void MoveByPath::update(Emitter* emitter) {
 
@@ -30,34 +32,38 @@ void MoveByPath::update(Emitter* emitter) {
     bool switched = false;
     if(currPos.x > std::max(pos1.x, pos2.x)) {
         currPos.x = std::max(pos1.x, pos2.x);
-        currPos.y = (currPos.x == pos1.x) ? pos1.y : pos2.y;
+        currPos.y = (areEqual(currPos.x, pos1.x)) ? pos1.y : pos2.y;
         emitter->setPosition(currPos);
         switched = true;
     }
     else if(currPos.x < std::min(pos1.x, pos2.x)) {
         currPos.x = std::min(pos1.x, pos2.x);
-        currPos.y = (currPos.x == pos1.x) ? pos1.y : pos2.y;
+        currPos.y = (areEqual(currPos.x, pos1.x)) ? pos1.y : pos2.y;
         emitter->setPosition(currPos);
         switched = true;
     }
     if(currPos.y > std::max(pos1.y, pos2.y)) {
         currPos.y = std::max(pos1.y, pos2.y);
-        currPos.x = (currPos.y == pos1.y) ? pos1.x : pos2.x;
+        currPos.x = (areEqual(currPos.y, pos1.y)) ? pos1.x : pos2.x;
         emitter->setPosition(currPos);
         switched = true;
     }
     else if(currPos.y < std::min(pos1.y, pos2.y)) {
         currPos.y = std::min(pos1.y, pos2.y);
-        currPos.x = (currPos.y == pos1.y) ? pos1.x : pos2.x;
+        currPos.x = (areEqual(currPos.y, pos1.y)) ? pos1.x : pos2.x;
         emitter->setPosition(currPos);
         switched = true;
     }
 
     if(switched) {
-        if (currPos == pos1)
+        if (areEqual(currPos.x, pos1.x) && areEqual(currPos.y, pos1.y)) {
             dir = pos2 - pos1;
-        else
+            dir = dir.norm();
+        }
+        else {
             dir = pos1 - pos2;
+            dir = dir.norm();
+        }
 
     }
 

@@ -56,12 +56,13 @@ Game::Game() {
 
     //lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1), true, false);
     lightScene.addEmitter(eVector2f(1000, 750), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(200, 100), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), true, false);
     //lightScene.addEmitter(eVector2f(400, 100), eVector2f(0, 1), true, false);
-    //lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
+
     //lightScene.setBehaviour(0, new EmitterBehaviour::MoveByCircle({585, 225}, 130, 3));
-    lightScene.setBehaviour(0, new EmitterBehaviour::Flicker(2));
-    lightScene.setBehaviour(1, new EmitterBehaviour::MoveByPath({400, 100}, {800, 50}, 5));
+    //lightScene.setBehaviour(0, new EmitterBehaviour::Flicker(1));
+    lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
+    lightScene.setBehaviour(1, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
 
     lightScene.updateEmittersRayTracing(&level);
 }
