@@ -215,3 +215,7 @@ bool LightScene::draw() {
     return true;
 }
 
+void LightScene::reset() {
+    scene.clear();
+}
+

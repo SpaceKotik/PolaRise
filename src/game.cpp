@@ -171,6 +171,9 @@ void Game::input()  {
             if(event.key.code == Keyboard::Escape) {
                 window.close();
             }
+            if(event.key.code == Keyboard::R) {
+                restart();
+            }
 
             if(event.key.code == Keyboard::D) {
                 player.states.right = true;
@@ -235,6 +238,22 @@ void Game::logic() {
 
 }
 
+void Game::restart() {
+    level.setField();
+    lightScene.reset();
+    player.reset();
+    ///Must load form level in the future
+    lightScene.addEmitter(eVector2f(1000, 750), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(930, 430), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), true, false);
+
+    lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
+    lightScene.setBehaviour(1, new EmitterBehaviour::Flicker(3));
+    lightScene.setBehaviour(2, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
+
+    lightScene.updateEmittersRayTracing(&level);
+    ////
+}
 ///may be useful for applying effects to menu etc.
 /*
 bool Game::setShaders() {

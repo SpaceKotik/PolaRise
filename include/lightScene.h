@@ -29,6 +29,7 @@ public:
     ~LightScene();
 
     void update();
+    void reset();
     bool setShaders(bool doBlur, bool doShadow);
     bool updateEmitter(int i, eVector2f pos, eVector2f _view, bool updateObstacles = false);
 

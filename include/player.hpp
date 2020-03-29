@@ -20,12 +20,9 @@ struct PlayerStates {
 };
 
 
-
-class PlayerState;
-
 class Player {
 private:
-	RectangleShape physForm;/// Ddfines player's position, collision rectangle, color etc
+	RectangleShape physForm;/// Dfines player's position, collision rectangle, color etc
     Vector2f view;          /// vector defining where player looks to
 	Vector2f velocity = Vector2f(0, 0);
 
@@ -40,6 +37,7 @@ public:
     void setLevel(Level* _level);   /// sets pointer to the current level
     void updateMovement();          /// processes player movement based on input
     void disableDynamicTiles();     ///set dynamic  tiles which player intersect inactive
+    void reset();
 
 	friend class Game;
 

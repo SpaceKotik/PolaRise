@@ -156,3 +156,8 @@ void Player::updateMovement() {
     }
 }
 
+void Player::reset() {
+    physForm.setPosition(Vector2f(100, 100));
+    velocity = {0, 0};
+}
+
