@@ -52,7 +52,7 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
     shaderShadow.setUniform("frag_LightOrigin", emitter.getPosition());
     //shaderShadow.setUniform("frag_ShadowParam1", float(20000));
     //shaderShadow.setUniform("frag_ShadowParam2", float(20000));
-    shaderShadow.setUniform("frag_LightColor", Vector3f(180, 80, 230));
+    shaderShadow.setUniform("frag_LightColor", Vector3f(255, 210, 80));
     //shaderShadow.setUniform("frag_LightColor", Vector3f(250, 245, 245));
     states.shader = &shaderShadow;
     }
@@ -117,9 +117,6 @@ void LightScene::updateEmittersRayTracing(Level *level) {
 
 void LightScene::addEmitter(eVector2f _position, eVector2f _view, bool _isRestricted, bool updateOnDemand) {
     Emitter emitter(_position, _view, updateOnDemand,Color(80, 80, 230), _isRestricted);
-    //EmitterBehaviour::Behaviour* temp = new EmitterBehaviour::Rotate((rand() % 5 + 1) / 100.f);
-    //emitter.setBehaviour(temp);
-    //behaviourPool.push_back(temp);
     scene.push_back(emitter);
 }
 

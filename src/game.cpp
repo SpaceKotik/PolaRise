@@ -34,17 +34,21 @@ Game::Game() {
     if(!lightScene.setShaders(DOBLUR, DOSHADOW))
        window.close();
 
-    //lightScene.addEmitter(eVector2f(200, 100), eVector2f(1,1), true, false);
-    lightScene.addEmitter(eVector2f(1000, 750), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(930, 430), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(900, 460), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(1100, 460), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(1000, 460), eVector2f(0, 1), true, false);
     lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), true, false);
+    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), true, false);
 
-
-    //lightScene.setBehaviour(0, new EmitterBehaviour::MoveByCircle({585, 225}, 130, 3));
-    //lightScene.setBehaviour(0, new EmitterBehaviour::Flicker(1));
     lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
     lightScene.setBehaviour(1, new EmitterBehaviour::Flicker(3));
-    lightScene.setBehaviour(2, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
+    lightScene.setBehaviour(2, new EmitterBehaviour::Flicker(3));
+    lightScene.setBehaviour(3, new EmitterBehaviour::Flicker(3));
+    lightScene.setBehaviour(4, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
+    lightScene.setBehaviour(5, new EmitterBehaviour::Flicker(9));
+    lightScene.setBehaviour(6, new EmitterBehaviour::Flicker(6));
 
     lightScene.updateEmittersRayTracing(&level);
 }
@@ -145,71 +149,79 @@ void Game::draw() {
 }
 
 void Game::input()  {
+
     Vector2f mousePos;
     mousePos = (Vector2f)Mouse::getPosition(window);
 
     Event event;
+    static bool isMouseInside = true;
     while (window.pollEvent(event)) {
-
         switch (event.type) {
-        case Event::Closed:
-            window.close();
-            break;
-        case Event::KeyPressed:
-            if(event.key.code == Keyboard::LShift) {
-                //lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(1, 1), false, true);
-                lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(1, 1), true, false);
-                lightScene.updateEmittersRayTracing(&level);
-            }
-            if(event.key.code == Keyboard::LControl) {
-                lightScene.deleteEmitter(Vector2f(Vector2f(Mouse::getPosition(window))));
-            }
-            if(event.key.code == Keyboard::Space) {
-                if (player.states.jumpAble)
-                    player.states.jumpMade = true;
-            }
-            if(event.key.code == Keyboard::Escape) {
+            case Event::MouseLeft:
+                isMouseInside = false;
+                break;
+            case Event::MouseEntered:
+                isMouseInside = true;
+                break;
+            case Event::Closed:
                 window.close();
-            }
-            if(event.key.code == Keyboard::R) {
-                restart();
-            }
+                break;
+            case Event::KeyPressed:
+                if(event.key.code == Keyboard::LShift) {
+                    //lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(1, 1), false, true);
+                    lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(0, 1), true, false);
+                    lightScene.updateEmittersRayTracing(&level);
+                }
+                if(event.key.code == Keyboard::LControl) {
+                    lightScene.deleteEmitter(Vector2f(Vector2f(Mouse::getPosition(window))));
+                }
+                if(event.key.code == Keyboard::Space) {
+                    if (player.states.jumpAble)
+                        player.states.jumpMade = true;
+                }
+                if(event.key.code == Keyboard::Escape) {
+                    window.close();
+                }
+                if(event.key.code == Keyboard::R) {
+                    restart();
+                }
 
-            if(event.key.code == Keyboard::D) {
-                player.states.right = true;
-            }
-            if(event.key.code == Keyboard::A) {
-                player.states.left = true;
-            }
-            break;
+                if(event.key.code == Keyboard::D) {
+                    player.states.right = true;
+                }
+                if(event.key.code == Keyboard::A) {
+                    player.states.left = true;
+                }
+                break;
 
-        case Event::KeyReleased:
-            if(event.key.code == Keyboard::D) {
-                player.states.right = false;
+            case Event::KeyReleased:
+                if(event.key.code == Keyboard::D) {
+                    player.states.right = false;
+                }
+                if(event.key.code == Keyboard::A) {
+                    player.states.left = false;
+                }
+                if(event.key.code == Keyboard::Space) {
+                    player.states.space = false;
+                    player.states.jumpAble = false;
+                }
+            default:
+                break;
             }
-            if(event.key.code == Keyboard::A) {
-                player.states.left = false;
-            }
-            if(event.key.code == Keyboard::Space) {
-                player.states.space = false;
-                player.states.jumpAble = false;
-            }
-        default:
-            break;
+    }
+    if(isMouseInside) {
+        if (Mouse::isButtonPressed(sf::Mouse::Left)) {
+            level.addTile(mousePos, Standart);
+            lightScene.updateEmittersRayTracing(&level);///////
         }
-    }
-
-    if (Mouse::isButtonPressed(sf::Mouse::Left)) {
-                level.addTile(mousePos, Standart);
-                lightScene.updateEmittersRayTracing(&level);///////
-    }
-    if (Mouse::isButtonPressed(sf::Mouse::Middle)) {
-        level.addTile(mousePos, Dynamic);
-        lightScene.updateEmittersRayTracing(&level);///////
-    }
-    if (Mouse::isButtonPressed(sf::Mouse::Right)) {
-        level.removeTile(mousePos);
-        lightScene.updateEmittersRayTracing(&level);///////
+        if (Mouse::isButtonPressed(sf::Mouse::Middle)) {
+            level.addTile(mousePos, Dynamic);
+            lightScene.updateEmittersRayTracing(&level);///////
+        }
+        if (Mouse::isButtonPressed(sf::Mouse::Right)) {
+            level.removeTile(mousePos);
+            lightScene.updateEmittersRayTracing(&level);///////
+        }
     }
 
 
@@ -243,13 +255,21 @@ void Game::restart() {
     lightScene.reset();
     player.reset();
     ///Must load form level in the future
-    lightScene.addEmitter(eVector2f(1000, 750), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(930, 430), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(900, 460), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(1100, 460), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(1000, 460), eVector2f(0, 1), true, false);
     lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), true, false);
+    lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), true, false);
+    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), true, false);
 
     lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
     lightScene.setBehaviour(1, new EmitterBehaviour::Flicker(3));
-    lightScene.setBehaviour(2, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
+    lightScene.setBehaviour(2, new EmitterBehaviour::Flicker(3));
+    lightScene.setBehaviour(3, new EmitterBehaviour::Flicker(3));
+    lightScene.setBehaviour(4, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
+    lightScene.setBehaviour(5, new EmitterBehaviour::Flicker(9));
+    lightScene.setBehaviour(6, new EmitterBehaviour::Flicker(6));
 
     lightScene.updateEmittersRayTracing(&level);
     ////

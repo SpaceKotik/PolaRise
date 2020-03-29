@@ -59,7 +59,7 @@ void Player::updateMovement() {
     }
 
     // TODO: fix player jumping in air
-    if (states.jumpTime.getElapsedTime().asSeconds() > 0.22) {
+    if (states.jumpTime.getElapsedTime().asSeconds() > 0.24) {
         states.space = false;
         states.jumpAble = false;
         states.jumpTime.restart();
@@ -128,6 +128,9 @@ void Player::updateMovement() {
 
         setPos(Vector2f(getPos().x, ((int) getPos().y / (int) scale + 1) * scale - heroHeight/2));
         velocity.y = 0;
+    }
+    else {
+        states.jumpAble = false;
     }
     if (velocity.y == 0)
         states.jumpAble = true;///////////////

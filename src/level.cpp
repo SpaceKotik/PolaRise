@@ -29,7 +29,7 @@ void Level::update() {
             }
         }
         else {
-            e.physForm.setFillColor(Color(255, 255, 255));
+            e.physForm.setFillColor(tileDefaultColor);
         }
 
     }
@@ -47,7 +47,7 @@ void Level::resetActive() {
 void Level::addTile(Vector2f pos, TileType type) {
 	pos = Vector2f (((int)pos.x/(int)scale)*scale,((int)pos.y/(int)scale)*scale);
     field.tiles.at(((int)pos.y/(int)scale)*fieldSize.x + (int)pos.x/(int)scale).type = type;
-
+    //field.tiles.at(((int)pos.y/(int)scale)*fieldSize.x + (int)pos.x/(int)scale).physForm.setFillColor(tileDefaultColor);
 	loadToFile();
 }
 
@@ -107,6 +107,7 @@ int Level::loadFromFile() {
 
     		case 1:
     			field.tiles[i*fieldSize.x + j].type = Standart;
+    			field.tiles[i*fieldSize.x + j].physForm.setFillColor(tileDefaultColor);
     			break;
     		case 2:
                 field.tiles[i*fieldSize.x + j].type = Dynamic;
@@ -134,7 +135,10 @@ int Level::loadFromFile() {
 }
 
 bool Level::isOnTile(Vector2f pos) {
-	Tile currTile = field.tiles.at((index(pos, {fieldSize.x, fieldSize.y}, scale)));
+    int i = index(pos, fieldSize, scale);
+    if(field.tiles.size() <= i || i < 0)
+        return false;
+	Tile currTile = field.tiles.at(i);
     return currTile.checkIfSolid();
 }
 
@@ -148,9 +152,13 @@ bool Level::isOnFinish(Vector2f pos) {
 
 // TODO: Maybe do something with indexes of tiles to make it look cleaner
 void Level::setActiveTile(Vector2f pos) {
-    Tile currTile = field.tiles.at(((int) pos.y / (int) scale) * fieldSize.x + (int) pos.x / (int) scale);
+    ///check if index is valid
+    int i = index(pos, fieldSize, scale);
+    if(field.tiles.size() <= i || i < 0)
+        return;
+    Tile currTile = field.tiles.at(i);
     if (currTile.type == Dynamic) {
-        field.tiles.at(((int) pos.y / (int) scale) * fieldSize.x + (int) pos.x / (int) scale).isActive = true;
+        field.tiles.at(i).isActive = true;
     }
 
 }
