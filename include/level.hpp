@@ -1,7 +1,13 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <iostream>
+#include <fstream>
+#include <cmath>
+
 #include "tile.hpp"
+#include "util/eMath/eMath.h"
+#include "consts.h"
 
 using namespace sf;
 
@@ -16,8 +22,6 @@ private:
 	Field field;
 	Vector2f startPos;
 	Vector2f finishPos;
-	int tileCount;
-	//LevelState levelState = Blue;
 public:
 	Level();
 	void setField();

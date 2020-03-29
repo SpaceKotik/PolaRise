@@ -1,8 +1,4 @@
-#include <SFML/Graphics.hpp>
-#include "game.hpp"
 #include "tile.hpp"
-
-#include "consts.h"
 
 using namespace sf;
 using namespace consts;

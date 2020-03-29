@@ -1,11 +1,8 @@
 #include <iostream>
 #include <cmath>
-#include "game.hpp"
-#include "tile.hpp"
 #include "level.hpp"
 #include "player.hpp"
 #include "consts.h"
-#include "level.hpp"
 using namespace consts;
 
 Player::Player() {

@@ -1,13 +1,6 @@
 #include <SFML/Graphics.hpp>
-#include <iostream>
-#include <mutex>
-
-#include "../util/FpsCounter/fpsCounter.h"
-#include "../SmartVector2/SmartVector2f.h"
 #include "game.hpp"
-#include "level.hpp"
-#include "consts.h"
-#include "emitterBehaviour.h"
+
 
 using namespace sf;
 using namespace consts;

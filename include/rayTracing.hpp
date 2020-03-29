@@ -1,8 +1,8 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-#include "level.hpp"
 #include <unistd.h>
+#include "level.hpp"
+
 
 using namespace sf;
 

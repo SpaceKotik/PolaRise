@@ -1,11 +1,10 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-#include <mutex>
-
+#include <algorithm>
 #include "rayTracing.hpp"
 #include "level.hpp"
 #include "../SmartVector2/SmartVector2f.h"
+#include "consts.h"
 
 namespace EmitterBehaviour {
     class Behaviour;

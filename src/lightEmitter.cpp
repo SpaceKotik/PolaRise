@@ -1,10 +1,3 @@
-#include <SFML/Graphics.hpp>
-#include <algorithm>
-
-#include "../SmartVector2/SmartVector2f.h"
-#include "rayTracing.hpp"
-#include "consts.h"
-
 #include "emitterBehaviour.h"
 #include "lightEmitter.h"
 

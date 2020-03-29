@@ -1,13 +1,7 @@
-#include <SFML/Graphics.hpp>
-#include <mutex>
-#include <thread>
-#include <iostream>
-#include "level.hpp"
-#include "../SmartVector2/SmartVector2f.h"
-#include "lightEmitter.h"
-#include "lightScene.h"
 
+#include "lightScene.h"
 #include "consts.h"
+
 using namespace consts;
 
 // TODO: fix loading shaders

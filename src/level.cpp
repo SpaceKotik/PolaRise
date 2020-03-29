@@ -1,21 +1,13 @@
-#include <SFML/Graphics.hpp>
-#include <iostream>
-#include <fstream>
-#include <cmath>
-#include "util/eMath/eMath.h"
-#include "game.hpp"
-#include "tile.hpp"
+#include "level.hpp"
 #include "rayTracing.hpp"
-#include "consts.h"
 
 using namespace consts;
 using namespace sf;
 
 Level::Level() {
-	tileCount = 0;
 	for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
 		Vector2f pos = Vector2f ((int)(i % fieldSize.x)*scale , ((int)i/(int)fieldSize.x)*scale) + offset;
-		field.tiles.push_back(Tile(pos, Void));
+		field.tiles.emplace_back(pos, Void);
 	}
 }
 

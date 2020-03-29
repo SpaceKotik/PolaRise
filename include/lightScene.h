@@ -2,13 +2,11 @@
 
 #include <SFML/Graphics.hpp>
 #include <mutex>
+#include <thread>
 #include <unistd.h>
-#include "tile.hpp"
 #include "rayTracing.hpp"
 #include "lightEmitter.h"
 #include "level.hpp"
-#include "player.hpp"
-#include "dump.hpp"
 #include "../SmartVector2/SmartVector2f.h"
 #include "emitterBehaviour.h"
 

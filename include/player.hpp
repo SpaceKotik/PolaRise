@@ -1,12 +1,11 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "tile.hpp"
+#include <cmath>
 #include "level.hpp"
-enum TypeInput {Pressed, Released};
+#include "consts.h"
+
 using namespace sf;
-
-
 
 struct PlayerStates {
     bool right = 0;

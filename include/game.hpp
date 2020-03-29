@@ -1,19 +1,18 @@
 #pragma once
 
+#include "../util/FpsCounter/fpsCounter.h"
+#include "../SmartVector2/SmartVector2f.h"
 #include <SFML/Graphics.hpp>
-#include <mutex>
-#include "tile.hpp"
-#include "rayTracing.hpp"
 #include "level.hpp"
 #include "player.hpp"
 #include "dump.hpp"
 #include "lightScene.h"
-#include "lightEmitter.h"
+#include "emitterBehaviour.h"
+#include "consts.h"
 
 using namespace sf;
 
 enum GameState {Menu, Menu_2, Gameplay, Leaderboard};
-
 
 class Game {
 private:
@@ -30,7 +29,6 @@ private:
     Shader shaderShadow;
     RenderTexture bufferTex;
     Dump dump;
-    void logicMovement();
 public:
     Game();
 //  ~Game();

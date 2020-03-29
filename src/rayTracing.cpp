@@ -1,11 +1,5 @@
-#include <SFML/Graphics.hpp>
-#include <iostream>
-#include <cmath>
-#include "game.hpp"
-#include "tile.hpp"
 #include "rayTracing.hpp"
-#include "level.hpp"
-#include "consts.h"
+
 
 using namespace consts;
 
