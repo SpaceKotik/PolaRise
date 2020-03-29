@@ -33,12 +33,7 @@ Emitter::Emitter(const eVector2f _position, const eVector2f _view, bool _updateO
     behaviour = nullptr;
 }
 
-Emitter::~Emitter() {
-    //std::cout << "Emitter: " << behaviour << std::endl;
-    //if (behaviour != nullptr)
-     //   delete behaviour;
-
-}
+Emitter::~Emitter() = default;
 
 void Emitter::updateLightMap(const RayTracing* _rayTracing) {
     rayTracing = *_rayTracing;

@@ -2,6 +2,7 @@
 #include "util/eMath/eMath.h"
 #include "emitterBehaviour.h"
 #include "lightEmitter.h"
+#include <iostream>
 
 using namespace EmitterBehaviour;
 Behaviour::Behaviour() = default;
@@ -22,8 +23,6 @@ MoveByPath::MoveByPath(const eVector2f _pos1, const eVector2f _pos2, float _spee
     dir = dir.norm();
 }
 
-
-// FIXME: if emitter's start pos is not on the first point of line, it works incorrectly
 void MoveByPath::update(Emitter* emitter) {
 
     emitter->move(dir*speed);
@@ -88,8 +87,10 @@ MoveByCircle::MoveByCircle(eVector2f _center, float _radius, float _speed) {
     angle = 0;
 }
 void MoveByCircle::update(Emitter* emitter) {
+
     angle += speed;
-    ///reset angle
+    while (angle >= 360)
+        angle -= 360;
 
     Transform rotate;
     rotate.rotate(angle);

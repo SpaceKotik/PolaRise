@@ -40,10 +40,8 @@ void LightScene::update() {
                 delete *e;
                 e = behaviourPool.erase(e);
             }
-            else {
+            else
                 ++e;
-            }
-
         }
     }
 }
@@ -179,16 +177,18 @@ bool LightScene::draw() {
     bufferSprite.setTexture(targetTex.getTexture());
     bufferSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
     bufferSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
-    //blur all light
+    ///blur all light
     if (doBlur) {
         shaderBlur.setUniform("image", targetTex.getTexture());
 
         for (int i = 0; i < 1; ++i) {
 
+            states.shader = &shaderBlur;
 
             shaderBlur.setUniform("dir", Vector2f(1, 0));
+            targetTex.draw(bufferSprite, states);
+            targetTex.display();
 
-            states.shader = &shaderBlur;
 
             shaderBlur.setUniform("dir", Vector2f(0, 1));
             targetTex.draw(bufferSprite, states);

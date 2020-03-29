@@ -1,12 +1,10 @@
 #include <SFML/Graphics.hpp>
 #include "consts.h"
+
+
 namespace consts {
     using namespace sf;
     constexpr int scale = 30;
-    //constexpr int field_x = 40;
-    //constexpr int field_y = 30;
-    //constexpr int window_x = field_x*scale;
-    //constexpr int window_y = field_y*scale;
 
     const Vector2i fieldSize = {40, 30};
     const Vector2i windowSize = {fieldSize.x*scale, fieldSize.y*scale};
@@ -34,7 +32,9 @@ namespace consts {
 
     //const Color lightColorBlue = Color(102, 102, 255);	                ///Blue for 1 source
     //const Color lightColorBlue = Color(250, 236, 130                      ///Blue for 1 source
-    const Color lightColorRed = Color(255, 51, 51);		///Red for 1 source
+    const Color lightColorRed = Color(255, 51, 51);		///
+    const Color inactiveTileColor = Color(100, 0, 80);		///Color for inactivate tiles
+    const Color activeTileColor = Color(255, 0, 220);		    ///Color for activate tiles
 }
 
 

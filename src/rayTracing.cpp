@@ -475,7 +475,6 @@ void RayTracing::updateObstacles(Level *level) {
     convertPolyMapToVertices();
 }
 
-// TODO: restrict tiles that might be activated be emitter by rectangle
 ///Pass all lines of light mesh to Level function to set all intersecting tiles as lighted (active)
 void RayTracing::setActiveTiles(Level *level) {
     std::array<Vertex, 2> currLine;

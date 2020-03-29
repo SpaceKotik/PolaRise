@@ -1,7 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <mutex>
-#include <cmath>
 
 #include "../util/FpsCounter/fpsCounter.h"
 #include "../SmartVector2/SmartVector2f.h"
@@ -13,20 +12,10 @@
 using namespace sf;
 using namespace consts;
 
-//#define NDEBUG true         ///show rays, obstacles, etc
-//#define UPDATESHADERS false ///update changes in shaders in real time
-//#define DUMP false
-
-#define DOPIXEL false
-#define DOBLUR false
-#define DOSHADOW false
-
 // FIXME: solve edge cases for emitters, player, etc.
-// FIXME: fix freezes, maybe make movement fps invariant
-//  Machine-based problem, simple test with moving rectangle also stutters
-// TODO: make lightScene more flexible (for rotating and moving emitters, like emitterRotate() and emitterMove())
 
 Game::Game() {
+
     gameState = Gameplay;
 
     ContextSettings settings;

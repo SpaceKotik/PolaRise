@@ -1,16 +1,18 @@
+#pragma once
+
 #include <SFML/Graphics.hpp>
 #include "../SmartVector2/SmartVector2f.h"
-#pragma once
+
+#define DEBUG true
+#define DOPIXEL true
+#define DOBLUR true
+#define DOSHADOW true
 
 namespace consts {
     using namespace sf;
     extern const int scale;
     extern const Vector2i fieldSize;
     extern const Vector2i windowSize;
-    //extern const int field_x;
-    //extern const int field_y;
-    //extern const int window_x;
-    //extern const int window_y;
     extern const float heroHeight;
     extern const float heroWidth;
     extern const float heroAcceleration;
@@ -29,4 +31,6 @@ namespace consts {
 
     extern const Color lightColorBlue;	    ///Blue for 1 source
     extern const Color lightColorRed;       ///Red for 1 source
+    extern const Color inactiveTileColor;
+    extern const Color activeTileColor;
 }

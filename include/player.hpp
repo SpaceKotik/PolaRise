@@ -6,6 +6,8 @@
 enum TypeInput {Pressed, Released};
 using namespace sf;
 
+
+
 struct PlayerStates {
     bool right = 0;
     bool left = 0;

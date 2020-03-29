@@ -2,11 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include "util/eMath/eMath.h"
 #include "game.hpp"
 #include "tile.hpp"
 #include "rayTracing.hpp"
 #include "consts.h"
-#include "util/eMath/eMath.h"
 
 using namespace consts;
 using namespace sf;
@@ -31,10 +31,10 @@ void Level::update() {
     for (auto &e : field.tiles) {
         if (e.type == Dynamic) {
             if (e.isActive)
-                e.physForm.setFillColor(Color(255, 0, 220));
-            else
-                e.physForm.setFillColor(Color(100, 0, 80));
-                //e.physForm.setFillColor(Color::Black);
+                e.physForm.setFillColor(activeTileColor);
+            else {
+                e.physForm.setFillColor(DEBUG ? inactiveTileColor : Color::Black);
+            }
         }
         else {
             e.physForm.setFillColor(Color(255, 255, 255));
@@ -100,7 +100,7 @@ int Level::loadToFile() {
 }
 
 int Level::loadFromFile() {
-	std::ifstream levelFile("../Levels//Level_01.txt");
+	std::ifstream levelFile("../Levels/Level_01.txt");
     if(!levelFile.is_open())
         return -1;
 
@@ -140,8 +140,6 @@ int Level::loadFromFile() {
     levelFile.close();
     return 0;
 }
-
-
 
 bool Level::isOnTile(Vector2f pos) {
 	Tile currTile = field.tiles.at((index(pos, {fieldSize.x, fieldSize.y}, scale)));
