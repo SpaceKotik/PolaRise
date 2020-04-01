@@ -34,7 +34,7 @@ namespace consts {
 
     //const Color lightColorBlue = Color(102, 102, 255);	                ///Blue for 1 source
     //const Color lightColorBlue = Color(250, 236, 130                      ///Blue for 1 source
-    const Color lightColorRed = Color(255, 51, 51);		///
+    const Color lightColorDefault = Color(255, 51, 51);		///
     const Color inactiveTileColor = Color(100, 0, 80);		///Color for inactivate tiles
     //const Color activeTileColor = Color(255, 0, 220);		    ///Color for activate tiles
     const Color activeTileColor = Color(250, 168, 8);		    ///Color for activate tiles

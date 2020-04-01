@@ -23,24 +23,24 @@ private:
 
     RenderTexture targetTex;///RenderTexture, where all lights are drawn to
     RenderTexture bufferTex;///RenderTexture for temporal drawing to apply shadow shader
+
     void doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock);  ///The function passed to thread in draw()
+    bool invalidIndex(int i);
 public:
     LightScene();
     ~LightScene();
 
+    bool draw();    ///Draws all Emitters to targetTex
     void update();
     void reset();
     bool setShaders(bool doBlur, bool doShadow);
-    bool updateEmitter(int i, eVector2f pos, eVector2f _view, bool updateObstacles = false);
 
-    bool setBehaviour(int i, EmitterBehaviour::Behaviour*);
-    void updateEmittersRayTracing(Level *level);     ///Updates obstacles in lightScene rayTracing, then applied to all Emitters
-    void addEmitter(eVector2f _position, eVector2f _view, bool _isRestricted = true, bool updateOnDemand = true);
+    void addEmitter(eVector2f position, eVector2f view, EmitterBehaviour::Behaviour* behaviour = nullptr, bool isRestricted = true);
     void deleteEmitter(eVector2f coord);
-    bool draw();    ///Draws all Emitters to targetTex
+    bool updateEmitter(int i, eVector2f pos, eVector2f _view, bool updateObstacles = false);
+    void updateEmittersRayTracing(Level *level);     ///Updates obstacles in lightScene rayTracing, then applied to all Emitter
+    bool setBehaviour(int i, EmitterBehaviour::Behaviour*);
+
     Texture& getTexture();  ///This texture must be applied to sprite which then drawn to window
-
     void setActiveTiles(Level *level);
-
-
 };

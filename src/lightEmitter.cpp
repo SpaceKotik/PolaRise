@@ -12,32 +12,54 @@ Emitter::Emitter() {
     view = DEFAULTEMITTER_VIEW;
     isRestricted = true;
     lineOfSight = DEFAULTEMITTER_LINEOFSIGHT;
-    color = lightColorRed;
+    color = lightColorDefault;
     behaviour = nullptr;
 }
 
-Emitter::Emitter(const eVector2f _position, const eVector2f _view, bool _updateOnDemand, Color _color, bool _isRestricted) {
+Emitter::Emitter(const eVector2f _position, const eVector2f _view, bool _isRestricted, Color _color) {
     position = _position;
     view = _view;
     isRestricted = _isRestricted;
     lineOfSight = viewAngle;
-    updateOnDemand = _updateOnDemand;
+    updateOnDemand = false;
     color = _color;
     behaviour = nullptr;
 }
 
 Emitter::~Emitter() = default;
 
+
 void Emitter::updateLightMap(const RayTracing* _rayTracing) {
     rayTracing = *_rayTracing;
 }
 
-void Emitter::setPosition(eVector2f pos) {
-    position = pos;
+///calculcates new VertexArray only if is needed
+void Emitter::updateRayTracing(bool update) {
+    if (!updateOnDemand || update)
+        rayTracing.update(position, isRestricted, view, lineOfSight);
+
 }
 
+VertexArray Emitter::createMesh() {
+    return rayTracing.createMesh(color);
+}
+
+void Emitter::setActiveTiles(Level *level) {
+    rayTracing.setActiveTiles(level);
+}
+
+void Emitter::update() {
+    if (behaviour != nullptr)
+        behaviour->update(this);
+}
+
+///
 Vector2f Emitter::getPosition() const {
     return position;
+}
+
+void Emitter::setPosition(eVector2f pos) {
+    position = pos;
 }
 
 void Emitter::setView(eVector2f _view) {
@@ -80,28 +102,6 @@ void Emitter::rotate(const float angle) {
 void Emitter::move(const eVector2f dir) {
     position += dir;
 }
-
-///calculcates new VertexArray only if is needed
-void Emitter::updateRayTracing(bool update) {
-    if (!updateOnDemand || update)
-        rayTracing.update(position, isRestricted, view, lineOfSight);
-
-}
-
-VertexArray Emitter::createMesh() {
-    return rayTracing.createMesh(color);
-}
-
-void Emitter::setActiveTiles(Level *level) {
-    rayTracing.setActiveTiles(level);
-}
-
-void Emitter::update() {
-    if (behaviour != nullptr)
-        behaviour->update(this);
-}
-
-
 
 
 

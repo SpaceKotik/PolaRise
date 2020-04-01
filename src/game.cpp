@@ -5,8 +5,6 @@
 using namespace sf;
 using namespace consts;
 
-// FIXME: solve edge cases for emitters, player, etc.
-
 Game::Game() {
 
     gameState = Gameplay;
@@ -16,9 +14,7 @@ Game::Game() {
     
     window.create(VideoMode(windowSize.x, windowSize.y), "PolaRise",
                   Style::Titlebar | Style::Close, settings);
-    //window.create(VideoMode(windowSize.x/2, windowSize.y/2), "aa", sf::Style::Fullscreen);
     window.setKeyRepeatEnabled(false);
-    //window.setFramerateLimit(120);
     window.setVerticalSyncEnabled(true);
     window.setPosition(Vector2i(600, 0));
     window.setMouseCursorGrabbed(false);
@@ -34,21 +30,21 @@ Game::Game() {
     if(!lightScene.setShaders(DOBLUR, DOSHADOW))
        window.close();
 
-    lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(900, 460), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(1100, 460), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(1000, 460), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), true, false);
-    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), true, false);
+    lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));
+    lightScene.addEmitter(eVector2f(900, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
+    lightScene.addEmitter(eVector2f(1100, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
+    lightScene.addEmitter(eVector2f(1000, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
+    lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
+    lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), new EmitterBehaviour::Flicker(9));
+    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::Flicker(6));
 
-    lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
+    /*lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
     lightScene.setBehaviour(1, new EmitterBehaviour::Flicker(3));
     lightScene.setBehaviour(2, new EmitterBehaviour::Flicker(3));
     lightScene.setBehaviour(3, new EmitterBehaviour::Flicker(3));
     lightScene.setBehaviour(4, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
     lightScene.setBehaviour(5, new EmitterBehaviour::Flicker(9));
-    lightScene.setBehaviour(6, new EmitterBehaviour::Flicker(6));
+    lightScene.setBehaviour(6, new EmitterBehaviour::Flicker(6));*/
 
     lightScene.updateEmittersRayTracing(&level);
 }
@@ -168,8 +164,7 @@ void Game::input()  {
                 break;
             case Event::KeyPressed:
                 if(event.key.code == Keyboard::LShift) {
-                    //lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(1, 1), false, true);
-                    lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(0, 1), true, false);
+                    lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(0, 1));
                     lightScene.updateEmittersRayTracing(&level);
                 }
                 if(event.key.code == Keyboard::LControl) {
@@ -255,21 +250,13 @@ void Game::restart() {
     lightScene.reset();
     player.reset();
     ///Must load form level in the future
-    lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(900, 460), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(1100, 460), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(1000, 460), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), true, false);
-    lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), true, false);
-    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), true, false);
-
-    lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
-    lightScene.setBehaviour(1, new EmitterBehaviour::Flicker(3));
-    lightScene.setBehaviour(2, new EmitterBehaviour::Flicker(3));
-    lightScene.setBehaviour(3, new EmitterBehaviour::Flicker(3));
-    lightScene.setBehaviour(4, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
-    lightScene.setBehaviour(5, new EmitterBehaviour::Flicker(9));
-    lightScene.setBehaviour(6, new EmitterBehaviour::Flicker(6));
+    lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));
+    lightScene.addEmitter(eVector2f(900, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
+    lightScene.addEmitter(eVector2f(1100, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
+    lightScene.addEmitter(eVector2f(1000, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
+    lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
+    lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), new EmitterBehaviour::Flicker(9));
+    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::Flicker(6));
 
     lightScene.updateEmittersRayTracing(&level);
     ////

@@ -26,7 +26,7 @@ namespace consts {
     extern const float playerOffset;
 
     extern const Color lightColorBlue;	    ///Blue for 1 source
-    extern const Color lightColorRed;       ///Red for 1 source
+    extern const Color lightColorDefault;
 
     extern const Color backgroundColor;
 
