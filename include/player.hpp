@@ -6,6 +6,7 @@
 #include "consts.h"
 
 using namespace sf;
+class Game;
 
 struct PlayerStates {
     bool right = 0;
@@ -28,6 +29,7 @@ private:
 
     PlayerStates states;    /// states used for processing input
     Level* level;           /// pointer to the current level (for processing collisions etc)
+    Game* game;
 public:
 	Player();
 	void move(Vector2f dir);        /// moves player by dir vector
@@ -38,6 +40,8 @@ public:
     void updateMovement();          /// processes player movement based on input
     void disableDynamicTiles();     ///set dynamic  tiles which player intersect inactive
     void reset();
+
+    void setMediator(Game* game);
 
 	friend class Game;
 

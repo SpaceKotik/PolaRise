@@ -86,13 +86,8 @@ bool Emitter::setLineOfSight(float _viewAngle) {
 }
 
 void Emitter::setBehaviour(EmitterBehaviour::Behaviour* _behaviour) {
-
-    if (_behaviour != nullptr) {
         delete behaviour;
         behaviour = _behaviour;
-    }
-
-
 }
 
 void Emitter::rotate(const float angle) {
@@ -102,9 +97,3 @@ void Emitter::rotate(const float angle) {
 void Emitter::move(const eVector2f dir) {
     position += dir;
 }
-
-
-
-
-
-

@@ -164,3 +164,7 @@ void Player::reset() {
     velocity = {0, 0};
 }
 
+void Player::setMediator(Game* _game) {
+    game = _game;
+}
+

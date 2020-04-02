@@ -1,5 +1,6 @@
 #include "lightScene.h"
 #include "consts.h"
+#include "game.hpp"
 
 using namespace consts;
 
@@ -14,6 +15,7 @@ LightScene::LightScene() {
 }
 
 LightScene::~LightScene() = default;
+
 
 bool LightScene::draw() {
     targetTex.clear(Color::Black);
@@ -33,61 +35,8 @@ bool LightScene::draw() {
     for (auto &e: drawThreads) {
         e.join();
     }
-
-    ///temporal vars for applying shaders
-    Sprite bufferSprite;
-    RenderStates states;
-    bufferSprite.setTexture(targetTex.getTexture());
-    bufferSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
-    bufferSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
-    ///blur all light
-    if (doBlur) {
-        shaderBlur.setUniform("image", targetTex.getTexture());
-
-        for (int i = 0; i < 1; ++i) {
-            bufferSprite.setTexture(bufferTex.getTexture());
-            states.shader = &shaderBlur;
-
-            shaderBlur.setUniform("dir", Vector2f(1, 0));
-            bufferTex.draw(bufferSprite, states);
-            bufferTex.display();
-
-            shaderBlur.setUniform("image", bufferTex.getTexture());
-            shaderBlur.setUniform("dir", Vector2f(0, 1));
-            bufferTex.draw(bufferSprite, states);
-            bufferTex.display();
-
-            shaderBlur.setUniform("image", bufferTex.getTexture());
-            shaderBlur.setUniform("dir", Vector2f(1, 1));
-            bufferTex.draw(bufferSprite, states);
-            bufferTex.display();
-
-            shaderBlur.setUniform("image", bufferTex.getTexture());
-            shaderBlur.setUniform("dir", Vector2f(1, -1));
-            bufferTex.draw(bufferSprite, states);
-            bufferTex.display();
-        }
-        bufferSprite.setTexture(bufferTex.getTexture());
-        targetTex.draw(bufferSprite, BlendAdd);
-        targetTex.draw(bufferSprite, BlendAdd);
-        targetTex.display();
-
-    }
-
-    ;
-    ///may be used to shadow everything except player
-    //make shadow
-    /*if (doShadow) {///
-        states.blendMode = BlendMultiply;
-        shaderShadow.setUniform("frag_LightOrigin", scene.at(0).getPosition());
-        shaderShadow.setUniform("frag_ShadowParam1", float(20000));
-        shaderShadow.setUniform("frag_ShadowParam2", float(20000));
-        states.shader = &shaderShadow;
-
-        targetTex.draw(bufferSprite, states);
-        targetTex.setSmooth(true);
-        targetTex.display();
-    }*/
+    if (doBlur)
+        applyBlur();
     return true;
 }
 
@@ -155,10 +104,7 @@ void LightScene::deleteEmitter(eVector2f coord) {
 
     scene.erase(std::remove_if(scene.begin() + 1, scene.end(), [coord](Emitter const &emitter)-> bool {
         eVector2f diff = emitter.getPosition() - coord;
-        if (diff.len() < 50)
-            return true;
-        else
-            return false;
+        return diff.len() < 50;
     }), scene.end());
 }
 
@@ -172,8 +118,8 @@ bool LightScene::updateEmitter(int i, eVector2f pos, eVector2f view, bool update
     return true;
 }
 
-void LightScene::updateEmittersRayTracing(Level *level) {
-    rayTracing.updateObstacles(level);
+void LightScene::updateEmittersRayTracing() {
+    rayTracing.updateObstacles(mediator->getLevel());
     for (auto &e : scene) {
         e.updateLightMap(&rayTracing);
         e.updateRayTracing(true);
@@ -192,10 +138,11 @@ bool LightScene::setBehaviour(int i, EmitterBehaviour::Behaviour* _behaviour) {
 Texture& LightScene::getTexture() {
     return const_cast<Texture &>(targetTex.getTexture());
 }
-void LightScene::setActiveTiles(Level *level) {
+
+void LightScene::setActiveTiles() {
     for (auto &e : scene) {
         if(e.isActive)
-            e.setActiveTiles(level);
+            e.setActiveTiles(mediator->getLevel());
     }
 }
 
@@ -217,11 +164,8 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
     states.blendMode = BlendAdd;
     if(doShadow) {
         shaderShadow.setUniform("frag_LightOrigin", emitter.getPosition());
-        //shaderShadow.setUniform("frag_ShadowParam1", float(20000));
-        //shaderShadow.setUniform("frag_ShadowParam2", float(20000));
         //shaderShadow.setUniform("frag_LightColor", Vector3f(255, 210, 80));
         shaderShadow.setUniform("frag_LightColor", Vector3f(125, 105, 40));
-        //shaderShadow.setUniform("frag_LightColor", Vector3f(250, 245, 245));
         states.shader = &shaderShadow;
     }
 
@@ -232,3 +176,59 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
     rtLock.unlock();
 }
 
+void LightScene::applyBlur() {
+
+    ///temporal vars for applying shader
+    Sprite bufferSprite;
+    RenderStates states;
+    bufferSprite.setTexture(bufferTex.getTexture());
+    bufferSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
+    bufferSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
+
+    ///blur all light
+    bufferTex.clear();
+
+    states.shader = &shaderBlur;
+
+    shaderBlur.setUniform("image", targetTex.getTexture());
+    shaderBlur.setUniform("dir", Vector2f(1, 0));
+    bufferTex.draw(bufferSprite, states);
+    bufferTex.display();
+
+    shaderBlur.setUniform("image", bufferTex.getTexture());
+    shaderBlur.setUniform("dir", Vector2f(0, 1));
+    bufferTex.draw(bufferSprite, states);
+    bufferTex.display();
+
+    shaderBlur.setUniform("image", bufferTex.getTexture());
+    shaderBlur.setUniform("dir", Vector2f(1, 1));
+    bufferTex.draw(bufferSprite, states);
+    bufferTex.display();
+
+    shaderBlur.setUniform("image", bufferTex.getTexture());
+    shaderBlur.setUniform("dir", Vector2f(1, -1));
+    bufferTex.draw(bufferSprite, states);
+    bufferTex.display();
+
+
+    bufferSprite.setTexture(targetTex.getTexture());
+
+    /*shaderBlur.setUniform("image", targetTex.getTexture());
+    shaderBlur.setUniform("dir", Vector2f(1, 0));
+    targetTex.draw(bufferSprite, states);
+    targetTex.display();
+
+    shaderBlur.setUniform("image", targetTex.getTexture());
+    shaderBlur.setUniform("dir", Vector2f(0, 1));
+    targetTex.draw(bufferSprite, states);
+    targetTex.display();*/
+
+
+    bufferSprite.setTexture(bufferTex.getTexture());
+    targetTex.draw(bufferSprite, BlendAdd);
+    targetTex.display();
+}
+
+void LightScene::setMediator(Game* _game) {
+    mediator = _game;
+}

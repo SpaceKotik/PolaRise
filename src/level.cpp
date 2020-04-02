@@ -40,22 +40,18 @@ void Level::resetActive() {
         if (e.type == Dynamic) {
             e.isActive = false;
         }
-
     }
 }
 
 void Level::addTile(Vector2f pos, TileType type) {
 	pos = Vector2f (((int)pos.x/(int)scale)*scale,((int)pos.y/(int)scale)*scale);
     field.tiles.at(((int)pos.y/(int)scale)*fieldSize.x + (int)pos.x/(int)scale).type = type;
-    //field.tiles.at(((int)pos.y/(int)scale)*fieldSize.x + (int)pos.x/(int)scale).physForm.setFillColor(tileDefaultColor);
 	loadToFile();
 }
 
 void Level::removeTile(Vector2f pos) {
-
 	pos = Vector2f (((int)pos.x/(int)scale)*scale + 0*scale,((int)pos.y/(int)scale)*scale + 0*scale);
     field.tiles.at(((int)pos.y/(int)scale)*fieldSize.x + (int)pos.x/(int)scale).type = Void;
-
 	loadToFile();
 }
 
@@ -143,11 +139,7 @@ bool Level::isOnTile(Vector2f pos) {
 }
 
 bool Level::isOnFinish(Vector2f pos) {
-	Tile currTile = field.tiles.at((index(pos, {fieldSize.x, fieldSize.y}, scale)));
-	if (currTile.type == FinishPos)
-		return true;
-	else
-		return false;
+    return field.tiles.at((index(pos, {fieldSize.x, fieldSize.y}, scale))).type == FinishPos;
 }
 
 // TODO: Maybe do something with indexes of tiles to make it look cleaner
@@ -191,3 +183,8 @@ void Level::setDynamicTiles(std::array<Vertex, 2> line) {
         currLen = sqrt ((currLine.startCoord.x - currPos.x)*(currLine.startCoord.x - currPos.x) + (currLine.startCoord.y - currPos.y)*(currLine.startCoord.y - currPos.y));
     }
 }
+
+void Level::setMediator(Game* _game) {
+    mediator = _game;
+}
+

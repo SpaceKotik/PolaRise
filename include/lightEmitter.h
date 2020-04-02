@@ -33,6 +33,7 @@ public:
 
     void updateLightMap(const RayTracing* _rayTracing); /// sets RayTracing equal to lightScene RayTracing (basically all obstacles)
     void update();
+
     void setActiveTiles(Level *level);
     void updateRayTracing(bool update = false);
     VertexArray createMesh();

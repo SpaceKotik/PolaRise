@@ -21,14 +21,13 @@ private:
 
     Level level;
     Player player;
-
     LightScene lightScene;
 
     Sprite bufferSprite;
     Shader shaderBlur;
     Shader shaderShadow;
     RenderTexture bufferTex;
-    Dump dump;
+    //Dump dump;
 public:
     Game();
 //  ~Game();
@@ -38,4 +37,8 @@ public:
     void draw();
     void logic();
     void restart();
+    void notify(Player* player);
+    void notify(Level* level);
+    void notify(LightScene* lightScene);
+    Level* getLevel();
 };

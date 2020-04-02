@@ -10,6 +10,9 @@
 #include "../SmartVector2/SmartVector2f.h"
 #include "emitterBehaviour.h"
 
+
+class Game;
+
 class LightScene {
 private:
     std::vector<Emitter> scene;
@@ -24,8 +27,10 @@ private:
     RenderTexture targetTex;///RenderTexture, where all lights are drawn to
     RenderTexture bufferTex;///RenderTexture for temporal drawing to apply shadow shader
 
+    Game* mediator;
     void doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock);  ///The function passed to thread in draw()
     bool invalidIndex(int i);
+    void applyBlur();
 public:
     LightScene();
     ~LightScene();
@@ -38,9 +43,11 @@ public:
     void addEmitter(eVector2f position, eVector2f view, EmitterBehaviour::Behaviour* behaviour = nullptr, bool isRestricted = true);
     void deleteEmitter(eVector2f coord);
     bool updateEmitter(int i, eVector2f pos, eVector2f _view, bool updateObstacles = false);
-    void updateEmittersRayTracing(Level *level);     ///Updates obstacles in lightScene rayTracing, then applied to all Emitter
+    void updateEmittersRayTracing();     ///Updates obstacles in lightScene rayTracing, then applied to all Emitter
     bool setBehaviour(int i, EmitterBehaviour::Behaviour*);
 
     Texture& getTexture();  ///This texture must be applied to sprite which then drawn to window
-    void setActiveTiles(Level *level);
+    void setActiveTiles();
+
+    void setMediator(Game* game);
 };

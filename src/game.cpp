@@ -7,6 +7,10 @@ using namespace consts;
 
 Game::Game() {
 
+    level.setMediator(this);
+    player.setMediator(this);
+    lightScene.setMediator(this);
+
     gameState = Gameplay;
 
     ContextSettings settings;
@@ -21,6 +25,7 @@ Game::Game() {
 
     level.setField();
     player.setLevel(&level);
+
     bufferTex.create(windowSize.x, windowSize.y);
     bufferTex.setSmooth(true);
     bufferSprite.setTexture(bufferTex.getTexture());
@@ -46,7 +51,7 @@ Game::Game() {
     lightScene.setBehaviour(5, new EmitterBehaviour::Flicker(9));
     lightScene.setBehaviour(6, new EmitterBehaviour::Flicker(6));*/
 
-    lightScene.updateEmittersRayTracing(&level);
+    lightScene.updateEmittersRayTracing();
 }
 
 RenderWindow* Game::getHandle() {   
@@ -165,7 +170,7 @@ void Game::input()  {
             case Event::KeyPressed:
                 if(event.key.code == Keyboard::LShift) {
                     lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(0, 1));
-                    lightScene.updateEmittersRayTracing(&level);
+                    lightScene.updateEmittersRayTracing();
                 }
                 if(event.key.code == Keyboard::LControl) {
                     lightScene.deleteEmitter(Vector2f(Vector2f(Mouse::getPosition(window))));
@@ -207,15 +212,15 @@ void Game::input()  {
     if(isMouseInside) {
         if (Mouse::isButtonPressed(sf::Mouse::Left)) {
             level.addTile(mousePos, Standart);
-            lightScene.updateEmittersRayTracing(&level);///////
+            lightScene.updateEmittersRayTracing();///////
         }
         if (Mouse::isButtonPressed(sf::Mouse::Middle)) {
             level.addTile(mousePos, Dynamic);
-            lightScene.updateEmittersRayTracing(&level);///////
+            lightScene.updateEmittersRayTracing();///////
         }
         if (Mouse::isButtonPressed(sf::Mouse::Right)) {
             level.removeTile(mousePos);
-            lightScene.updateEmittersRayTracing(&level);///////
+            lightScene.updateEmittersRayTracing();///////
         }
     }
 
@@ -234,7 +239,7 @@ void Game::logic() {
     lightScene.update();
 
     level.resetActive();
-    lightScene.setActiveTiles(&level);
+    lightScene.setActiveTiles();
     player.disableDynamicTiles();
     level.update();
     player.updateMovement();
@@ -258,8 +263,24 @@ void Game::restart() {
     lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), new EmitterBehaviour::Flicker(9));
     lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::Flicker(6));
 
-    lightScene.updateEmittersRayTracing(&level);
+    lightScene.updateEmittersRayTracing();
     ////
+}
+
+void Game::notify(Player *player) {
+
+}
+
+void Game::notify(Level *level) {
+
+}
+
+void Game::notify(LightScene *lightScene) {
+
+}
+
+Level *Game::getLevel() {
+    return &level;
 }
 ///may be useful for applying effects to menu etc.
 /*
