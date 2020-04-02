@@ -12,24 +12,17 @@
 using namespace sf;
 class Game;
 
-enum LevelState {Red, Blue};
-
-struct Field {
-	std::vector<Tile> tiles;
-};
-
-
 
 class Level {
 private:
-	Field field;
+    std::vector<Tile> level;
 	Vector2f startPos;
 	Vector2f finishPos;
 	Game* mediator;
 public:
 	Level();
 	void setField();
-	Field* getField();
+    std::vector<Tile>* getField();
 	void update();
 	void addTile(Vector2f, TileType type);
 	void removeTile(Vector2f);

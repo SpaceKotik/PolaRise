@@ -55,7 +55,7 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 				tempCell.edgeId[k] = -1;
 			}
 
-            tempCell.exist = !(level->getField()->tiles[i * fieldSize.x + j].checkIfLightAbsorb());
+            tempCell.exist = !(level->getField()->at(i * fieldSize.x + j).checkIfLightAbsorb());
 			processingCells.push_back(tempCell);
 		}
 	}
@@ -86,8 +86,8 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 					///if not, make one
 					else {
 						Line newEdge;
-						newEdge.startCoord = getRectPointPos(level->getField()->tiles[self], 0);
-						newEdge.dir = getRectPointPos(level->getField()->tiles[self], 3) - newEdge.startCoord;
+						newEdge.startCoord = getRectPointPos(level->getField()->at(self), 0);
+						newEdge.dir = getRectPointPos(level->getField()->at(self), 3) - newEdge.startCoord;
 
 						int edge_id = edges.size();
 
@@ -111,8 +111,8 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 					///if not, make one
 					else {
 						Line newEdge;
-						newEdge.startCoord = getRectPointPos(level->getField()->tiles[self], 1);
-						newEdge.dir = getRectPointPos(level->getField()->tiles[self], 2) - newEdge.startCoord;
+						newEdge.startCoord = getRectPointPos(level->getField()->at(self), 1);
+						newEdge.dir = getRectPointPos(level->getField()->at(self), 2) - newEdge.startCoord;
 
 						int edge_id = edges.size();
 
@@ -137,8 +137,8 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 					///if not, make one
 					else {
 						Line newEdge;
-						newEdge.startCoord = getRectPointPos(level->getField()->tiles[self], 0);
-						newEdge.dir = getRectPointPos(level->getField()->tiles[self], 1) - newEdge.startCoord;
+						newEdge.startCoord = getRectPointPos(level->getField()->at(self), 0);
+						newEdge.dir = getRectPointPos(level->getField()->at(self), 1) - newEdge.startCoord;
 
 						int edge_id = edges.size();
 
@@ -162,8 +162,8 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 					///if not, make one
 					else {
 						Line newEdge;
-						newEdge.startCoord = getRectPointPos(level->getField()->tiles[self], 3);//
-						newEdge.dir =  getRectPointPos(level->getField()->tiles[self], 2) - newEdge.startCoord;
+						newEdge.startCoord = getRectPointPos(level->getField()->at(self), 3);//
+						newEdge.dir =  getRectPointPos(level->getField()->at(self), 2) - newEdge.startCoord;
 
 						int edge_id = edges.size();
 

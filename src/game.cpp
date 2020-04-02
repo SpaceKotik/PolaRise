@@ -100,8 +100,8 @@ void Game::draw() {
 
     ///draw all tiles
     for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
-        if (level.getField()->tiles[i].checkIfLightAbsorb()) {
-            window.draw(level.getField()->tiles[i].physForm, BlendAdd);
+        if (level.getField()->at(i).checkIfLightAbsorb()) {
+            window.draw(level.getField()->at(i).physForm, BlendAdd);
         }
     }
 

@@ -44,8 +44,8 @@ void Player::disableDynamicTiles() {
     playerRect.width -= 2*playerOffset;
     playerRect.height -= 2*playerOffset;
     ///check all tiles and set inactive all intersecting
-    for (auto &e: level->getField()->tiles) {
-        if (e.getRect().getGlobalBounds().intersects(playerRect))
+    for (auto &e: *level->getField()) {
+        if (e.getRect().getGlobalBounds().intersects(playerRect)) // TODO: aaa
             e.isActive = false;
     }
 }
