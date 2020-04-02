@@ -28,15 +28,13 @@ private:
 	Vector2f velocity = Vector2f(0, 0);
 
     PlayerStates states;    /// states used for processing input
-    Level* level;           /// pointer to the current level (for processing collisions etc)
-    Game* game;
+    Game* mediator;
 public:
 	Player();
 	void move(Vector2f dir);        /// moves player by dir vector
 	void setPos(Vector2f pos);      /// sets player's position
 	Vector2f getPos();              /// returns player's position
 	RectangleShape* getPhysForm();  /// returns pointer to physForm for drawing
-    void setLevel(Level* _level);   /// sets pointer to the current level
     void updateMovement();          /// processes player movement based on input
     void disableDynamicTiles();     ///set dynamic  tiles which player intersect inactive
     void reset();

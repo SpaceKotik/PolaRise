@@ -6,9 +6,11 @@ using namespace consts;
 
 // TODO: fix loading shaders
 LightScene::LightScene() {
-    doBlur = true;
-    doShadow = true;
-    setShaders(doBlur, doShadow);
+    doBlur = DOBLUR;
+    doShadow = DOSHADOW;
+    /// TODO: check if shaders actually loaded
+    setShaders(DOBLUR, DOSHADOW);
+    ///
     targetTex.create(windowSize.x, windowSize.y);
     bufferTex.create(windowSize.x, windowSize.y);
     targetTex.setSmooth(true);
@@ -98,6 +100,7 @@ void LightScene::addEmitter(eVector2f position, eVector2f view, EmitterBehaviour
         behaviourPool.push_back(behaviour);
     }
     scene.push_back(emitter);
+    updateEmittersRayTracing();
 }
 
 void LightScene::deleteEmitter(eVector2f coord) {

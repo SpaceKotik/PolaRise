@@ -1,21 +1,20 @@
 #include <SFML/Graphics.hpp>
 #include "game.hpp"
 
-
 using namespace sf;
 using namespace consts;
 
 Game::Game() {
-
+    ///Using Mediator pattern; set mediator's pointer for all components
     level.setMediator(this);
     player.setMediator(this);
     lightScene.setMediator(this);
 
+    ///probably will be used while adding GUI
     gameState = Gameplay;
 
     ContextSettings settings;
     settings.antialiasingLevel = 8;
-    
     window.create(VideoMode(windowSize.x, windowSize.y), "PolaRise",
                   Style::Titlebar | Style::Close, settings);
     window.setKeyRepeatEnabled(false);
@@ -23,17 +22,15 @@ Game::Game() {
     window.setPosition(Vector2i(600, 0));
     window.setMouseCursorGrabbed(false);
 
-    level.setField();
-    player.setLevel(&level);
 
+    /// TODO: extract method
     bufferTex.create(windowSize.x, windowSize.y);
     bufferTex.setSmooth(true);
     bufferSprite.setTexture(bufferTex.getTexture());
     bufferSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
     bufferSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
+    ///
 
-    if(!lightScene.setShaders(DOBLUR, DOSHADOW))
-       window.close();
 
     lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));
     lightScene.addEmitter(eVector2f(900, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
@@ -42,24 +39,9 @@ Game::Game() {
     lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
     lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), new EmitterBehaviour::Flicker(9));
     lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::Flicker(6));
-
-    /*lightScene.setBehaviour(0, new EmitterBehaviour::Rotate(0.04));
-    lightScene.setBehaviour(1, new EmitterBehaviour::Flicker(3));
-    lightScene.setBehaviour(2, new EmitterBehaviour::Flicker(3));
-    lightScene.setBehaviour(3, new EmitterBehaviour::Flicker(3));
-    lightScene.setBehaviour(4, new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
-    lightScene.setBehaviour(5, new EmitterBehaviour::Flicker(9));
-    lightScene.setBehaviour(6, new EmitterBehaviour::Flicker(6));*/
-
-    lightScene.updateEmittersRayTracing();
-}
-
-RenderWindow* Game::getHandle() {   
-    return &window;
 }
 
 void Game::run() {
-    Clock clock;
     FPScounter fpsCounter;
     while(window.isOpen()) {
         window.setTitle("PolaRise" + fpsCounter.get());
@@ -70,15 +52,15 @@ void Game::run() {
 }
 
 void Game::draw() {
-
     window.clear(backgroundColor);
     bufferTex.clear(backgroundColor);
 
+
+    ///draw light
 //////////////////////
     window.setActive(false);
-
-
     lightScene.draw();
+    // TODO: Make tempSprite not that temp, not effective
     Sprite tempSprite;
     tempSprite.setTexture(lightScene.getTexture());
     tempSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
@@ -86,6 +68,17 @@ void Game::draw() {
     window.draw(tempSprite, BlendAdd);
 //////////////////////
 
+    ///draw tiles
+    for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
+        if (level.getField()->at(i).checkIfLightAbsorb()) {
+            window.draw(level.getField()->at(i).physForm, BlendAdd);
+        }
+    }
+
+    ///draw player
+    window.draw(*player.getPhysForm());
+
+    // TODO: Make resource holder for this
     ///pixelate everyrhing
     if (DOPIXEL) {
         if (!shaderShadow.loadFromFile("../shaders/pixelate.frag", sf::Shader::Fragment)) {
@@ -98,64 +91,17 @@ void Game::draw() {
         window.draw(tempSprite, states);
     }
 
-    ///draw all tiles
-    for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
-        if (level.getField()->at(i).checkIfLightAbsorb()) {
-            window.draw(level.getField()->at(i).physForm, BlendAdd);
-        }
-    }
-
-
-    ///Debug does not work like this now
-    /*
-    //DEBUG
-    if (!NDEBUG) {
-        //DEBUG DRAW POINTS
-        for (int i = 0; i < rayTracing.vertices.size(); ++i) {
-            CircleShape currCirle;
-            currCirle.setRadius(2);
-            currCirle.setOrigin(2, 2);
-            currCirle.setPosition(rayTracing.vertices.at(i));
-            currCirle.setFillColor(Color::Red);
-            window.draw(currCirle);
-        }
-        //DDEBUG DRAW EDGES
-        for (int i = 0; i < rayTracing.edges.size(); ++i) {
-            Vertex currLine[2];
-            currLine[0].position = rayTracing.edges.at(i).startCoord;
-            currLine[1].position = rayTracing.edges.at(i).startCoord + Vector2f(rayTracing.edges.at(i).dirX, rayTracing.edges.at(i).dirY);
-            currLine[0].color = Color::Green;
-            currLine[1].color = Color::Green;
-            window.draw(currLine, 2, Lines);
-        }
-        //DEBUG DRAW RAYS
-        rayTracing.update(player.getPos(), true, player.view, player.lineOfSight);
-        dump.add("Rays on screen: " + std::to_string(rayTracing.raysVertex.size()) + "\n");
-        for (int i = 0; i < rayTracing.raysVertex.size(); ++i) {
-            
-            Vertex currRay[2];
-            currRay[0].position = rayTracing.raysVertex.at(i)[0].position;
-            currRay[1].position = rayTracing.raysVertex.at(i)[1].position;
-            currRay[0].color = Color::White;
-            currRay[1].color = Color::White;
-            window.draw(currRay, 2, Lines);
-        }
-
-    }*/
-
-    ///draw player
-    window.draw(*player.getPhysForm());
     window.display();
-
 }
 
 void Game::input()  {
-
+    // TODO: maybe replace with calling Mouse::getPosition(window) each time?
     Vector2f mousePos;
     mousePos = (Vector2f)Mouse::getPosition(window);
 
-    Event event;
+    Event event{};
     static bool isMouseInside = true;
+
     while (window.pollEvent(event)) {
         switch (event.type) {
             case Event::MouseLeft:
@@ -170,12 +116,12 @@ void Game::input()  {
             case Event::KeyPressed:
                 if(event.key.code == Keyboard::LShift) {
                     lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(0, 1));
-                    lightScene.updateEmittersRayTracing();
                 }
                 if(event.key.code == Keyboard::LControl) {
                     lightScene.deleteEmitter(Vector2f(Vector2f(Mouse::getPosition(window))));
                 }
                 if(event.key.code == Keyboard::Space) {
+                    // TODO: maybe move all logic of changing to player class?
                     if (player.states.jumpAble)
                         player.states.jumpMade = true;
                 }
@@ -224,29 +170,26 @@ void Game::input()  {
         }
     }
 
-
+    // FIXME: this definitely must be moved to player's logic
     ///normalized view
     player.view = eVector2f((Vector2f)Mouse::getPosition(window) - player.getPos()).norm();
 }
 
 void Game::logic() {
-    /*for (int i = 0; i < 20000; ++i) {
-        lightScene.addEmitter(eVector2f(500, 300), eVector2f(0, 1), true, false);
+    ///Stress test
+    /*
+    for (int i = 0; i < 200; ++i) {
+        lightScene.addEmitter(eVector2f(500, 300), eVector2f(0, 1));
         lightScene.setBehaviour(3, new EmitterBehaviour::Rotate(0.04));
         lightScene.deleteEmitter({500, 300});
     }*/
-
-    lightScene.update();
-
+    // TODO: Refactor this
     level.resetActive();
+    lightScene.update();
     lightScene.setActiveTiles();
     player.disableDynamicTiles();
     level.update();
     player.updateMovement();
-
-    //dump.add("Velocity: (" + std::to_string(player.velocity.x) + " : " + std::to_string(player.velocity.y) + ")");
-    //dump.add("View: (" + std::to_string(player.view.x) + " : " + std::to_string(player.view.y) + ")");
-
 
 }
 
@@ -254,7 +197,7 @@ void Game::restart() {
     level.setField();
     lightScene.reset();
     player.reset();
-    ///Must load form level in the future
+    ///TODO: Must load form level in the future
     lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));
     lightScene.addEmitter(eVector2f(900, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
     lightScene.addEmitter(eVector2f(1100, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
@@ -262,8 +205,6 @@ void Game::restart() {
     lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
     lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), new EmitterBehaviour::Flicker(9));
     lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::Flicker(6));
-
-    lightScene.updateEmittersRayTracing();
     ////
 }
 
@@ -281,6 +222,10 @@ void Game::notify(LightScene *lightScene) {
 
 Level *Game::getLevel() {
     return &level;
+}
+
+RenderWindow* Game::getHandle() {
+    return &window;
 }
 ///may be useful for applying effects to menu etc.
 /*

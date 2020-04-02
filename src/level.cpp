@@ -1,4 +1,6 @@
 #include "level.hpp"
+
+#include <cmath>
 #include "rayTracing.hpp"
 
 using namespace consts;
@@ -9,8 +11,9 @@ Level::Level() {
 		Vector2f pos = Vector2f ((int)(i % fieldSize.x)*scale , ((int)i/(int)fieldSize.x)*scale) + offset;
         level.emplace_back(pos, Void);
 	}
+	loadFromFile();
 }
-
+///FIXME: Deprecated
 void Level::setField() {
 	loadFromFile();
 }
@@ -162,7 +165,7 @@ void Level::setDynamicTiles(std::array<Vertex, 2> line) {
     currLine.dir = line[1].position - line[0].position;
 
     ///make direction of line
-    float maxLen = sqrt(currLine.dir.x*currLine.dir.x + currLine.dir.y*currLine.dir.y); ///length of the line
+    float maxLen = std::sqrt(currLine.dir.x*currLine.dir.x + currLine.dir.y*currLine.dir.y); ///length of the line // TODO : test
     float currLen = 0;  ///current distance from starting end of the line
     eVector2f dir = currLine.dir;
     dir = dir.norm();
