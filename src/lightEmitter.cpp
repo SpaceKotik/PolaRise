@@ -86,7 +86,6 @@ bool Emitter::setLineOfSight(float _viewAngle) {
 }
 
 void Emitter::setBehaviour(EmitterBehaviour::Behaviour* _behaviour) {
-        delete behaviour;
         behaviour = _behaviour;
 }
 

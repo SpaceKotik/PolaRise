@@ -14,6 +14,7 @@ LightScene::LightScene() {
     targetTex.create(windowSize.x, windowSize.y);
     bufferTex.create(windowSize.x, windowSize.y);
     targetTex.setSmooth(true);
+    mediator = nullptr;
 }
 
 LightScene::~LightScene() = default;
@@ -42,7 +43,7 @@ bool LightScene::draw() {
     return true;
 }
 
-void LightScene::update() {
+void LightScene::removeDeprecatedBehaviours() {
     for (auto &e : scene) {
         e.update();
     }
@@ -111,16 +112,6 @@ void LightScene::deleteEmitter(eVector2f coord) {
     }), scene.end());
 }
 
-bool LightScene::updateEmitter(int i, eVector2f pos, eVector2f view, bool updateObstacles) {
-    if (invalidIndex(i))
-        return false;
-    if (updateObstacles)
-        scene.at(i).updateLightMap(&rayTracing);
-    scene.at(i).setPosition(pos);
-    scene.at(i).setView(view);
-    return true;
-}
-
 void LightScene::updateEmittersRayTracing() {
     rayTracing.updateObstacles(mediator->getLevel());
     for (auto &e : scene) {
@@ -149,13 +140,12 @@ void LightScene::setActiveTiles() {
     }
 }
 
-
 bool LightScene::invalidIndex(int i) {
-    if (i >=scene.size()) {
+    if (i >= scene.size()) {
         std::cout << "Error: invalid emitter index\n";
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 ///function passed to threads
 void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock) {
@@ -168,7 +158,8 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
     if(doShadow) {
         shaderShadow.setUniform("frag_LightOrigin", emitter.getPosition());
         //shaderShadow.setUniform("frag_LightColor", Vector3f(255, 210, 80));
-        shaderShadow.setUniform("frag_LightColor", Vector3f(125, 105, 40));
+        //shaderShadow.setUniform("frag_LightColor", Vector3f(125, 105, 40));
+        shaderShadow.setUniform("frag_LightColor", Vector3f(52, 125, 125));
         states.shader = &shaderShadow;
     }
 
@@ -234,4 +225,9 @@ void LightScene::applyBlur() {
 
 void LightScene::setMediator(Game* _game) {
     mediator = _game;
+}
+
+void LightScene::update() {
+    setActiveTiles();
+    removeDeprecatedBehaviours();
 }

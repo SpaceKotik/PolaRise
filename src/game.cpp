@@ -179,17 +179,19 @@ void Game::logic() {
     ///Stress test
     /*
     for (int i = 0; i < 200; ++i) {
-        lightScene.addEmitter(eVector2f(500, 300), eVector2f(0, 1));
-        lightScene.setBehaviour(3, new EmitterBehaviour::Rotate(0.04));
+        lightScene.addEmitter(eVector2f(500, 300), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));
+        //lightScene.setBehaviour(3, new EmitterBehaviour::Rotate(0.04));
         lightScene.deleteEmitter({500, 300});
-    }*/
+    }
+    */
     // TODO: Refactor this
+    player.update();
+    lightScene.updateEmittersRayTracing();
     level.resetActive();
     lightScene.update();
-    lightScene.setActiveTiles();
-    player.disableDynamicTiles();
+    //player.disableDynamicTiles();
     level.update();
-    player.updateMovement();
+    //player.updateMovement();
 
 }
 
@@ -208,17 +210,6 @@ void Game::restart() {
     ////
 }
 
-void Game::notify(Player *player) {
-
-}
-
-void Game::notify(Level *level) {
-
-}
-
-void Game::notify(LightScene *lightScene) {
-
-}
 
 Level *Game::getLevel() {
     return &level;
@@ -279,3 +270,15 @@ RenderStates Game::getStatesShadow(float param1, float param2) {
     return states;
 }
  */
+
+void Game::notify(Player *player) {
+
+}
+
+void Game::notify(Level *level) {
+
+}
+
+void Game::notify(LightScene *lightScene) {
+
+}

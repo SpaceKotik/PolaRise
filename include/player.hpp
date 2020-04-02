@@ -31,6 +31,7 @@ private:
     Game* mediator;
 public:
 	Player();
+	void update();
 	void move(Vector2f dir);        /// moves player by dir vector
 	void setPos(Vector2f pos);      /// sets player's position
 	Vector2f getPos();              /// returns player's position

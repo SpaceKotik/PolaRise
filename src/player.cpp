@@ -39,8 +39,12 @@ void Player::disableDynamicTiles() {
     playerRect.height -= 2*playerOffset;
     ///check all tiles and set inactive all intersecting
     for (auto &e: *(mediator->getLevel()->getField())) {
+            e.isUnderPlayer = false;
+    }
+    for (auto &e: *(mediator->getLevel()->getField())) {
         if (e.getRect().getGlobalBounds().intersects(playerRect))
-            e.isActive = false;
+            //e.isActive = false;
+            e.isUnderPlayer = true;
     }
 }
 
@@ -160,5 +164,10 @@ void Player::reset() {
 
 void Player::setMediator(Game* _game) {
     mediator = _game;
+}
+
+void Player::update() {
+    updateMovement();
+    disableDynamicTiles();
 }
 

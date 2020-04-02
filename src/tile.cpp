@@ -34,5 +34,5 @@ bool Tile::checkIfSolid() {
 }
 
 bool Tile::checkIfLightAbsorb() {
-    return (type != Void) ;
+    return (type != Void && !isUnderPlayer);
 }

@@ -138,7 +138,7 @@ bool Level::isOnTile(Vector2f pos) {
     if(level.size() <= i || i < 0)
         return false;
 	Tile currTile = level.at(i);
-    return currTile.checkIfSolid();
+    return (currTile.checkIfSolid() && !currTile.isUnderPlayer);
 }
 
 bool Level::isOnFinish(Vector2f pos) {

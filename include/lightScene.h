@@ -42,12 +42,11 @@ public:
 
     void addEmitter(eVector2f position, eVector2f view, EmitterBehaviour::Behaviour* behaviour = nullptr, bool isRestricted = true);
     void deleteEmitter(eVector2f coord);
-    bool updateEmitter(int i, eVector2f pos, eVector2f _view, bool updateObstacles = false);
     void updateEmittersRayTracing();     ///Updates obstacles in lightScene rayTracing, then applied to all Emitter
     bool setBehaviour(int i, EmitterBehaviour::Behaviour*);
 
     Texture& getTexture();  ///This texture must be applied to sprite which then drawn to window
     void setActiveTiles();
-
+    void removeDeprecatedBehaviours();
     void setMediator(Game* game);
 };

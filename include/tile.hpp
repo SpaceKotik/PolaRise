@@ -12,6 +12,7 @@ private:
 	RectangleShape physForm;
     TileType type = Standart;
 	bool isActive = false;
+	bool isUnderPlayer = false;
 public:
 	Tile();
 	Tile(Vector2f pos, TileType _type);
