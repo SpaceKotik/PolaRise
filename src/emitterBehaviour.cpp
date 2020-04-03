@@ -2,6 +2,7 @@
 #include "util/eMath/eMath.h"
 #include "emitterBehaviour.h"
 #include "lightEmitter.h"
+#include "player.hpp"
 #include <iostream>
 
 using namespace EmitterBehaviour;
@@ -86,6 +87,7 @@ MoveByCircle::MoveByCircle(eVector2f _center, float _radius, float _speed) {
     speed = _speed;
     angle = 0;
 }
+
 void MoveByCircle::update(Emitter* emitter) {
 
     angle += speed;
@@ -103,6 +105,7 @@ void MoveByCircle::update(Emitter* emitter) {
 
 }
 
+
 ///Flicker
 Flicker::Flicker(float _speed) {
     speed = _speed;
@@ -116,4 +119,15 @@ void Flicker::update(Emitter* emitter) {
         isActive = !isActive;
         emitter->setActive(isActive);
     }
+}
+
+
+///BindToPlayer
+BindToPlayer::BindToPlayer(Player *_player) {
+    player = _player;
+}
+
+void BindToPlayer::update(Emitter* emitter) {
+    emitter->setPosition(player->getPos());
+    emitter->setView(player->getView());
 }

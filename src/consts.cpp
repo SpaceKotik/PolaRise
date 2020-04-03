@@ -19,14 +19,16 @@ namespace consts {
     constexpr float jumpGravity = 0.1;
     constexpr float fallGravity = 0.8;
 
-    const eVector2f offset = eVector2f(0.01, 0.01);
+    const eVector2f offset = eVector2f(0.005, 0.005);
     const float playerOffset = 0.01;
-    const Color tileDefaultColor = Color(200, 200, 200);
+    //const Color tileDefaultColor = Color(200, 200, 200);
+    const Color tileDefaultColor = Color::White;
     const Color heroColor = Color(75, 135, 255);
     const Color backgroundColor = Color (20, 20, 20);
     const Color lightColorDefault = Color(255, 51, 51);		///
     const Color inactiveTileColor = Color(100, 0, 80);		///Color for inactivate tiles
-    const Color activeTileColor = Color(250, 168, 8);		    ///Color for activate tiles
+    //const Color activeTileColor = Color(250, 168, 8);		    ///Color for activate tiles
+    const Color activeTileColor = Color(80, 200, 200);		    ///Color for activate tiles
 }
 
 

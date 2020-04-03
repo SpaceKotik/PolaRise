@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "../SmartVector2/SmartVector2f.h"
 class Emitter;
-
+class Player;
 
 namespace EmitterBehaviour {
 
@@ -11,7 +11,7 @@ namespace EmitterBehaviour {
     public:
         Behaviour();
         virtual ~Behaviour() = 0;
-        virtual void update(Emitter*){};
+        virtual void update(Emitter* emitter){};
     };
 
     class MoveByPath : public Behaviour {
@@ -33,7 +33,7 @@ namespace EmitterBehaviour {
     public:
         //Rotate();
         Rotate(float);
-        void update(Emitter*) override;
+        void update(Emitter* emitter) override;
     };
 
     class MoveByCircle : public Behaviour {
@@ -44,7 +44,7 @@ namespace EmitterBehaviour {
         float speed;
     public:
         MoveByCircle(eVector2f, float radius, float speed);
-        void update(Emitter*) override;
+        void update(Emitter* emitter) override;
     };
 
     class Flicker : public Behaviour {
@@ -54,7 +54,15 @@ namespace EmitterBehaviour {
         sf::Clock timer;
     public:
         Flicker(float speed);
-        void update(Emitter*) override;
+        void update(Emitter* emitter) override;
+    };
+
+    class BindToPlayer : public Behaviour {
+    private:
+        Player* player;
+    public:
+        BindToPlayer(Player* player);
+        void update(Emitter* emitter) override;
     };
 
 

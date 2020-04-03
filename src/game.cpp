@@ -31,7 +31,7 @@ Game::Game() {
     bufferSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
     ///
 
-
+    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::BindToPlayer(&player));
     lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));
     lightScene.addEmitter(eVector2f(900, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
     lightScene.addEmitter(eVector2f(1100, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
@@ -39,6 +39,7 @@ Game::Game() {
     lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
     lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), new EmitterBehaviour::Flicker(9));
     lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::Flicker(6));
+
 }
 
 void Game::run() {
@@ -56,6 +57,19 @@ void Game::draw() {
     bufferTex.clear(backgroundColor);
 
 
+    Texture tex;
+    tex.loadFromFile("../Textures/background.png");
+    tex.setRepeated(true);
+    Sprite spr;
+    spr.setTexture(tex);
+    spr.setTextureRect(IntRect(0, 0, 2000, 2000));
+    //spr.setScale(2, 2);
+    spr.setColor(Color(100, 100, 100));
+    spr.setPosition(-windowSize.x / 4.f , 0);
+    window.draw(spr);
+
+
+
     ///draw light
 //////////////////////
     window.setActive(false);
@@ -67,15 +81,34 @@ void Game::draw() {
     window.draw(tempSprite, BlendAdd);
 //////////////////////
 
+
+
+//////////////////////
+    Texture tex2;
+    tex2.loadFromFile("../Textures/tile.png");
+    Sprite spr2;
+    spr2.setTexture(tex2);
+    spr2.scale(scale/24.f, scale/24.f);
+    spr2.setColor(Color(255, 210, 140));
+    //spr.setTextureRect(IntRect(0, 0, 2000, 2000));
+    //spr.setScale(2, 2);
+    //spr.setColor(Color(100, 100, 100));
+//////////////////////
+
     ///draw tiles
     for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
+        //TODO: condition must be removed after game is finished
         if (level.getField()->at(i).checkIfLightAbsorb()) {
-            window.draw(level.getField()->at(i).physForm, BlendAdd);
+            //spr2.setPosition(level.getField()->at(i).physForm.getPosition());
+            //window.draw(spr2);
+            window.draw(level.getField()->at(i).physForm);
         }
     }
 
     ///draw player
     window.draw(*player.getPhysForm());
+
+    window.draw(player.flashLight.sprite);
 
 
     // TODO: Make resource holder for this
@@ -90,6 +123,11 @@ void Game::draw() {
         states.shader = &shaderShadow;
         window.draw(tempSprite, states);
     }
+
+
+
+
+
 
     window.display();
 }
@@ -188,6 +226,7 @@ void Game::restart() {
     lightScene.reset();
 
     ///TODO: Must load form level in the future
+    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::BindToPlayer(&player));
     lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));
     lightScene.addEmitter(eVector2f(900, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
     lightScene.addEmitter(eVector2f(1100, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));

@@ -10,7 +10,6 @@
 #include "../SmartVector2/SmartVector2f.h"
 #include "emitterBehaviour.h"
 
-
 class Game;
 
 class LightScene {
@@ -32,15 +31,15 @@ private:
     void doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock);  ///The function passed to thread in draw()
     bool invalidIndex(int i);
     void applyBlur();
-    void setActiveTiles();
-    void removeDeprecatedBehaviours();
+    void setActiveTiles();                  ///sets lighted tiles active
+    void removeDeprecatedBehaviours();      ///removes unused behaviours from behaviourPool
 public:
     LightScene();
     ~LightScene();
     void setMediator(Game* game);
 
     Texture& drawToTex();    ///Draws all Emitters to targetTex
-    void update();
+    void update();           ///Calls update for emitters behaviour, applies their effects on level's dynamic tiles, etc.
     void reset();
     bool setShaders(bool doBlur, bool doShadow);
 

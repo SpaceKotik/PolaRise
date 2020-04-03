@@ -97,7 +97,7 @@ void LightScene::addEmitter(eVector2f position, eVector2f view, EmitterBehaviour
 
 void LightScene::deleteEmitter(eVector2f coord) {
 
-    scene.erase(std::remove_if(scene.begin() + 1, scene.end(), [coord](Emitter const &emitter)-> bool {
+    scene.erase(std::remove_if(scene.begin(), scene.end(), [coord](Emitter const &emitter)-> bool {
         eVector2f diff = emitter.getPosition() - coord;
         return diff.len() < 50;
     }), scene.end());
@@ -118,7 +118,6 @@ bool LightScene::setBehaviour(int i, EmitterBehaviour::Behaviour* _behaviour) {
     behaviourPool.push_back(_behaviour);
     return true;
 }
-
 
 
 bool LightScene::invalidIndex(int i) {

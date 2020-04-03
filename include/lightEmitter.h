@@ -32,15 +32,14 @@ public:
     ~Emitter();
 
     void updateLightMap(const RayTracing* _rayTracing); /// sets RayTracing equal to lightScene RayTracing (basically all obstacles)
-    void update();
+    void update();                                      /// updates behaviour
 
-    void setActiveTiles(Level *level);
-    void updateRayTracing(bool update = false);
+    void setActiveTiles(Level *level);                  /// this function just passes call to RayTracing method
+    void updateRayTracing(bool update = false);         /// updates light mesh (should be called only if emitters position, view, etc. changes)
     VertexArray createMesh();
 
 
     Vector2f getPosition() const;
-
     void setPosition(eVector2f);
     void setView(eVector2f);
     void setColor(Color);
@@ -51,7 +50,6 @@ public:
 
     void rotate(float angle);
     void move(eVector2f dir);
-
 
     friend class LightScene;
 };

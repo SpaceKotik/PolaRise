@@ -8,6 +8,7 @@
 #include "dump.hpp"
 #include "lightScene.h"
 #include "emitterBehaviour.h"
+#include "lantern.h"
 #include "consts.h"
 
 using namespace sf;

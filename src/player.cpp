@@ -25,6 +25,10 @@ Vector2f Player::getPos() {
 	return physForm.getPosition();
 }
 
+Vector2f Player::getView() {
+    return view;
+}
+
 RectangleShape* Player::getPhysForm() {
 	return &physForm;
 }
@@ -39,16 +43,16 @@ void Player::disableDynamicTiles() {
     playerRect.height -= 2*playerOffset;
     ///check all tiles and set inactive all intersecting
     for (auto &e: *(mediator->getLevel()->getField())) {
-            e.isUnderPlayer = false;
-    }
-    for (auto &e: *(mediator->getLevel()->getField())) {
-        if (e.getRect().getGlobalBounds().intersects(playerRect))
-            //e.isActive = false;
-            e.isUnderPlayer = true;
+        e.isUnderPlayer = e.getRect().getGlobalBounds().intersects(playerRect);
     }
 }
 
 void Player::updateMovement() {
+    //flashLight.sprite.setPosition(physForm.getPosition());
+
+
+
+
     if (states.jumpMade) {
         velocity.y -= maxVelocity;
         states.jumpTime.restart();
@@ -172,5 +176,9 @@ void Player::update(Vector2f mousePos) {
 
     updateMovement();
     disableDynamicTiles();
+
+    flashLight.sprite.setPosition(physForm.getPosition());
+    flashLight.sprite.setRotation(-atan2(view.x, view.y)*180/M_PI + 135);
+
 }
 

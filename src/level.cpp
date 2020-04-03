@@ -25,16 +25,17 @@ std::vector<Tile>* Level::getField() {
 void Level::update() {
     for (auto &e : level) {
         if (e.type == Dynamic) {
-            if (e.isActive)
+            if (e.isActive && !e.isUnderPlayer)
                 e.physForm.setFillColor(activeTileColor);
             else {
-                e.physForm.setFillColor(DEBUG ? inactiveTileColor : Color::Black);
+                e.physForm.setFillColor(DEBUG ? inactiveTileColor : Color::Transparent);
             }
         }
-        else {
+        else if (e.type == Standart) {
             e.physForm.setFillColor(tileDefaultColor);
         }
-
+        else if (e.type == Void)
+            e.physForm.setFillColor(Color::Transparent);
     }
 }
 
