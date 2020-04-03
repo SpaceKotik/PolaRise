@@ -19,8 +19,22 @@ LightScene::LightScene() {
 
 LightScene::~LightScene() = default;
 
+void LightScene::setMediator(Game* _game) {
+    mediator = _game;
+}
 
-bool LightScene::draw() {
+void LightScene::update() {
+    ///reset activated tiles from previous update call
+    mediator->getLevel()->resetActive();
+    ///and set new
+    setActiveTiles();
+    ///set tile colors according to their status
+    mediator->getLevel()->update();
+    ///free unused pointers to behaviours
+    removeDeprecatedBehaviours();
+}
+
+Texture& LightScene::drawToTex() {
     targetTex.clear(Color::Black);
 
     /// draw Emitters in threads
@@ -40,31 +54,7 @@ bool LightScene::draw() {
     }
     if (doBlur)
         applyBlur();
-    return true;
-}
-
-void LightScene::removeDeprecatedBehaviours() {
-    for (auto &e : scene) {
-        e.update();
-    }
-    while (behaviourPool.size() > scene.size()) {
-
-        for (auto e = behaviourPool.begin() ; e != behaviourPool.end(); ) {
-            bool isOutdated = true;
-            for (const auto& k : scene) {
-                if (k.behaviour == *e) {
-                    isOutdated = false;
-                    break;
-                }
-            }
-            if (isOutdated) {
-                delete *e;
-                e = behaviourPool.erase(e);
-            }
-            else
-                ++e;
-        }
-    }
+    return const_cast<Texture &>(targetTex.getTexture());
 }
 
 void LightScene::reset() {
@@ -91,6 +81,7 @@ bool LightScene::setShaders(bool _doBlur, bool _doShadow) {
 
     return true;
 }
+
 
 
 void LightScene::addEmitter(eVector2f position, eVector2f view, EmitterBehaviour::Behaviour* behaviour, bool isRestricted) {
@@ -129,16 +120,6 @@ bool LightScene::setBehaviour(int i, EmitterBehaviour::Behaviour* _behaviour) {
 }
 
 
-Texture& LightScene::getTexture() {
-    return const_cast<Texture &>(targetTex.getTexture());
-}
-
-void LightScene::setActiveTiles() {
-    for (auto &e : scene) {
-        if(e.isActive)
-            e.setActiveTiles(mediator->getLevel());
-    }
-}
 
 bool LightScene::invalidIndex(int i) {
     if (i >= scene.size()) {
@@ -147,6 +128,7 @@ bool LightScene::invalidIndex(int i) {
     }
     return false;
 }
+
 ///function passed to threads
 void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock) {
     emitter.updateRayTracing();
@@ -159,6 +141,7 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
         shaderShadow.setUniform("frag_LightOrigin", emitter.getPosition());
         //shaderShadow.setUniform("frag_LightColor", Vector3f(255, 210, 80));
         //shaderShadow.setUniform("frag_LightColor", Vector3f(125, 105, 40));
+        // TODO: make shader color constant (or apply color not in shader)
         shaderShadow.setUniform("frag_LightColor", Vector3f(52, 125, 125));
         states.shader = &shaderShadow;
     }
@@ -168,6 +151,37 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
     targetTex.display();
 
     rtLock.unlock();
+}
+
+void LightScene::removeDeprecatedBehaviours() {
+    for (auto &e : scene) {
+        e.update();
+    }
+    while (behaviourPool.size() > scene.size()) {
+
+        for (auto e = behaviourPool.begin() ; e != behaviourPool.end(); ) {
+            bool isOutdated = true;
+            for (const auto& k : scene) {
+                if (k.behaviour == *e) {
+                    isOutdated = false;
+                    break;
+                }
+            }
+            if (isOutdated) {
+                delete *e;
+                e = behaviourPool.erase(e);
+            }
+            else
+                ++e;
+        }
+    }
+}
+
+void LightScene::setActiveTiles() {
+    for (auto &e : scene) {
+        if(e.isActive)
+            e.setActiveTiles(mediator->getLevel());
+    }
 }
 
 void LightScene::applyBlur() {
@@ -223,11 +237,6 @@ void LightScene::applyBlur() {
     targetTex.display();
 }
 
-void LightScene::setMediator(Game* _game) {
-    mediator = _game;
-}
-
-void LightScene::update() {
-    setActiveTiles();
-    removeDeprecatedBehaviours();
+Texture& LightScene::getTexture() {
+    return const_cast<Texture &>(targetTex.getTexture());
 }

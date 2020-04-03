@@ -28,25 +28,27 @@ private:
     RenderTexture bufferTex;///RenderTexture for temporal drawing to apply shadow shader
 
     Game* mediator;
+
     void doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock);  ///The function passed to thread in draw()
     bool invalidIndex(int i);
     void applyBlur();
+    void setActiveTiles();
+    void removeDeprecatedBehaviours();
 public:
     LightScene();
     ~LightScene();
+    void setMediator(Game* game);
 
-    bool draw();    ///Draws all Emitters to targetTex
+    Texture& drawToTex();    ///Draws all Emitters to targetTex
     void update();
     void reset();
     bool setShaders(bool doBlur, bool doShadow);
 
     void addEmitter(eVector2f position, eVector2f view, EmitterBehaviour::Behaviour* behaviour = nullptr, bool isRestricted = true);
     void deleteEmitter(eVector2f coord);
-    void updateEmittersRayTracing();     ///Updates obstacles in lightScene rayTracing, then applied to all Emitter
     bool setBehaviour(int i, EmitterBehaviour::Behaviour*);
+    void updateEmittersRayTracing();    ///Updates obstacles in lightScene rayTracing, then applied to all Emitters
+                                        ///(Must be called only when level has changed)
 
     Texture& getTexture();  ///This texture must be applied to sprite which then drawn to window
-    void setActiveTiles();
-    void removeDeprecatedBehaviours();
-    void setMediator(Game* game);
 };

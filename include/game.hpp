@@ -30,15 +30,14 @@ private:
     //Dump dump;
 public:
     Game();
-//  ~Game();
-    RenderWindow* getHandle();
+    //~Game();
     void run();
     void input();
     void draw();
     void logic();
     void restart();
-    void notify(Player* player);
-    void notify(Level* level);
-    void notify(LightScene* lightScene);
+    //void notify(Player* player);
+    //void notify(Level* level);
+    //void notify(LightScene* lightScene);
     Level* getLevel();
 };

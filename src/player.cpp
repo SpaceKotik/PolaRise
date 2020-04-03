@@ -166,7 +166,10 @@ void Player::setMediator(Game* _game) {
     mediator = _game;
 }
 
-void Player::update() {
+void Player::update(Vector2f mousePos) {
+    ///normalized view
+    view = eVector2f(mousePos - getPos()).norm();
+
     updateMovement();
     disableDynamicTiles();
 }

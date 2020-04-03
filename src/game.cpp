@@ -59,10 +59,9 @@ void Game::draw() {
     ///draw light
 //////////////////////
     window.setActive(false);
-    lightScene.draw();
     // TODO: Make tempSprite not that temp, not effective
     Sprite tempSprite;
-    tempSprite.setTexture(lightScene.getTexture());
+    tempSprite.setTexture(lightScene.drawToTex());
     tempSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
     tempSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
     window.draw(tempSprite, BlendAdd);
@@ -77,6 +76,7 @@ void Game::draw() {
 
     ///draw player
     window.draw(*player.getPhysForm());
+
 
     // TODO: Make resource holder for this
     ///pixelate everyrhing
@@ -95,10 +95,6 @@ void Game::draw() {
 }
 
 void Game::input()  {
-    // TODO: maybe replace with calling Mouse::getPosition(window) each time?
-    Vector2f mousePos;
-    mousePos = (Vector2f)Mouse::getPosition(window);
-
     Event event{};
     static bool isMouseInside = true;
 
@@ -157,22 +153,18 @@ void Game::input()  {
     }
     if(isMouseInside) {
         if (Mouse::isButtonPressed(sf::Mouse::Left)) {
-            level.addTile(mousePos, Standart);
+            level.addTile((Vector2f)Mouse::getPosition(window), Standart);
             lightScene.updateEmittersRayTracing();///////
         }
         if (Mouse::isButtonPressed(sf::Mouse::Middle)) {
-            level.addTile(mousePos, Dynamic);
+            level.addTile((Vector2f)Mouse::getPosition(window), Dynamic);
             lightScene.updateEmittersRayTracing();///////
         }
         if (Mouse::isButtonPressed(sf::Mouse::Right)) {
-            level.removeTile(mousePos);
+            level.removeTile((Vector2f)Mouse::getPosition(window));
             lightScene.updateEmittersRayTracing();///////
         }
     }
-
-    // FIXME: this definitely must be moved to player's logic
-    ///normalized view
-    player.view = eVector2f((Vector2f)Mouse::getPosition(window) - player.getPos()).norm();
 }
 
 void Game::logic() {
@@ -184,21 +176,17 @@ void Game::logic() {
         lightScene.deleteEmitter({500, 300});
     }
     */
-    // TODO: Refactor this
-    player.update();
+    player.update((Vector2f)Mouse::getPosition(window));
     lightScene.updateEmittersRayTracing();
-    level.resetActive();
     lightScene.update();
-    //player.disableDynamicTiles();
-    level.update();
-    //player.updateMovement();
 
 }
 
 void Game::restart() {
+    player.reset();
     level.setField();
     lightScene.reset();
-    player.reset();
+
     ///TODO: Must load form level in the future
     lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));
     lightScene.addEmitter(eVector2f(900, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
@@ -210,75 +198,6 @@ void Game::restart() {
     ////
 }
 
-
 Level *Game::getLevel() {
     return &level;
-}
-
-RenderWindow* Game::getHandle() {
-    return &window;
-}
-///may be useful for applying effects to menu etc.
-/*
-bool Game::setShaders() {
-    if(DOSHADOW) {
-        if(!shaderShadow.loadFromFile("../shaders/shadow.frag", sf::Shader::Fragment)) {
-            return false;
-        }
-        shaderShadow.setParameter("frag_ScreenResolution", Vector2f(field_x*scale, field_y*scale));
-        shaderShadow.setParameter("frag_LightColor", Vector3f(255, 255, 255));
-    }
-
-    if(DOBLUR) {
-        if(!shaderBlur.loadFromFile("../shaders/blur.frag", sf::Shader::Fragment)) {
-            window.close();
-        }
-        shaderBlur.setParameter("resolution", sf::Vector2f(field_x*scale, field_y*scale));
-    }
-
-
-    return true;
-}
-
-RenderStates Game::getStatesBlur(Vector2f dir, Texture buffer) {
-    RenderStates states;
-    //states.blendMode = BlendMultiply;
-    if (!DOBLUR)
-        return states;
-
-    shaderBlur.setUniform("dir", dir);
-    shaderBlur.setUniform("image", buffer);
-    states.shader = &shaderBlur;
-
-    return states;
-}
-
-//Note: param1 must be about 20000-30000 to make smooth light
-//      param2 is inverse to the size of the light circle
-//This shader uses kind of gaussian distribution function with different sigmas
-RenderStates Game::getStatesShadow(float param1, float param2) {
-    RenderStates states;
-    states.blendMode = BlendMultiply;
-    if (!DOSHADOW)
-        return states;
-
-    shaderShadow.setUniform("frag_LightOrigin", player.getPos());
-    shaderShadow.setUniform("frag_ShadowParam1", param1);
-    shaderShadow.setUniform("frag_ShadowParam2", param2);
-    states.shader = &shaderShadow;
-
-    return states;
-}
- */
-
-void Game::notify(Player *player) {
-
-}
-
-void Game::notify(Level *level) {
-
-}
-
-void Game::notify(LightScene *lightScene) {
-
 }
