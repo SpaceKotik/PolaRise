@@ -51,6 +51,10 @@ void Game::run() {
 }
 
 void Game::draw() {
+    //static RenderTexture frameBuffer;
+    //frameBuffer.create(windowSize.x, windowSize.y);
+
+
     window.clear(Color::Black);
     bufferTex.clear(Color::Black);
 
@@ -122,24 +126,47 @@ void Game::draw() {
 
 
 
-
+//////////////////////
     shaderBlur.loadFromFile("../shaders/shadow.frag", sf::Shader::Fragment);
     shaderBlur.setUniform("frag_ScreenResolution", Vector2f(windowSize.x, windowSize.y));
     shaderBlur.setUniform("frag_LightColor", Vector3f(255, 255, 255));
     shaderBlur.setUniform("frag_LightOrigin", player.getPos());
+    //shaderBlur.setUniform("frag_LightColor", Vector3f(52, 125, 125));
+    shaderBlur.setUniform("coef1", 240.f);
+    shaderBlur.setUniform("coef2", 0.14f);
+    shaderBlur.setUniform("coef3", 0.07f);
     RenderStates states2;
     states2.blendMode = BlendAdd;
     states2.shader = &shaderBlur;
-
+    bufferTex.clear();
     ///draw tiles
     for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
         //TODO: condition must be removed after game is finished
         if (level.getField()->at(i).checkIfDrawable()) {
             //spr2.setPosition(level.getField()->at(i).physForm.getPosition());
             //window.draw(spr2, BlendMultiply);
-            window.draw(level.getField()->at(i).physForm, states2);
+            bufferTex.draw(level.getField()->at(i).physForm, states2);
         }
     }
+    bufferTex.display();
+
+    // TODO: Make resource holder for this
+    ///pixelate everyrhing
+    if (DOPIXEL) {
+        if (!shaderShadow.loadFromFile("../shaders/pixelate.frag", sf::Shader::Fragment)) {
+            window.close();
+        }
+        RenderStates states;
+        shaderShadow.setUniform("image", bufferTex.getTexture());
+        states.blendMode = BlendAdd;
+        states.shader = &shaderShadow;
+        window.draw(tempSprite, states);
+    }
+
+
+
+    //tempSprite.setTexture(bufferTex.getTexture());
+    //window.draw(tempSprite, BlendAdd);
 
 
     window.draw(player.flashLight.sprite);

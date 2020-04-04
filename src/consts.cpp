@@ -23,7 +23,8 @@ namespace consts {
     const float playerOffset = 0.01;
     const Color tileDefaultColor = Color(200, 200, 200);
     //const Color tileDefaultColor = Color(200, 100, 200);
-    const Color heroColor = Color::Red;
+    //const Color heroColor = Color::Red;
+    const Color heroColor = Color(255, 110, 110);
     const Color backgroundColor = Color (20, 20, 20);
     const Color lightColorDefault = Color(255, 51, 51);		///
     const Color inactiveTileColor = Color(100, 0, 80);		///Color for inactivate tiles

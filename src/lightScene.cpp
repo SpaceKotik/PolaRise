@@ -155,6 +155,9 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
         shaderShadow.setUniform("frag_LightOrigin", emitter.getPosition());
         // TODO: make shader color constant (or apply color not in shader)
         shaderShadow.setUniform("frag_LightColor", Vector3f(52, 125, 125));
+        shaderShadow.setUniform("coef1", 140.f);
+        shaderShadow.setUniform("coef2", 0.07f);
+        shaderShadow.setUniform("coef3", 0.017f);
         states.shader = &shaderShadow;
     }
 

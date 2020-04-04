@@ -324,7 +324,8 @@ void RayTracing::update(Vector2f pos, bool _isRestricted, Vector2f view, float _
     ///may be the way to show walls better
 	for (auto &e : raysVertex) {
 	    float len = std::sqrt((e[1].position.x-e[0].position.x)*(e[1].position.x-e[0].position.x) + (e[1].position.y-e[0].position.y)*(e[1].position.y-e[0].position.y));
-        float alpha = (len + 3)/len;
+        // FIXME: May cause bugs
+	    float alpha = (len + 1)/len;
 	    Transform transform;
         transform.scale(alpha, alpha, pos.x, pos.y);
         e[1].position = transform.transformPoint(e[1].position);
