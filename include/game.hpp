@@ -41,4 +41,5 @@ public:
     //void notify(Level* level);
     //void notify(LightScene* lightScene);
     Level* getLevel();
+    Player* getPlayer();
 };

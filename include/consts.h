@@ -4,7 +4,7 @@
 #include "../SmartVector2/SmartVector2f.h"
 
 #define DEBUG false
-#define DOPIXEL false
+#define DOPIXEL true
 #define DOBLUR true
 #define DOSHADOW true
 

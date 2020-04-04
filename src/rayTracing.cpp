@@ -323,8 +323,10 @@ void RayTracing::update(Vector2f pos, bool _isRestricted, Vector2f view, float _
 // TODO: make line extention constant
     ///may be the way to show walls better
 	for (auto &e : raysVertex) {
-        Transform transform;
-        transform.scale(1.01, 1.01, pos.x, pos.y);
+	    float len = std::sqrt((e[1].position.x-e[0].position.x)*(e[1].position.x-e[0].position.x) + (e[1].position.y-e[0].position.y)*(e[1].position.y-e[0].position.y));
+        float alpha = (len + 3)/len;
+	    Transform transform;
+        transform.scale(alpha, alpha, pos.x, pos.y);
         e[1].position = transform.transformPoint(e[1].position);
 	}
 }

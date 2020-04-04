@@ -54,6 +54,21 @@ Texture& LightScene::drawToTex() {
     }
     if (doBlur)
         applyBlur();
+
+    /*
+    if (doShadow) {
+        shaderShadow.setUniform("frag_LightOrigin", mediator->getPlayer()->getPos());
+        shaderShadow.setUniform("frag_LightColor", Vector3f(52, 125, 125));
+        RenderStates states;
+        states.shader = &shaderShadow;
+        states.blendMode = BlendMultiply;
+        Sprite tempSprite;
+        tempSprite.setTexture(targetTex.getTexture());
+        tempSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
+        tempSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
+        targetTex.draw(tempSprite, states);
+    }
+     */
     return const_cast<Texture &>(targetTex.getTexture());
 }
 
@@ -138,8 +153,6 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
     states.blendMode = BlendAdd;
     if(doShadow) {
         shaderShadow.setUniform("frag_LightOrigin", emitter.getPosition());
-        //shaderShadow.setUniform("frag_LightColor", Vector3f(255, 210, 80));
-        //shaderShadow.setUniform("frag_LightColor", Vector3f(125, 105, 40));
         // TODO: make shader color constant (or apply color not in shader)
         shaderShadow.setUniform("frag_LightColor", Vector3f(52, 125, 125));
         states.shader = &shaderShadow;
@@ -220,7 +233,7 @@ void LightScene::applyBlur() {
 
     bufferSprite.setTexture(targetTex.getTexture());
 
-    /*shaderBlur.setUniform("image", targetTex.getTexture());
+    shaderBlur.setUniform("image", targetTex.getTexture());
     shaderBlur.setUniform("dir", Vector2f(1, 0));
     targetTex.draw(bufferSprite, states);
     targetTex.display();
@@ -228,7 +241,7 @@ void LightScene::applyBlur() {
     shaderBlur.setUniform("image", targetTex.getTexture());
     shaderBlur.setUniform("dir", Vector2f(0, 1));
     targetTex.draw(bufferSprite, states);
-    targetTex.display();*/
+    targetTex.display();
 
 
     bufferSprite.setTexture(bufferTex.getTexture());

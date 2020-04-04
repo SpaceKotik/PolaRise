@@ -114,6 +114,7 @@ Flicker::Flicker(float _speed) {
 }
 
 void Flicker::update(Emitter* emitter) {
+    emitter->setRestricted(false);
     if(timer.getElapsedTime().asSeconds() >= speed)  {
         timer.restart();
         isActive = !isActive;

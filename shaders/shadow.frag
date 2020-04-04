@@ -8,7 +8,7 @@ void main() {
   baseDistance.y = frag_ScreenResolution.y-baseDistance.y;
   vec2 distance=frag_LightOrigin - baseDistance;
   float linear_distance = length(distance);
-  float attenuation = 1./(71. + 2.45*linear_distance + 0.0175*linear_distance*linear_distance);
+  float attenuation = 1./(141. + 0.07*linear_distance + 0.017*linear_distance*linear_distance);
   vec4 lightColor = vec4(frag_LightColor, 1.0);
   vec4 color = vec4(attenuation, attenuation, attenuation, 1.0) * lightColor; gl_FragColor=color;
 }

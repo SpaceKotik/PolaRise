@@ -23,7 +23,7 @@ namespace EmitterBehaviour {
 
     public:
         MoveByPath();
-        MoveByPath(eVector2f, eVector2f, float);
+        MoveByPath(eVector2f pos1, eVector2f pos2, float speed);
         void update(Emitter*) override;
     };
 
@@ -31,8 +31,7 @@ namespace EmitterBehaviour {
     private:
         float speed = 0.03;
     public:
-        //Rotate();
-        Rotate(float);
+        explicit Rotate(float speed);
         void update(Emitter* emitter) override;
     };
 
@@ -43,7 +42,7 @@ namespace EmitterBehaviour {
         float angle;
         float speed;
     public:
-        MoveByCircle(eVector2f, float radius, float speed);
+        MoveByCircle(eVector2f center, float radius, float speed);
         void update(Emitter* emitter) override;
     };
 
@@ -53,7 +52,7 @@ namespace EmitterBehaviour {
         bool isActive = true;
         sf::Clock timer;
     public:
-        Flicker(float speed);
+        explicit Flicker(float period);
         void update(Emitter* emitter) override;
     };
 

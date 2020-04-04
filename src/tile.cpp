@@ -36,3 +36,11 @@ bool Tile::checkIfSolid() {
 bool Tile::checkIfLightAbsorb() {
     return (type != Void && !isUnderPlayer);
 }
+
+bool Tile::checkIfDrawable() {
+    if (type == Standart)
+        return true;
+    if (!isUnderPlayer && type == Dynamic && isActive)
+        return true;
+    return false;
+}

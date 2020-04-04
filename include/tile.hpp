@@ -20,6 +20,7 @@ public:
 
 	bool checkIfSolid();
 	bool checkIfLightAbsorb();
+	bool checkIfDrawable();
 
 friend class Game;
 friend class Level;
