@@ -28,5 +28,19 @@ add_executable(PolaRise
 
         SmartVector2/SmartVector2f.cpp
         SmartVector2/SmartVector2f.h
-        Textures/lightMask.png src/lightEmitter.cpp include/lightEmitter.h include/lightScene.h src/lightScene.cpp include/consts.h util/FpsCounter/fpsCounter.cpp util/FpsCounter/fpsCounter.h include/emitterBehaviour.h src/emitterBehaviour.cpp util/eMath/eMath.cpp util/eMath/eMath.h include/lantern.h src/lantern.cpp)
+        src/lightEmitter.cpp
+        include/lightEmitter.h
+        include/lightScene.h
+        src/lightScene.cpp
+        include/consts.h
+        util/FpsCounter/fpsCounter.cpp
+        util/FpsCounter/fpsCounter.h
+        include/emitterBehaviour.h
+        src/emitterBehaviour.cpp
+        util/eMath/eMath.cpp
+        util/eMath/eMath.h
+        include/lantern.h
+        src/lantern.cpp
+        util/ResourceHolder/resourceHolder.cpp
+        util/ResourceHolder/resourceHolder.h util/ResourceHolder/resourceIdentifier.h)
 target_link_libraries(PolaRise sfml-graphics sfml-window sfml-system)

@@ -38,6 +38,12 @@ Game::Game() {
     lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), new EmitterBehaviour::Flicker(9));
     lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::Flicker(6));
 
+
+
+
+    textures.load(Textures::Background, "../Textures/background.png");
+    textures.setRepeat(Textures::Background, true);
+
 }
 
 void Game::run() {
@@ -51,17 +57,10 @@ void Game::run() {
 }
 
 void Game::draw() {
-    //static RenderTexture frameBuffer;
-    //frameBuffer.create(windowSize.x, windowSize.y);
-
 
     window.clear(Color::Black);
     bufferTex.clear(Color::Black);
-
-
-
-
-
+    
 
     ///draw light
 //////////////////////
@@ -91,11 +90,11 @@ void Game::draw() {
 
 ///background
 //////////////////////
-    Texture tex;
-    tex.loadFromFile("../Textures/background.png");
-    tex.setRepeated(true);
+    //Texture tex;
+    //tex.loadFromFile("../Textures/background.png");
+    //tex.setRepeated(true);
     Sprite spr;
-    spr.setTexture(tex);
+    spr.setTexture(textures.get(Textures::Background));
     //spr.setColor(Color(50, 50, 50));
     spr.setTextureRect(IntRect(0, 0, windowSize.x*2, windowSize.y*2));
     spr.setPosition(-windowSize.x / 4.f , 0);

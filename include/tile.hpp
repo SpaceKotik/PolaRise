@@ -5,7 +5,13 @@
 
 using namespace sf;
 
-enum TileType {Standart, Dynamic, Void, StartPos, FinishPos};
+enum TileType{
+    Standart,
+    Dynamic,
+    Void,
+    StartPos,
+    FinishPos
+};
 
 class Tile {
 private:

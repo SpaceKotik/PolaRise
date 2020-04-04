@@ -10,6 +10,8 @@
 #include "emitterBehaviour.h"
 #include "lantern.h"
 #include "consts.h"
+#include "../util/ResourceHolder/resourceHolder.h"
+#include "../util/ResourceHolder/resourceIdentifier.h"
 
 using namespace sf;
 
@@ -28,6 +30,8 @@ private:
     Shader shaderBlur;
     Shader shaderShadow;
     RenderTexture bufferTex;
+
+    TextureHolder textures;
     //Dump dump;
 public:
     Game();
