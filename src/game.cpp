@@ -44,6 +44,17 @@ Game::Game() {
     textures.load(Textures::Background, "../Textures/background.png");
     textures.setRepeat(Textures::Background, true);
 
+    shaders.load(Shaders::Shadow, "../shaders/shadow.frag");
+    shaders.setParam(Shaders::Shadow, "frag_ScreenResolution", Vector2f(windowSize.x, windowSize.y));
+    shaders.setParam(Shaders::Shadow, "frag_LightColor", Vector3f(255, 255, 255));
+    shaders.setParam(Shaders::Shadow, "frag_LightOrigin", player.getPos());
+    shaders.setParam(Shaders::Shadow, "coef1", 240.f);
+    shaders.setParam(Shaders::Shadow, "coef2", 0.14f);
+    shaders.setParam(Shaders::Shadow, "coef3", 0.07f);
+
+
+    shaders.load(Shaders::Pixel, "../shaders/pixel.frag");
+
 }
 
 void Game::run() {
@@ -56,121 +67,92 @@ void Game::run() {
     }
 }
 
-void Game::draw() {
+void Game::drawLight() {
+    Sprite bufferSpr, backgroundSprite;
 
-    window.clear(Color::Black);
-    bufferTex.clear(Color::Black);
-    
-
-    ///draw light
-//////////////////////
-    window.setActive(false);
-    // TODO: Make tempSprite not that temp, not effective
-    Sprite tempSprite;
-    tempSprite.setColor(Color::White);
-    tempSprite.setTexture(lightScene.drawToTex());
-    tempSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
-    tempSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
-    window.draw(tempSprite);
-//////////////////////
-
-
-    // TODO: Make resource holder for this
-    ///pixelate everyrhing
-    if (DOPIXEL) {
-        if (!shaderShadow.loadFromFile("../shaders/pixelate.frag", sf::Shader::Fragment)) {
-            window.close();
-        }
-        RenderStates states;
-        shaderShadow.setUniform("image", lightScene.getTexture());
-        states.blendMode = BlendNone;
-        states.shader = &shaderShadow;
-        window.draw(tempSprite, states);
+    RenderStates states;
+    if(DOPIXEL) {
+        shaders.get(Shaders::Pixel).setUniform("image", lightScene.getTexture());
+        states.shader = &shaders.get(Shaders::Pixel);
     }
 
-///background
-//////////////////////
-    //Texture tex;
-    //tex.loadFromFile("../Textures/background.png");
-    //tex.setRepeated(true);
-    Sprite spr;
-    spr.setTexture(textures.get(Textures::Background));
-    //spr.setColor(Color(50, 50, 50));
-    spr.setTextureRect(IntRect(0, 0, windowSize.x*2, windowSize.y*2));
-    spr.setPosition(-windowSize.x / 4.f , 0);
-    window.draw(spr, BlendMultiply);
-//////////////////////
+    /// 1st layer of light
+    window.setActive(false);
 
-    ///draw player
+    bufferSpr.setTexture(lightScene.drawToTex());
+    bufferSpr.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
+    bufferSpr.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
+    window.draw(bufferSpr, states);
+
+    /// background
+    backgroundSprite.setTexture(textures.get(Textures::Background));
+    backgroundSprite.setTextureRect(IntRect(0, 0, windowSize.x * 2, windowSize.y * 2));
+    backgroundSprite.setPosition(-windowSize.x / 4.f , 0);
+    window.draw(backgroundSprite, BlendMultiply);
+
+    /// player
     window.draw(*player.getPhysForm());
 
-    tempSprite.setColor(Color(110, 110, 110));
-    window.draw(tempSprite, BlendAdd);
+    /// 2nd layer of light
+    bufferSpr.setColor(Color(110, 110, 110));
 
+    states.blendMode = BlendAdd;
+    window.draw(bufferSpr, BlendAdd);
+}
 
+void Game::drawTiles() {
+    bufferTex.clear(Color::Transparent);
 
+    Sprite bufferSpr;
+    bufferSpr.setTexture(bufferTex.getTexture());
+    bufferSpr.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
+    bufferSpr.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
 
-///Tiles
-//////////////////////
-    Texture tex2;
-    tex2.loadFromFile("../Textures/tile.png");
-    Sprite spr2;
-    spr2.setTexture(tex2);
-    spr2.scale(scale/24.f, scale/24.f);
-    spr2.setColor(Color(255, 210, 140));
-    //spr.setTextureRect(IntRect(0, 0, 2000, 2000));
-    //spr.setScale(2, 2);
-    //spr.setColor(Color(100, 100, 100));
-//////////////////////
+    RenderStates statesTiles;
+    shaders.setParam(Shaders::Shadow, "frag_LightOrigin", player.getPos());
+    statesTiles.shader = &shaders.get(Shaders::Shadow);
+    statesTiles.blendMode = BlendAdd;
 
+    RenderStates statesPixel;
+    shaders.get(Shaders::Pixel).setUniform("image", bufferTex.getTexture());
+    statesPixel.blendMode = BlendAdd;
+    statesPixel.shader = &shaders.get(Shaders::Pixel);
 
-
-//////////////////////
-    shaderBlur.loadFromFile("../shaders/shadow.frag", sf::Shader::Fragment);
-    shaderBlur.setUniform("frag_ScreenResolution", Vector2f(windowSize.x, windowSize.y));
-    shaderBlur.setUniform("frag_LightColor", Vector3f(255, 255, 255));
-    shaderBlur.setUniform("frag_LightOrigin", player.getPos());
-    //shaderBlur.setUniform("frag_LightColor", Vector3f(52, 125, 125));
-    shaderBlur.setUniform("coef1", 240.f);
-    shaderBlur.setUniform("coef2", 0.14f);
-    shaderBlur.setUniform("coef3", 0.07f);
-    RenderStates states2;
-    states2.blendMode = BlendAdd;
-    states2.shader = &shaderBlur;
-    bufferTex.clear();
     ///draw tiles
     for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
-        //TODO: condition must be removed after game is finished
         if (level.getField()->at(i).checkIfDrawable()) {
+            bufferTex.draw(level.getField()->at(i).physForm, statesTiles);
             //spr2.setPosition(level.getField()->at(i).physForm.getPosition());
-            //window.draw(spr2, BlendMultiply);
-            bufferTex.draw(level.getField()->at(i).physForm, states2);
+            //window.draw(spr2, statesTiles);
         }
     }
     bufferTex.display();
 
-    // TODO: Make resource holder for this
-    ///pixelate everyrhing
-    if (DOPIXEL) {
-        if (!shaderShadow.loadFromFile("../shaders/pixelate.frag", sf::Shader::Fragment)) {
-            window.close();
-        }
-        RenderStates states;
-        shaderShadow.setUniform("image", bufferTex.getTexture());
-        states.blendMode = BlendAdd;
-        states.shader = &shaderShadow;
-        window.draw(tempSprite, states);
-    }
+    ///pixelate tiles
+    if (DOPIXEL)
+        window.draw(bufferSpr, statesPixel);
+    else
+        window.draw(bufferSpr);
+/*
+///Tiles
+Texture tex2;
+tex2.loadFromFile("../Textures/tile.png");
+Sprite spr2;
+spr2.setTexture(tex2);
+spr2.scale(scale/24.f, scale/24.f);
+spr2.setColor(Color(255, 210, 140));
+//spr.setTextureRect(IntRect(0, 0, 2000, 2000));
+//spr.setScale(2, 2);
+//spr.setColor(Color(100, 100, 100));
+*/
+}
 
+void Game::draw() {
 
-
-    //tempSprite.setTexture(bufferTex.getTexture());
-    //window.draw(tempSprite, BlendAdd);
-
-
+    window.clear();
+    drawLight();
+    drawTiles();
     window.draw(player.flashLight.sprite);
-
-
     window.display();
 }
 

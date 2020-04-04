@@ -27,14 +27,15 @@ private:
     Player player;
     LightScene lightScene;
 
-    Sprite bufferSprite;
-    Shader shaderBlur;
-    Shader shaderShadow;
-    RenderTexture bufferTex;
-
     TextureHolder textures;
     ShaderHolder shaders;
-    //Dump dump;
+
+    Sprite bufferSprite;
+    RenderTexture bufferTex;
+
+protected:
+    void drawLight();
+    void drawTiles();
 public:
     Game();
     //~Game();
@@ -43,9 +44,6 @@ public:
     void draw();
     void logic();
     void restart();
-    //void notify(Player* player);
-    //void notify(Level* level);
-    //void notify(LightScene* lightScene);
     Level* getLevel();
     Player* getPlayer();
 };

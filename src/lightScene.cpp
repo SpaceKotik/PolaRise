@@ -35,7 +35,7 @@ void LightScene::update() {
 }
 
 Texture& LightScene::drawToTex() {
-    targetTex.clear(Color::Black);
+    targetTex.clear(Color::Transparent);
 
     /// draw Emitters in threads
     std::vector<std::thread> drawThreads;
@@ -54,21 +54,6 @@ Texture& LightScene::drawToTex() {
     }
     if (doBlur)
         applyBlur();
-
-    /*
-    if (doShadow) {
-        shaderShadow.setUniform("frag_LightOrigin", mediator->getPlayer()->getPos());
-        shaderShadow.setUniform("frag_LightColor", Vector3f(52, 125, 125));
-        RenderStates states;
-        states.shader = &shaderShadow;
-        states.blendMode = BlendMultiply;
-        Sprite tempSprite;
-        tempSprite.setTexture(targetTex.getTexture());
-        tempSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
-        tempSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
-        targetTex.draw(tempSprite, states);
-    }
-     */
     return const_cast<Texture &>(targetTex.getTexture());
 }
 
@@ -155,6 +140,7 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
         shaderShadow.setUniform("frag_LightOrigin", emitter.getPosition());
         // TODO: make shader color constant (or apply color not in shader)
         shaderShadow.setUniform("frag_LightColor", Vector3f(52, 125, 125));
+        //shaderShadow.setUniform("frag_LightColor", Vector3f(25, 60, 60));
         shaderShadow.setUniform("coef1", 140.f);
         shaderShadow.setUniform("coef2", 0.07f);
         shaderShadow.setUniform("coef3", 0.017f);
@@ -253,5 +239,6 @@ void LightScene::applyBlur() {
 }
 
 Texture& LightScene::getTexture() {
+    //targetTex.display();
     return const_cast<Texture &>(targetTex.getTexture());
 }

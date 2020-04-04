@@ -34,9 +34,20 @@ void ShaderHolder::insertResource(Shaders::ID id, std::unique_ptr<Shader> resour
     assert(inserted.second);
 }
 
-template<typename T>
+template<class T>
 void ShaderHolder::setParam(Shaders::ID id, const std::string &param, T value) {
     auto found = mResourceMap.find(id);
     assert(found != mResourceMap.end());
     found->second->setUniform(param, value);
 }
+
+void ShaderHolder::setParam(Shaders::ID id, const std::string &param, Texture& value) {
+    auto found = mResourceMap.find(id);
+    assert(found != mResourceMap.end());
+    found->second->setUniform(param, value);
+}
+
+template void ShaderHolder::setParam<float> (Shaders::ID, const std::string&, float);
+template void ShaderHolder::setParam<Vector2f> (Shaders::ID, const std::string&, Vector2f);
+template void ShaderHolder::setParam<Vector3f> (Shaders::ID, const std::string&, Vector3f);
+//template void ShaderHolder::setParam<Texture> (Shaders::ID, const std::string&, Texture);

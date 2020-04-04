@@ -10,8 +10,9 @@ public:
     sf::Shader& get(Shaders::ID id);
     const sf::Shader& get(Shaders::ID id) const;
 
-    template<typename T>
+    template<class T>
     void setParam(Shaders::ID id, const std::string& param, T);
+    void setParam(Shaders::ID id, const std::string& param, sf::Texture&);
 
 protected:
     void insertResource(Shaders::ID, std::unique_ptr<sf::Shader> resource);
@@ -19,4 +20,6 @@ protected:
 protected:
     std::map<Shaders::ID, std::unique_ptr<sf::Shader>> mResourceMap;
 };
+
+
 
