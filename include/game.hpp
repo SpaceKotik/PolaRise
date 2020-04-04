@@ -10,8 +10,9 @@
 #include "emitterBehaviour.h"
 #include "lantern.h"
 #include "consts.h"
-#include "../util/ResourceHolder/resourceHolder.h"
-#include "../util/ResourceHolder/resourceIdentifier.h"
+#include "util/ResourceHolders/TextureHolder/textureHolder.h"
+#include "util/ResourceHolders/ShaderHolder/shaderHolder.h"
+#include "util/ResourceHolders/resourceIdentifiers.h"
 
 using namespace sf;
 
@@ -32,6 +33,7 @@ private:
     RenderTexture bufferTex;
 
     TextureHolder textures;
+    ShaderHolder shaders;
     //Dump dump;
 public:
     Game();

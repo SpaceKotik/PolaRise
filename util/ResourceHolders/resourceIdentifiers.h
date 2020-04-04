@@ -35,7 +35,7 @@ namespace Shaders {
 template <class Resource, class Identifier>
 class ResourceHolder;
 
-typedef ResourceHolder<sf::Texture, Textures::ID>   TextureHolder;
-typedef ResourceHolder<sf::Shader, Shaders::ID>   ShaderHolder;
-//typedef ResourceHolder<sf::Font, Fonts::ID>           FontHolder;
-//typedef ResourceHolder<sf::SoundBuffer, Sounds::ID>   SoundHolder;
+//typedef ResourceHolders<sf::Texture, Textures::ID>   TextureHolder;
+///typedef ResourceHolders<sf::Shader, Shaders::ID>   ShaderHolder;
+//typedef ResourceHolders<sf::Font, Fonts::ID>           FontHolder;
+//typedef ResourceHolders<sf::SoundBuffer, Sounds::ID>   SoundHolder;

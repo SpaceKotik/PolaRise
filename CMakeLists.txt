@@ -41,6 +41,6 @@ add_executable(PolaRise
         util/eMath/eMath.h
         include/lantern.h
         src/lantern.cpp
-        util/ResourceHolder/resourceHolder.cpp
-        util/ResourceHolder/resourceHolder.h util/ResourceHolder/resourceIdentifier.h)
+        util/ResourceHolders/TextureHolder/textureHolder.cpp
+        util/ResourceHolders/TextureHolder/textureHolder.h util/ResourceHolders/resourceIdentifiers.h util/ResourceHolders/ShaderHolder/shaderHolder.cpp util/ResourceHolders/ShaderHolder/shaderHolder.h)
 target_link_libraries(PolaRise sfml-graphics sfml-window sfml-system)
