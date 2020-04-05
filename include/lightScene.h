@@ -18,21 +18,21 @@ private:
     RayTracing rayTracing;
     std::vector<EmitterBehaviour::Behaviour*> behaviourPool;
 
-    Shader shaderBlur;      ///Shaders for enhancing lights
+    Shader shaderBlur;      ///Shaders for lights
     Shader shaderShadow;    ///
-    bool doBlur;            ///If false, shaders are not applied
-    bool doShadow;          ///
 
     RenderTexture targetTex;///RenderTexture, where all lights are drawn to
     RenderTexture bufferTex;///RenderTexture for temporal drawing to apply shadow shader
 
-    Game* mediator;
+    Game* mediator;         ///Reference to game to get access to all required objects like level, resource holders, etc.
 
+protected:
     void doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock);  ///The function passed to thread in draw()
     bool invalidIndex(int i);
     void applyBlur();
     void setActiveTiles();                  ///sets lighted tiles active
     void removeDeprecatedBehaviours();      ///removes unused behaviours from behaviourPool
+
 public:
     LightScene();
     ~LightScene();

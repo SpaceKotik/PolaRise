@@ -6,8 +6,6 @@ using namespace consts;
 
 // TODO: fix loading shaders
 LightScene::LightScene() {
-    doBlur = DOBLUR;
-    doShadow = DOSHADOW;
     /// TODO: check if shaders actually loaded
     setShaders(DOBLUR, DOSHADOW);
     ///
@@ -35,7 +33,7 @@ void LightScene::update() {
 }
 
 Texture& LightScene::drawToTex() {
-    targetTex.clear(Color::Transparent);
+    targetTex.clear(Color::Black);
 
     /// draw Emitters in threads
     std::vector<std::thread> drawThreads;
@@ -52,7 +50,7 @@ Texture& LightScene::drawToTex() {
     for (auto &e: drawThreads) {
         e.join();
     }
-    if (doBlur)
+    if (DOBLUR)
         applyBlur();
     return const_cast<Texture &>(targetTex.getTexture());
 }
@@ -62,16 +60,13 @@ void LightScene::reset() {
 }
 
 bool LightScene::setShaders(bool _doBlur, bool _doShadow) {
-    doBlur = _doBlur;
-    doShadow = _doShadow;
-
-    if(doBlur) {
+    if(DOBLUR) {
         if(!shaderBlur.loadFromFile("../shaders/blur.frag", sf::Shader::Fragment)) {
             return false;
         }
         shaderBlur.setUniform("resolution", Vector2f(windowSize.x, windowSize.y));
     }
-    if(doShadow) {
+    if(DOSHADOW) {
         if(!shaderShadow.loadFromFile("../shaders/shadow.frag", sf::Shader::Fragment)) {
             return false;
         }
@@ -136,7 +131,7 @@ void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex
 
     RenderStates states;
     states.blendMode = BlendAdd;
-    if(doShadow) {
+    if(DOSHADOW) {
         shaderShadow.setUniform("frag_LightOrigin", emitter.getPosition());
         // TODO: make shader color constant (or apply color not in shader)
         shaderShadow.setUniform("frag_LightColor", Vector3f(52, 125, 125));

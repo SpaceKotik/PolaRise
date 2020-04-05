@@ -12,7 +12,6 @@ public:
 
     template<class T>
     void setParam(Shaders::ID id, const std::string& param, T);
-    void setParam(Shaders::ID id, const std::string& param, sf::Texture&);
 
 protected:
     void insertResource(Shaders::ID, std::unique_ptr<sf::Shader> resource);

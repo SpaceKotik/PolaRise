@@ -173,7 +173,7 @@ void Game::input()  {
                 break;
             case Event::KeyPressed:
                 if(event.key.code == Keyboard::LShift) {
-                    lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(0, 1));
+                    lightScene.addEmitter( eVector2f(Vector2f(Mouse::getPosition(window))), eVector2f(0, 1), nullptr, false);
                 }
                 if(event.key.code == Keyboard::LControl) {
                     lightScene.deleteEmitter(Vector2f(Vector2f(Mouse::getPosition(window))));
