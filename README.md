@@ -10,4 +10,4 @@ Mouse middle - place dynamic lighted tile<br/>
 R - restart level<br/>
 Esc - close application<br/>
 
-![PolaRise 1 0 0](https://user-images.githubusercontent.com/55507150/77863826-e50ab380-722d-11ea-9f0a-ddb38e19c77e.png)
+![PolaRise3](https://user-images.githubusercontent.com/55507150/78464453-90b27880-76f2-11ea-84d2-cd697a6870e7.png)
