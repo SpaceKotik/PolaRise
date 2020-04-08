@@ -49,7 +49,6 @@ Game::Game() {
     lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
     lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), new EmitterBehaviour::Flicker(9));
     lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::Flicker(6));
-
 }
 
 void Game::run() {
@@ -208,21 +207,21 @@ void Game::input()  {
     if(isMouseInside) {
         if (Mouse::isButtonPressed(sf::Mouse::Left)) {
             level.addTile((Vector2f)Mouse::getPosition(window), Standart);
-            lightScene.updateEmittersRayTracing();///////
+            lightScene.updateEmittersRayTracing(true);///////
         }
         if (Mouse::isButtonPressed(sf::Mouse::Middle)) {
             level.addTile((Vector2f)Mouse::getPosition(window), Dynamic);
-            lightScene.updateEmittersRayTracing();///////
+            lightScene.updateEmittersRayTracing(true);///////
         }
         if (Mouse::isButtonPressed(sf::Mouse::Right)) {
             level.removeTile((Vector2f)Mouse::getPosition(window));
-            lightScene.updateEmittersRayTracing();///////
+            lightScene.updateEmittersRayTracing(true);///////
         }
     }
 }
 
 void Game::logic() {
-    ///Stress test
+    ///memory test
     /*
     for (int i = 0; i < 200; ++i) {
         lightScene.addEmitter(eVector2f(500, 300), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));

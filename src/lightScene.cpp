@@ -108,7 +108,7 @@ void LightScene::addEmitter(eVector2f position, eVector2f view, EmitterBehaviour
         behaviourPool.push_back(behaviour);
     }
     scene.push_back(emitter);
-    updateEmittersRayTracing();
+    updateEmittersRayTracing(true);
 }
 
 void LightScene::deleteEmitter(eVector2f coord) {
@@ -119,11 +119,13 @@ void LightScene::deleteEmitter(eVector2f coord) {
     }), scene.end());
 }
 
-void LightScene::updateEmittersRayTracing() {
-    rayTracing.updateObstacles(mediator->getLevel());
+void LightScene::updateEmittersRayTracing(bool force) {
+    if (force)
+        rayTracing.updateObstacles(mediator->getLevel());
     for (auto &e : scene) {
-        e.updateLightMap(&rayTracing);
-        e.updateRayTracing(true);
+        if (force)
+            e.updateLightMap(&rayTracing);
+        e.updateRayTracing(force);
     }
 }
 

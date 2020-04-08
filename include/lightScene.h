@@ -46,7 +46,7 @@ public:
     void addEmitter(eVector2f position, eVector2f view, EmitterBehaviour::Behaviour* behaviour = nullptr, bool isRestricted = true);
     void deleteEmitter(eVector2f coord);
     bool setBehaviour(int i, EmitterBehaviour::Behaviour*);
-    void updateEmittersRayTracing();    ///Updates obstacles in lightScene rayTracing, then applied to all Emitters
+    void updateEmittersRayTracing(bool force = false);    ///Updates obstacles in lightScene rayTracing, then applied to all Emitters
                                         ///(Must be called only when level has changed)
 
     Texture& getTexture();  ///This texture must be applied to sprite which then drawn to window

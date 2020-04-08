@@ -87,7 +87,7 @@ bool Emitter::setLineOfSight(float _viewAngle) {
 
 void Emitter::setBehaviour(EmitterBehaviour::Behaviour* _behaviour) {
         behaviour = _behaviour;
-        //updateOnDemand = false;
+        updateOnDemand = false;
 }
 
 void Emitter::rotate(const float angle) {
