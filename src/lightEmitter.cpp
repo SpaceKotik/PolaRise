@@ -21,7 +21,7 @@ Emitter::Emitter(const eVector2f _position, const eVector2f _view, bool _isRestr
     view = _view;
     isRestricted = _isRestricted;
     lineOfSight = viewAngle;
-    updateOnDemand = false;
+    updateOnDemand = true;
     color = _color;
     behaviour = nullptr;
 }
@@ -87,6 +87,7 @@ bool Emitter::setLineOfSight(float _viewAngle) {
 
 void Emitter::setBehaviour(EmitterBehaviour::Behaviour* _behaviour) {
         behaviour = _behaviour;
+        //updateOnDemand = false;
 }
 
 void Emitter::rotate(const float angle) {

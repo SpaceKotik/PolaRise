@@ -18,8 +18,8 @@ private:
     RayTracing rayTracing;
     std::vector<EmitterBehaviour::Behaviour*> behaviourPool;
 
-    Shader shaderBlur;      ///Shaders for lights
-    Shader shaderShadow;    ///
+    Shader* shaderBlur;      ///Shaders for lights
+    Shader* shaderShadow;    ///
 
     RenderTexture targetTex;///RenderTexture, where all lights are drawn to
     RenderTexture bufferTex;///RenderTexture for temporal drawing to apply shadow shader
@@ -27,7 +27,7 @@ private:
     Game* mediator;         ///Reference to game to get access to all required objects like level, resource holders, etc.
 
 protected:
-    void doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock);  ///The function passed to thread in draw()
+    void doRayTracing(Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock);  ///The function passed to thread in draw()
     bool invalidIndex(int i);
     void applyBlur();
     void setActiveTiles();                  ///sets lighted tiles active
@@ -41,7 +41,7 @@ public:
     Texture& drawToTex();    ///Draws all Emitters to targetTex
     void update();           ///Calls update for emitters behaviour, applies their effects on level's dynamic tiles, etc.
     void reset();
-    bool setShaders(bool doBlur, bool doShadow);
+    bool setShaders();
 
     void addEmitter(eVector2f position, eVector2f view, EmitterBehaviour::Behaviour* behaviour = nullptr, bool isRestricted = true);
     void deleteEmitter(eVector2f coord);

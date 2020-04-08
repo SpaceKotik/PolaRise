@@ -46,4 +46,5 @@ public:
     void restart();
     Level* getLevel();
     Player* getPlayer();
+    ShaderHolder* getShaders();
 };

@@ -14,18 +14,18 @@ void ShaderHolder::load(Shaders::ID id, const std::string& filename){
     insertResource(id, std::move(resource));
 }
 
-Shader& ShaderHolder::get(Shaders::ID id){
+Shader* ShaderHolder::get(Shaders::ID id){
     auto found = mResourceMap.find(id);
     assert(found != mResourceMap.end());
 
-    return *found->second;
+    return found->second.get();
 }
 
-const Shader& ShaderHolder::get(Shaders::ID id) const {
+const Shader* ShaderHolder::get(Shaders::ID id) const {
     auto found = mResourceMap.find(id);
     assert(found != mResourceMap.end());
 
-    return *found->second;
+    return found->second.get();
 }
 
 void ShaderHolder::insertResource(Shaders::ID id, std::unique_ptr<Shader> resource){

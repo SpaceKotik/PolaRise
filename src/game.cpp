@@ -5,10 +5,22 @@ using namespace sf;
 using namespace consts;
 
 Game::Game() {
+
+    textures.load(Textures::Background, "../Textures/background.png");
+    textures.setRepeat(Textures::Background, true);
+
+    shaders.load(Shaders::Pixel, "../shaders/pixel.frag");
+    shaders.load(Shaders::Blur, "../shaders/blur.frag");
+    shaders.load(Shaders::Shadow, "../shaders/shadow.frag");
+
+    shaders.setParam(Shaders::Shadow, "frag_ScreenResolution", Vector2f(windowSize.x, windowSize.y));
+
+
     ///Using Mediator pattern; set mediator's pointer for all components
     level.setMediator(this);
     player.setMediator(this);
     lightScene.setMediator(this);
+    lightScene.setShaders();
 
     ///probably will be used while adding GUI
     gameState = Gameplay;
@@ -38,23 +50,6 @@ Game::Game() {
     lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), new EmitterBehaviour::Flicker(9));
     lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::Flicker(6));
 
-
-
-
-    textures.load(Textures::Background, "../Textures/background.png");
-    textures.setRepeat(Textures::Background, true);
-
-    shaders.load(Shaders::Shadow, "../shaders/shadow.frag");
-    shaders.setParam(Shaders::Shadow, "frag_ScreenResolution", Vector2f(windowSize.x, windowSize.y));
-    shaders.setParam(Shaders::Shadow, "frag_LightColor", Vector3f(255, 255, 255));
-    shaders.setParam(Shaders::Shadow, "frag_LightOrigin", player.getPos());
-    shaders.setParam(Shaders::Shadow, "coef1", 240.f);
-    shaders.setParam(Shaders::Shadow, "coef2", 0.14f);
-    shaders.setParam(Shaders::Shadow, "coef3", 0.07f);
-
-
-    shaders.load(Shaders::Pixel, "../shaders/pixel.frag");
-
 }
 
 void Game::run() {
@@ -72,8 +67,8 @@ void Game::drawLight() {
 
     RenderStates states;
     if(DOPIXEL) {
-        shaders.get(Shaders::Pixel).setUniform("image", lightScene.getTexture());
-        states.shader = &shaders.get(Shaders::Pixel);
+        shaders.get(Shaders::Pixel)->setUniform("image", lightScene.getTexture());
+        states.shader = shaders.get(Shaders::Pixel);
     }
 
     /// 1st layer of light
@@ -88,6 +83,7 @@ void Game::drawLight() {
     backgroundSprite.setTexture(textures.get(Textures::Background));
     backgroundSprite.setTextureRect(IntRect(0, 0, windowSize.x * 2, windowSize.y * 2));
     backgroundSprite.setPosition(-windowSize.x / 4.f , 0);
+    backgroundSprite.setScale(3.f/4.f, 3.f/4.f);
     window.draw(backgroundSprite, BlendMultiply);
 
     /// player
@@ -95,30 +91,38 @@ void Game::drawLight() {
 
     /// 2nd layer of light
     bufferSpr.setColor(Color(110, 110, 110));
-
-    states.blendMode = BlendAdd;
     window.draw(bufferSpr, BlendAdd);
 }
 
 void Game::drawTiles() {
-    bufferTex.clear(Color::Transparent);
 
+    ///Set states for drawing tiles with shadow around player
+    RenderStates statesTiles;
+    statesTiles.blendMode = BlendAdd;
+    if (DOSHADOW) {
+        statesTiles.shader = shaders.get(Shaders::Shadow);
+        shaders.setParam(Shaders::Shadow, "coef1", 240.f);
+        shaders.setParam(Shaders::Shadow, "coef2", 0.14f);
+        shaders.setParam(Shaders::Shadow, "coef3", 0.07f);
+        shaders.setParam(Shaders::Shadow, "frag_LightColor", Vector3f(255, 255, 255));
+        shaders.setParam(Shaders::Shadow, "frag_LightOrigin", player.getPos());
+    }
+    ///States for pixelating tiles
+    RenderStates statesPixel;
+    shaders.get(Shaders::Pixel)->setUniform("image", bufferTex.getTexture());
+    statesPixel.blendMode = BlendAdd;
+    statesPixel.shader = shaders.get(Shaders::Pixel);
+
+    ///Sprite for drawing buffer texture
     Sprite bufferSpr;
     bufferSpr.setTexture(bufferTex.getTexture());
     bufferSpr.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
     bufferSpr.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
 
-    RenderStates statesTiles;
-    shaders.setParam(Shaders::Shadow, "frag_LightOrigin", player.getPos());
-    statesTiles.shader = &shaders.get(Shaders::Shadow);
-    statesTiles.blendMode = BlendAdd;
+    ///Start of actual drawing
+    bufferTex.clear(Color::Transparent);
 
-    RenderStates statesPixel;
-    shaders.get(Shaders::Pixel).setUniform("image", bufferTex.getTexture());
-    statesPixel.blendMode = BlendAdd;
-    statesPixel.shader = &shaders.get(Shaders::Pixel);
-
-    ///draw tiles
+    ///Draw tiles
     for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
         if (level.getField()->at(i).checkIfDrawable()) {
             bufferTex.draw(level.getField()->at(i).physForm, statesTiles);
@@ -133,18 +137,6 @@ void Game::drawTiles() {
         window.draw(bufferSpr, statesPixel);
     else
         window.draw(bufferSpr);
-/*
-///Tiles
-Texture tex2;
-tex2.loadFromFile("../Textures/tile.png");
-Sprite spr2;
-spr2.setTexture(tex2);
-spr2.scale(scale/24.f, scale/24.f);
-spr2.setColor(Color(255, 210, 140));
-//spr.setTextureRect(IntRect(0, 0, 2000, 2000));
-//spr.setScale(2, 2);
-//spr.setColor(Color(100, 100, 100));
-*/
 }
 
 void Game::draw() {
@@ -266,3 +258,17 @@ Level* Game::getLevel() {
 Player* Game::getPlayer() {
     return &player;
 }
+
+ShaderHolder* Game::getShaders() {
+    return &shaders;
+}
+
+/*
+///Tiles texturing
+Texture tex2;
+tex2.loadFromFile("../Textures/tile.png");
+Sprite spr2;
+spr2.setTexture(tex2);
+spr2.scale(scale/24.f, scale/24.f);
+spr2.setColor(Color(255, 210, 140));
+*/

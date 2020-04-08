@@ -1,14 +1,13 @@
 #include "lightScene.h"
 #include "consts.h"
 #include "game.hpp"
+#include "util/ResourceHolders/ShaderHolder/shaderHolder.h"
+#include "util/ResourceHolders/resourceIdentifiers.h"
 
 using namespace consts;
 
 // TODO: fix loading shaders
 LightScene::LightScene() {
-    /// TODO: check if shaders actually loaded
-    setShaders(DOBLUR, DOSHADOW);
-    ///
     targetTex.create(windowSize.x, windowSize.y);
     bufferTex.create(windowSize.x, windowSize.y);
     targetTex.setSmooth(true);
@@ -33,23 +32,50 @@ void LightScene::update() {
 }
 
 Texture& LightScene::drawToTex() {
+
     targetTex.clear(Color::Black);
 
-    /// draw Emitters in threads
+    // TODO: make drawThreads a class field
+    ///Draw Emitters in threads
     std::vector<std::thread> drawThreads;
     std::mutex block;
-    int index = 0;
     for (auto &e: scene) {
         if (e.isActive) {
             drawThreads.emplace_back(
-                    std::thread(&LightScene::doRayTracing, this, index, std::ref(e), std::ref(targetTex),
+                    std::thread(&LightScene::doRayTracing, this, std::ref(e), std::ref(targetTex),
                                 std::ref(block))); ///changed from push_back
-            index++;
         }
     }
     for (auto &e: drawThreads) {
         e.join();
     }
+
+    ///Set shadow shader
+    RenderStates states;
+    states.blendMode= BlendAdd;
+    if(DOSHADOW) {
+        mediator->getShaders()->setParam(Shaders::Shadow, "frag_LightColor", Vector3f(52, 125, 125));
+        mediator->getShaders()->setParam(Shaders::Shadow, "coef1", 140.f);
+        mediator->getShaders()->setParam(Shaders::Shadow, "coef2", 0.07f);
+        mediator->getShaders()->setParam(Shaders::Shadow, "coef3", 0.017f);
+        states.shader = shaderShadow;
+    }
+
+    ///Draw all lights (Not in threads as OpenGL does not support multi-threading and may not work (e.g. on win10)
+    for (auto &e: scene) {
+        ///If current emitter is inactive, skip it
+        if (!e.isActive)
+            continue;
+        if(DOSHADOW) {
+            // TODO: make shader color constant (or apply color not in shader)
+            mediator->getShaders()->setParam(Shaders::Shadow, "frag_LightOrigin", e.getPosition());
+        }
+        // TODO:: make createMesh() store the mesh in RayTracing to make it possible to create mesh in threads
+        targetTex.draw(e.createMesh(), states);
+    }
+    targetTex.display();
+
+    ///Apply blur to the image (smooths border between pixelated and non-pixelated light)
     if (DOBLUR)
         applyBlur();
     return const_cast<Texture &>(targetTex.getTexture());
@@ -59,25 +85,20 @@ void LightScene::reset() {
     scene.clear();
 }
 
-bool LightScene::setShaders(bool _doBlur, bool _doShadow) {
+bool LightScene::setShaders() {
+
     if(DOBLUR) {
-        if(!shaderBlur.loadFromFile("../shaders/blur.frag", sf::Shader::Fragment)) {
-            return false;
-        }
-        shaderBlur.setUniform("resolution", Vector2f(windowSize.x, windowSize.y));
+        shaderBlur = mediator->getShaders()->get(Shaders::Blur);
+        shaderBlur->setUniform("resolution", Vector2f(windowSize.x, windowSize.y));
     }
     if(DOSHADOW) {
-        if(!shaderShadow.loadFromFile("../shaders/shadow.frag", sf::Shader::Fragment)) {
-            return false;
-        }
-        shaderShadow.setUniform("frag_ScreenResolution", Vector2f(windowSize.x, windowSize.y));
-        shaderShadow.setUniform("frag_LightColor", Vector3f(255, 255, 255));
+        shaderShadow = mediator->getShaders()->get(Shaders::Shadow);
+        shaderShadow->setUniform("frag_ScreenResolution", Vector2f(windowSize.x, windowSize.y));
+        shaderShadow->setUniform("frag_LightColor", Vector3f(255, 255, 255));
     }
 
     return true;
 }
-
-
 
 void LightScene::addEmitter(eVector2f position, eVector2f view, EmitterBehaviour::Behaviour* behaviour, bool isRestricted) {
     ///updateOmDemand must be smart
@@ -124,29 +145,29 @@ bool LightScene::invalidIndex(int i) {
 }
 
 ///function passed to threads
-void LightScene::doRayTracing(int i, Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock) {
+void LightScene::doRayTracing(Emitter &emitter, RenderTexture &_targetTex, std::mutex &rtLock) {
     emitter.updateRayTracing();
-
+    //TODO: delete this
+/*
     rtLock.lock();
 
     RenderStates states;
     states.blendMode = BlendAdd;
-    if(DOSHADOW) {
-        shaderShadow.setUniform("frag_LightOrigin", emitter.getPosition());
+    if(false) {
         // TODO: make shader color constant (or apply color not in shader)
-        shaderShadow.setUniform("frag_LightColor", Vector3f(52, 125, 125));
-        //shaderShadow.setUniform("frag_LightColor", Vector3f(25, 60, 60));
-        shaderShadow.setUniform("coef1", 140.f);
-        shaderShadow.setUniform("coef2", 0.07f);
-        shaderShadow.setUniform("coef3", 0.017f);
-        states.shader = &shaderShadow;
+        mediator->getShaders()->setParam(Shaders::Shadow, "frag_LightOrigin", emitter.getPosition());
+        mediator->getShaders()->setParam(Shaders::Shadow, "frag_LightColor", Vector3f(52, 125, 125));
+        mediator->getShaders()->setParam(Shaders::Shadow, "coef1", 140.f);
+        mediator->getShaders()->setParam(Shaders::Shadow, "coef2", 0.07f);
+        mediator->getShaders()->setParam(Shaders::Shadow, "coef3", 0.017f);
+        states.shader = shaderShadow;
     }
 
-    targetTex.draw(emitter.createMesh(), states);
-    targetTex.setSmooth(true);
-    targetTex.display();
+    //targetTex.draw(emitter.createMesh(), states);
+    //targetTex.setSmooth(true);
+    //targetTex.display();
 
-    rtLock.unlock();
+    rtLock.unlock();*/
 }
 
 void LightScene::removeDeprecatedBehaviours() {
@@ -192,38 +213,38 @@ void LightScene::applyBlur() {
     ///blur all light
     bufferTex.clear();
 
-    states.shader = &shaderBlur;
+    states.shader = shaderBlur;
 
-    shaderBlur.setUniform("image", targetTex.getTexture());
-    shaderBlur.setUniform("dir", Vector2f(1, 0));
+    shaderBlur->setUniform("image", targetTex.getTexture());
+    shaderBlur->setUniform("dir", Vector2f(1, 0));
     bufferTex.draw(bufferSprite, states);
     bufferTex.display();
 
-    shaderBlur.setUniform("image", bufferTex.getTexture());
-    shaderBlur.setUniform("dir", Vector2f(0, 1));
+    shaderBlur->setUniform("image", bufferTex.getTexture());
+    shaderBlur->setUniform("dir", Vector2f(0, 1));
     bufferTex.draw(bufferSprite, states);
     bufferTex.display();
 
-    shaderBlur.setUniform("image", bufferTex.getTexture());
-    shaderBlur.setUniform("dir", Vector2f(1, 1));
+    shaderBlur->setUniform("image", bufferTex.getTexture());
+    shaderBlur->setUniform("dir", Vector2f(1, 1));
     bufferTex.draw(bufferSprite, states);
     bufferTex.display();
 
-    shaderBlur.setUniform("image", bufferTex.getTexture());
-    shaderBlur.setUniform("dir", Vector2f(1, -1));
+    shaderBlur->setUniform("image", bufferTex.getTexture());
+    shaderBlur->setUniform("dir", Vector2f(1, -1));
     bufferTex.draw(bufferSprite, states);
     bufferTex.display();
 
 
     bufferSprite.setTexture(targetTex.getTexture());
 
-    shaderBlur.setUniform("image", targetTex.getTexture());
-    shaderBlur.setUniform("dir", Vector2f(1, 0));
+    shaderBlur->setUniform("image", targetTex.getTexture());
+    shaderBlur->setUniform("dir", Vector2f(1, 0));
     targetTex.draw(bufferSprite, states);
     targetTex.display();
 
-    shaderBlur.setUniform("image", targetTex.getTexture());
-    shaderBlur.setUniform("dir", Vector2f(0, 1));
+    shaderBlur->setUniform("image", targetTex.getTexture());
+    shaderBlur->setUniform("dir", Vector2f(0, 1));
     targetTex.draw(bufferSprite, states);
     targetTex.display();
 
@@ -234,6 +255,5 @@ void LightScene::applyBlur() {
 }
 
 Texture& LightScene::getTexture() {
-    //targetTex.display();
     return const_cast<Texture &>(targetTex.getTexture());
 }

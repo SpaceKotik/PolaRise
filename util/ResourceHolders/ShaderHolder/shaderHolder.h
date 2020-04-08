@@ -7,9 +7,8 @@
 class ShaderHolder {
 public:
     void load(Shaders::ID id, const std::string& filename);
-    sf::Shader& get(Shaders::ID id);
-    const sf::Shader& get(Shaders::ID id) const;
-
+    sf::Shader* get(Shaders::ID id);
+    const sf::Shader* get(Shaders::ID id) const;
     template<class T>
     void setParam(Shaders::ID id, const std::string& param, T);
 
