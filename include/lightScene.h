@@ -9,6 +9,8 @@
 #include "level.hpp"
 #include "../SmartVector2/SmartVector2f.h"
 #include "emitterBehaviour.h"
+#include "Game/sceneLoader.h"
+
 
 class Game;
 
@@ -24,6 +26,7 @@ private:
     RenderTexture targetTex;///RenderTexture, where all lights are drawn to
     RenderTexture bufferTex;///RenderTexture for temporal drawing to apply shadow shader
 
+    SceneLoader sceneLoader;
     Game* mediator;         ///Reference to game to get access to all required objects like level, resource holders, etc.
 
 protected:
@@ -37,11 +40,14 @@ public:
     LightScene();
     ~LightScene();
     void setMediator(Game* game);
+    void loadScene();
+
 
     Texture& drawToTex();    ///Draws all Emitters to targetTex
     void update();           ///Calls update for emitters behaviour, applies their effects on level's dynamic tiles, etc.
     void reset();
     bool setShaders();
+    Player* getPlayer();     ///Used in Scene loader
 
     void addEmitter(eVector2f position, eVector2f view, EmitterBehaviour::Behaviour* behaviour = nullptr, bool isRestricted = true);
     void deleteEmitter(eVector2f coord);

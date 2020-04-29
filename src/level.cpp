@@ -13,6 +13,7 @@ Level::Level() {
 	}
 	loadFromFile();
 }
+
 ///FIXME: Deprecated
 void Level::setField() {
 	loadFromFile();

@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "game.hpp"
+#include "Game/sceneLoader.h"
 
 using namespace sf;
 using namespace consts;
@@ -43,12 +44,10 @@ Game::Game() {
     bufferSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
     ///
 
-    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::BindToPlayer(&player));
-    lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));
-    lightScene.addEmitter(eVector2f(1000, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
-    lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
-    lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), new EmitterBehaviour::Flicker(9));
-    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::Flicker(6));
+
+    //SceneLoader sceneLoader;
+    //sceneLoader.loadFromFile(&lightScene);
+    lightScene.loadScene();
 }
 
 void Game::run() {
@@ -239,15 +238,7 @@ void Game::restart() {
     player.reset();
     level.setField();
     lightScene.reset();
-
-    ///TODO: Must load form level in the future
-    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::BindToPlayer(&player));
-    lightScene.addEmitter(eVector2f(1020, 750), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));
-    lightScene.addEmitter(eVector2f(1000, 460), eVector2f(0, 1), new EmitterBehaviour::Flicker(3));
-    lightScene.addEmitter(eVector2f(1000, 300), eVector2f(0, 1), new EmitterBehaviour::MoveByPath({400, 100}, {800, 100}, 5));
-    lightScene.addEmitter(eVector2f(210, 615), eVector2f(-1, 0), new EmitterBehaviour::Flicker(9));
-    lightScene.addEmitter(eVector2f(210, 495), eVector2f(-1, 0), new EmitterBehaviour::Flicker(6));
-    ////
+    lightScene.loadScene();
 }
 
 Level* Game::getLevel() {

@@ -3,6 +3,7 @@
 #include "game.hpp"
 #include "util/ResourceHolders/ShaderHolder/shaderHolder.h"
 #include "util/ResourceHolders/resourceIdentifiers.h"
+#include "Game/sceneLoader.h"
 
 using namespace consts;
 
@@ -11,6 +12,7 @@ LightScene::LightScene() {
     targetTex.create(windowSize.x, windowSize.y);
     bufferTex.create(windowSize.x, windowSize.y);
     targetTex.setSmooth(true);
+    sceneLoader.setLightScene(this);
     mediator = nullptr;
 }
 
@@ -258,4 +260,12 @@ void LightScene::applyBlur() {
 
 Texture& LightScene::getTexture() {
     return const_cast<Texture &>(targetTex.getTexture());
+}
+
+Player *LightScene::getPlayer() {
+    return mediator->getPlayer();
+}
+
+void LightScene::loadScene() {
+    sceneLoader.loadFromFile();
 }
