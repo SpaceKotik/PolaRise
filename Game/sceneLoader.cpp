@@ -3,6 +3,15 @@
 #include "SmartVector2/SmartVector2f.h"
 #include "lightScene.h"
 
+/// Used for convenient interpretation of file commands
+std::map <std::string, int> mapping {
+        {"MoveByPath", 1},
+        {"Rotate", 2},
+        {"MoveByCircle", 3},
+        {"Flicker", 4},
+        {"BindToPlayer", 5},
+};
+
 
 bool SceneLoader::loadToFile() {
     return true;
@@ -12,13 +21,9 @@ bool SceneLoader::loadFromFile() {
     std::ifstream levelFile("../Levels/Level_01_lightScene.txt");
     if(!levelFile.is_open())
         return -1;
-    int currFeature;
-    int i = 0;
-    //while (levelFile >> currFeature) {
-    while (i++ < 6) {
-        levelFile >> currFeature;
-        std::cout << currFeature << std::endl;
-        switch (currFeature) {
+    std::string currFeature;
+    while (levelFile >> currFeature) {
+        switch (mapping[currFeature]) {
             case 0:
                 break;
             case 1:
@@ -99,4 +104,5 @@ bool SceneLoader::setLightScene(LightScene *_lightScene) {
     if (lightScene == nullptr)
         return false;
     lightScene = _lightScene;
+    return true;
 }
