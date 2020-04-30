@@ -3,8 +3,10 @@
 #include "SmartVector2/SmartVector2f.h"
 #include "lightScene.h"
 
+
 /// Used for convenient interpretation of file commands
-std::map <std::string, int> mapping {
+std::map <std::string, int> behaviourNamesMapping {
+        {"NoBehaviour", 0},
         {"MoveByPath", 1},
         {"Rotate", 2},
         {"MoveByCircle", 3},
@@ -12,19 +14,23 @@ std::map <std::string, int> mapping {
         {"BindToPlayer", 5},
 };
 
-
-bool SceneLoader::loadToFile() {
+bool SceneLoader::loadToFile(eVector2f pos) {
+    std::ofstream levelFile("../Levels/Level_01_lightScene.txt", std::ios::app);
+    if(!levelFile.is_open())
+        return false;
+    levelFile << std::endl << "NoBehaviour " << pos.x << " " << pos.y;
     return true;
 }
 
 bool SceneLoader::loadFromFile() {
     std::ifstream levelFile("../Levels/Level_01_lightScene.txt");
     if(!levelFile.is_open())
-        return -1;
+        return false;
     std::string currFeature;
     while (levelFile >> currFeature) {
-        switch (mapping[currFeature]) {
+        switch (behaviourNamesMapping[currFeature]) {
             case 0:
+                handleNoBehaviour(&levelFile);
                 break;
             case 1:
                 handleMoveByPath(&levelFile);
@@ -45,7 +51,13 @@ bool SceneLoader::loadFromFile() {
                 break;
         }
     }
+    return true;
+}
 
+bool SceneLoader::setLightScene(LightScene *_lightScene) {
+    if (lightScene == nullptr)
+        return false;
+    lightScene = _lightScene;
     return true;
 }
 
@@ -100,9 +112,9 @@ void SceneLoader::handleBindToPlayer(std::ifstream* levelFile) {
     lightScene->addEmitter(eVector2f(0, 0), eVector2f(0, 0), new EmitterBehaviour::BindToPlayer(lightScene->getPlayer()));
 }
 
-bool SceneLoader::setLightScene(LightScene *_lightScene) {
-    if (lightScene == nullptr)
-        return false;
-    lightScene = _lightScene;
-    return true;
+void SceneLoader::handleNoBehaviour(std::ifstream *levelFile) {
+    eVector2f position;
+    *levelFile >> position.x;
+    *levelFile >> position.y;
+    lightScene->addEmitter(position, eVector2f(0, 1), nullptr);
 }

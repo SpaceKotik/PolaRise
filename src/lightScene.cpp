@@ -113,6 +113,13 @@ void LightScene::addEmitter(eVector2f position, eVector2f view, EmitterBehaviour
     updateEmittersRayTracing(true);
 }
 
+void LightScene::addEmitterOnInput(eVector2f position) {
+    Emitter emitter(position, eVector2f(0, 1), true, lightColorDefault);
+    scene.push_back(emitter);
+    updateEmittersRayTracing(true);
+    sceneLoader.loadToFile(position);
+}
+
 void LightScene::deleteEmitter(eVector2f coord) {
 
     scene.erase(std::remove_if(scene.begin(), scene.end(), [coord](Emitter const &emitter)-> bool {

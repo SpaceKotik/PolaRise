@@ -49,7 +49,8 @@ public:
     bool setShaders();
     Player* getPlayer();     ///Used in Scene loader
 
-    void addEmitter(eVector2f position, eVector2f view, EmitterBehaviour::Behaviour* behaviour = nullptr, bool isRestricted = true);
+    void addEmitter(eVector2f position, eVector2f view = {0, 1}, EmitterBehaviour::Behaviour* behaviour = nullptr, bool isRestricted = true);
+    void addEmitterOnInput(eVector2f position);
     void deleteEmitter(eVector2f coord);
     bool setBehaviour(int i, EmitterBehaviour::Behaviour*);
     void updateEmittersRayTracing(bool force = false);    ///Updates obstacles in lightScene rayTracing, then applied to all Emitters

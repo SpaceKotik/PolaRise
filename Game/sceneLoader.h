@@ -1,12 +1,14 @@
 #pragma once
 #include <iostream>
 
+class eVector2f;
 class LightScene;
 
 class SceneLoader {
 public:
     LightScene* lightScene;
 private:
+    void handleNoBehaviour(std::ifstream*);
     void handleMoveByPath(std::ifstream*);
     void handleRotate(std::ifstream*);
     void handleMoveByCircle(std::ifstream*);
@@ -14,7 +16,7 @@ private:
     void handleBindToPlayer(std::ifstream*);
 public:
     bool setLightScene(LightScene* lightScene);
-    bool loadToFile();
+    bool loadToFile(eVector2f pos);
     bool loadFromFile();
 };
 
