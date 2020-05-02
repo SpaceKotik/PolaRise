@@ -31,6 +31,7 @@ void LightScene::update() {
     mediator->getLevel()->update();
     ///free unused pointers to behaviours
     removeDeprecatedBehaviours();
+    removeShot();
 }
 
 Texture& LightScene::drawToTex() {
@@ -186,7 +187,6 @@ void LightScene::removeDeprecatedBehaviours() {
         e.update();
     }
     while (behaviourPool.size() > scene.size()) {
-
         for (auto e = behaviourPool.begin() ; e != behaviourPool.end(); ) {
             bool isOutdated = true;
             for (const auto& k : scene) {
@@ -203,6 +203,14 @@ void LightScene::removeDeprecatedBehaviours() {
                 ++e;
         }
     }
+}
+
+void LightScene::removeShot() {
+    scene.erase(std::remove_if(scene.begin(), scene.end(), [](Emitter const &emitter)-> bool {
+        if (emitter.behaviour == nullptr)
+            return false;
+        return emitter.behaviour->mustBeDeleted();
+    }), scene.end());
 }
 
 void LightScene::setActiveTiles() {
@@ -276,3 +284,5 @@ Player *LightScene::getPlayer() {
 void LightScene::loadScene() {
     sceneLoader.loadFromFile();
 }
+
+

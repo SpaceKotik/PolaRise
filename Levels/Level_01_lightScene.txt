@@ -4,6 +4,6 @@ Flicker 210 615 -1 0 9
 Flicker 210 495 -1 0 6
 MoveByPath 0 1 400 100 800 100 5
 BindToPlayer
-
-NoBehaviour 1062 115
-NoBehaviour 857 115
+NoBehaviour 352 118
+NoBehaviour 829 115
+NoBehaviour 520 119

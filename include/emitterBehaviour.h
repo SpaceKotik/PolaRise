@@ -4,6 +4,7 @@
 #include "../SmartVector2/SmartVector2f.h"
 class Emitter;
 class Player;
+class Level;
 
 namespace EmitterBehaviour {
 
@@ -12,6 +13,10 @@ namespace EmitterBehaviour {
         Behaviour();
         virtual ~Behaviour() = 0;
         virtual void update(Emitter* emitter){};
+        virtual bool mustBeDeleted() {
+            return false;
+        }
+
     };
 
     class MoveByPath : public Behaviour {
@@ -64,5 +69,17 @@ namespace EmitterBehaviour {
         void update(Emitter* emitter) override;
     };
 
-
+    class Shootable : public Behaviour {
+    private:
+        eVector2f speed;
+        eVector2f position;
+        Player* player;
+        Level* level;
+        sf::Clock timer;
+        float timeUntilDisappears;
+    public:
+        Shootable(Player* player, Level* level);
+        void update(Emitter* emitter) override;
+        bool mustBeDeleted() override;
+    };
 }

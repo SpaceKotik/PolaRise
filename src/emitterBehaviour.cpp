@@ -132,3 +132,26 @@ void BindToPlayer::update(Emitter* emitter) {
     emitter->setPosition(player->getPos());
     emitter->setView(player->getView());
 }
+
+///Shootable
+Shootable::Shootable(Player *_player, Level *_level) {
+    player = _player;
+    level = _level;
+    timer.restart();
+    timeUntilDisappears = 4;
+    speed = player->getView() * 32;
+    position = player->getPos();
+}
+
+void Shootable::update(Emitter *emitter) {
+    emitter->setRestricted(false);
+    timeUntilDisappears -= timer.restart().asSeconds();
+    position += speed;
+    if (level->isOnTile(position))
+        position -= speed;
+    emitter->setPosition(position);
+}
+
+bool Shootable::mustBeDeleted() {
+    return timeUntilDisappears <= 0;
+}

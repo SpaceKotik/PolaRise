@@ -35,6 +35,7 @@ protected:
     void applyBlur();
     void setActiveTiles();                  ///sets lighted tiles active
     void removeDeprecatedBehaviours();      ///removes unused behaviours from behaviourPool
+    void removeShot();
 
 public:
     LightScene();

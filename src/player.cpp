@@ -25,8 +25,8 @@ Vector2f Player::getPos() {
 	return physForm.getPosition();
 }
 
-Vector2f Player::getView() {
-    return view;
+eVector2f Player::getView() {
+    return view.norm();
 }
 
 RectangleShape* Player::getPhysForm() {

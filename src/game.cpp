@@ -176,6 +176,9 @@ void Game::input()  {
                 if(event.key.code == Keyboard::Escape) {
                     window.close();
                 }
+                if(event.key.code == Keyboard::S) {
+                    lightScene.addEmitter(player.getPos(), player.getView(), new EmitterBehaviour::Shootable(&player, &level));
+                }
                 if(event.key.code == Keyboard::R) {
                     restart();
                 }

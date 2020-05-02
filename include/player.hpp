@@ -25,7 +25,7 @@ struct PlayerStates {
 class Player {
 private:
 	RectangleShape physForm;/// Dfines player's position, collision rectangle, color etc
-    Vector2f view;          /// vector defining where player looks to
+    eVector2f view;          /// vector defining where player looks to
 	Vector2f velocity = Vector2f(0, 0);
     PlayerStates states;    /// states used for processing input
     Lantern flashLight;
@@ -37,7 +37,7 @@ public:
 	void move(Vector2f dir);        /// moves player by dir vector
 	void setPos(Vector2f pos);      /// sets player's position
 	Vector2f getPos();              /// returns player's position
-	Vector2f getView();
+	eVector2f getView();
 	RectangleShape* getPhysForm();  /// returns pointer to physForm for drawing
     void updateMovement();          /// processes player movement based on input
     void disableDynamicTiles();     ///set dynamic  tiles which player intersect inactive
