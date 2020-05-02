@@ -35,7 +35,6 @@ protected:
     void applyBlur();
     void setActiveTiles();                  ///sets lighted tiles active
     void removeDeprecatedBehaviours();      ///removes unused behaviours from behaviourPool
-    void removeShot();
 
 public:
     LightScene();
@@ -53,6 +52,8 @@ public:
     void addEmitter(eVector2f position, eVector2f view = {0, 1}, EmitterBehaviour::Behaviour* behaviour = nullptr, bool isRestricted = true);
     void addEmitterOnInput(eVector2f position);
     void deleteEmitter(eVector2f coord);
+    void removeShot();
+    void removeShotForce();
     bool setBehaviour(int i, EmitterBehaviour::Behaviour*);
     void updateEmittersRayTracing(bool force = false);    ///Updates obstacles in lightScene rayTracing, then applied to all Emitters
                                         ///(Must be called only when level has changed)

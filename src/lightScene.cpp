@@ -4,6 +4,7 @@
 #include "util/ResourceHolders/ShaderHolder/shaderHolder.h"
 #include "util/ResourceHolders/resourceIdentifiers.h"
 #include "Game/sceneLoader.h"
+#include <typeinfo>
 
 using namespace consts;
 
@@ -210,6 +211,16 @@ void LightScene::removeShot() {
         if (emitter.behaviour == nullptr)
             return false;
         return emitter.behaviour->mustBeDeleted();
+    }), scene.end());
+
+
+}
+
+void LightScene::removeShotForce() {
+    scene.erase(std::remove_if(scene.begin(), scene.end(), [](Emitter const &emitter)-> bool {
+        if (emitter.behaviour == nullptr)
+            return false;
+        return typeid(EmitterBehaviour::Shootable) == typeid(*emitter.behaviour);
     }), scene.end());
 }
 

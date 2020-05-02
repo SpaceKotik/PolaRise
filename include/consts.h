@@ -22,6 +22,8 @@ namespace consts {
     extern const float jumpGravity;
     extern const float fallGravity;
 
+    extern const float shootableDuration;
+
     extern const eVector2f offset;
     extern const float playerOffset;
 

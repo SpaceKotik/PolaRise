@@ -16,6 +16,8 @@ struct PlayerStates {
     bool jumpAble = true;
     bool jumpMade = false;
     Clock jumpTime;
+    bool ShootAble;
+    Clock sinceLastShot;
 
     bool isOnStart = 0;
     bool isOnFinish = 0;

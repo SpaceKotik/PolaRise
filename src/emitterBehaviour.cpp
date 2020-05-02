@@ -4,8 +4,10 @@
 #include "lightEmitter.h"
 #include "player.hpp"
 #include <iostream>
+#include "consts.h"
 
 using namespace EmitterBehaviour;
+using namespace consts;
 Behaviour::Behaviour() = default;
 Behaviour::~Behaviour() = default;
 
@@ -138,8 +140,8 @@ Shootable::Shootable(Player *_player, Level *_level) {
     player = _player;
     level = _level;
     timer.restart();
-    timeUntilDisappears = 4;
-    speed = player->getView() * 32;
+    timeUntilDisappears = shootableDuration;
+    speed = player->getView() * 25;
     position = player->getPos();
 }
 

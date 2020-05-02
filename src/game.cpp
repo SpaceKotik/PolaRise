@@ -177,7 +177,10 @@ void Game::input()  {
                     window.close();
                 }
                 if(event.key.code == Keyboard::S) {
-                    lightScene.addEmitter(player.getPos(), player.getView(), new EmitterBehaviour::Shootable(&player, &level));
+                    lightScene.removeShotForce();
+                    lightScene.addEmitter(player.getPos(), player.getView(),
+                                          new EmitterBehaviour::Shootable(&player, &level));
+
                 }
                 if(event.key.code == Keyboard::R) {
                     restart();

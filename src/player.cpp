@@ -11,6 +11,8 @@ Player::Player() {
 	physForm.setFillColor(heroColor);
 	physForm.setOutlineColor(Color(20, 20, 20));
 	physForm.setOutlineThickness(0);
+	states.jumpTime.restart();
+	states.sinceLastShot.restart();
 }
 
 void Player::move(Vector2f dir) {

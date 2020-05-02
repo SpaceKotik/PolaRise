@@ -18,6 +18,7 @@ namespace consts {
 
     constexpr float jumpGravity = 0.1;
     constexpr float fallGravity = 0.8;
+    constexpr float shootableDuration = 2.5;
 
     const eVector2f offset = eVector2f(0.005, 0.005);
     const float playerOffset = 0.01;
