@@ -6,7 +6,7 @@
 #define DEBUG false
 #define DOPIXEL true
 #define DOBLUR true
-#define DOSHADOW false
+#define DOSHADOW true
 
 namespace consts {
     using namespace sf;

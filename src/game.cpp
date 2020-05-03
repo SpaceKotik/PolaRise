@@ -105,7 +105,7 @@ void Game::drawTiles() {
 
     ///Set states for drawing tiles with shadow around player
     RenderStates statesTiles;
-    statesTiles.blendMode = BlendAdd;
+    statesTiles.blendMode = BlendMultiply;
     if (DOSHADOW) {
         statesTiles.shader = shaders.get(Shaders::Shadow);
         shaders.setParam(Shaders::Shadow, "coef1", 240.f);
@@ -132,6 +132,9 @@ void Game::drawTiles() {
     ///Draw tiles
     for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
         if (level.getField()->at(i).checkIfDrawable()) {
+            ///Basically drawing a tile and then drawing light mask above it (quite elegant solution in 1 line of code instead
+            /// of rewriting the whole shader logic)
+            bufferTex.draw(level.getField()->at(i).physForm, BlendAdd);
             bufferTex.draw(level.getField()->at(i).physForm, statesTiles);
             //spr2.setPosition(level.getField()->at(i).physForm.getPosition());
             //window.draw(spr2, statesTiles);
