@@ -295,5 +295,3 @@ Player *LightScene::getPlayer() {
 void LightScene::loadScene() {
     sceneLoader.loadFromFile();
 }
-
-

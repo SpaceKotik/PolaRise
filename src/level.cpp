@@ -73,11 +73,14 @@ int Level::loadToFile() {
                 case Dynamic:
                     levelFile << 2 << ' ';
                     break;
-                case StartPos:
+                case Deadly:
                     levelFile << 3 << ' ';
                     break;
-                case FinishPos:
+                case StartPos:
                     levelFile << 4 << ' ';
+                    break;
+                case FinishPos:
+                    levelFile << 5 << ' ';
                     break;
                 case Void:
                     levelFile << 0 << ' ';
@@ -113,13 +116,17 @@ int Level::loadFromFile() {
     		case 2:
                 level[i * fieldSize.x + j].type = Dynamic;
     			break;
-    		case 3:
+            case 3:
+                level[i * fieldSize.x + j].type = Deadly;
+                level[i * fieldSize.x + j].physForm.setFillColor(sf::Color::Red);
+                break;
+    		case 4:
                 level[i * fieldSize.x + j].type = StartPos;
                 level[i * fieldSize.x + j].physForm.setFillColor(Color::Green);
                 level[i * fieldSize.x + j].physForm.setOutlineColor(Color::Black);
                 level[i * fieldSize.x + j].physForm.setOutlineThickness(1);
     			break;
-    		case 4:
+    		case 5:
                 level[i * fieldSize.x + j].type = FinishPos;
                 level[i * fieldSize.x + j].physForm.setFillColor(Color::Red);
                 level[i * fieldSize.x + j].physForm.setOutlineColor(Color::Black);
@@ -141,6 +148,14 @@ bool Level::isOnTile(Vector2f pos) {
         return false;
 	Tile currTile = level.at(i);
     return (currTile.checkIfSolid() && !currTile.isUnderPlayer);
+}
+
+bool Level::isOnDeadly(Vector2f pos) {
+    int i = index(pos, fieldSize, scale);
+    if(level.size() <= i || i < 0)
+        return false;
+    Tile currTile = level.at(i);
+    return (currTile.type == Deadly);
 }
 
 bool Level::isOnFinish(Vector2f pos) {

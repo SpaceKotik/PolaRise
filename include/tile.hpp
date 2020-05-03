@@ -9,6 +9,7 @@ enum TileType{
     Standart,
     Dynamic,
     Void,
+    Deadly,
     StartPos,
     FinishPos
 };
@@ -27,6 +28,7 @@ public:
 	bool checkIfSolid();
 	bool checkIfLightAbsorb();
 	bool checkIfDrawable();
+	bool checkIfDeadly();
 
 friend class Game;
 friend class Level;

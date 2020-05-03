@@ -52,7 +52,14 @@ void Player::disableDynamicTiles() {
 void Player::updateMovement() {
     //flashLight.sprite.setPosition(physForm.getPosition());
 
-
+    if (mediator->getLevel()->isOnDeadly(getPos() + Vector2f(heroWidth/2 + .1, heroHeight/2 + .1)) ||
+        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(heroWidth/2 + .1, -heroHeight/2 - .1)) ||
+        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(-heroWidth/2 - .1, heroHeight/2 + .1)) ||
+        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(-heroWidth/2 - .1, -heroHeight/2 - .1)) ||
+        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(heroWidth/2 + .1, 0)) ||
+        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(-heroWidth/2 - .1, 0))) {
+        mediator->restart();
+    }
 
 
     if (states.jumpMade) {

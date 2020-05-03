@@ -13,6 +13,8 @@
 #include "util/ResourceHolders/TextureHolder/textureHolder.h"
 #include "util/ResourceHolders/ShaderHolder/shaderHolder.h"
 #include "util/ResourceHolders/resourceIdentifiers.h"
+#include "tile.hpp"
+
 
 using namespace sf;
 

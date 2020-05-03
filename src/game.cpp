@@ -60,6 +60,15 @@ void Game::run() {
     }
 }
 
+void Game::draw() {
+
+    window.clear();
+    drawLight();
+    drawTiles();
+    window.draw(player.flashLight.sprite);
+    window.display();
+}
+
 void Game::drawLight() {
     Sprite bufferSpr, backgroundSprite;
 
@@ -137,15 +146,6 @@ void Game::drawTiles() {
         window.draw(bufferSpr);
 }
 
-void Game::draw() {
-
-    window.clear();
-    drawLight();
-    drawTiles();
-    window.draw(player.flashLight.sprite);
-    window.display();
-}
-
 void Game::input()  {
     Event event{};
     static bool isMouseInside = true;
@@ -204,6 +204,10 @@ void Game::input()  {
                 if(event.key.code == Keyboard::Space) {
                     player.states.space = false;
                     player.states.jumpAble = false;
+                }
+                if (event.key.code == Keyboard::Num1) {
+                    level.addTile((Vector2f)Mouse::getPosition(window), Deadly);
+                    lightScene.updateEmittersRayTracing(true);///////
                 }
             default:
                 break;

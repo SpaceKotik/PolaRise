@@ -30,6 +30,7 @@ public:
 	int loadFromFile();
 	bool isOnTile(Vector2f pos);
 	bool isOnFinish(Vector2f pos);
+	bool isOnDeadly(Vector2f pos);
 
     void resetActive();                                 /// set all tiles as unlighted (inactive)
 	void setActiveTile(Vector2f pos);                   /// set tile where pos lies as active

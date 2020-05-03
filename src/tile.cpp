@@ -38,9 +38,14 @@ bool Tile::checkIfLightAbsorb() {
 }
 
 bool Tile::checkIfDrawable() {
-    if (type == Standart)
+    if (type == Standart || type == Deadly)
         return true;
     if (!isUnderPlayer && type == Dynamic && isActive)
         return true;
     return false;
 }
+
+bool Tile::checkIfDeadly() {
+    return type == Deadly;
+}
+
