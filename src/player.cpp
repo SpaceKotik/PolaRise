@@ -5,10 +5,10 @@
 using namespace consts;
 
 Player::Player() {
-	physForm.setSize({heroWidth, heroHeight});
-	physForm.setOrigin(Vector2f(heroWidth/2, heroHeight/2));
+	physForm.setSize({playerWidth, playerHeight});
+	physForm.setOrigin(Vector2f(playerWidth / 2, playerHeight / 2));
 	physForm.setPosition(Vector2f(100, 100));
-	physForm.setFillColor(heroColor);
+	physForm.setFillColor(playerColor);
 	physForm.setOutlineColor(Color(20, 20, 20));
 	physForm.setOutlineThickness(0);
 	states.jumpTime.restart();
@@ -50,18 +50,18 @@ void Player::disableDynamicTiles() {
 }
 
 void Player::updateMovement() {
-    //flashLight.sprite.setPosition(physForm.getPosition());
+    ///Check if on a deadly tile and restart level if so
+    if (mediator->getLevel()->isOnDeadly(getPos() + Vector2f(playerWidth / 2 + .1, playerHeight / 2 + .1)) ||
+        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(playerWidth / 2 + .1, -playerHeight / 2 - .1)) ||
+        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(-playerWidth / 2 - .1, playerHeight / 2 + .1)) ||
+        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(-playerWidth / 2 - .1, -playerHeight / 2 - .1)) ||
+        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(playerWidth / 2 + .1, 0)) ||
+        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(-playerWidth / 2 - .1, 0))) {
 
-    if (mediator->getLevel()->isOnDeadly(getPos() + Vector2f(heroWidth/2 + .1, heroHeight/2 + .1)) ||
-        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(heroWidth/2 + .1, -heroHeight/2 - .1)) ||
-        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(-heroWidth/2 - .1, heroHeight/2 + .1)) ||
-        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(-heroWidth/2 - .1, -heroHeight/2 - .1)) ||
-        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(heroWidth/2 + .1, 0)) ||
-        mediator->getLevel()->isOnDeadly(getPos() + Vector2f(-heroWidth/2 - .1, 0))) {
         mediator->restart();
     }
 
-
+    ///Change states on jump
     if (states.jumpMade) {
         velocity.y -= maxVelocity;
         states.jumpTime.restart();
@@ -69,18 +69,18 @@ void Player::updateMovement() {
         states.jumpMade = false;
     }
 
-    // TODO: fix player jumping in air
+    ///Change states if jumping up for too long
     if (states.jumpTime.getElapsedTime().asSeconds() > 0.24) {
         states.space = false;
         states.jumpAble = false;
         states.jumpTime.restart();
     }
 
-    ///process input
+    ///Process input
     if (states.right)
-        velocity.x += heroAcceleration;
+        velocity.x += playerAcceleration;
     if (states.left)
-        velocity.x -= heroAcceleration;
+        velocity.x -= playerAcceleration;
     if (states.space) {
         velocity.y += jumpGravity;
     }
@@ -95,12 +95,12 @@ void Player::updateMovement() {
     ///process right moving if player moves right
     desPos = getPos() + Vector2f(velocity.x, 0);
     ///if no intersections, move only horizontally
-    if (mediator->getLevel()->isOnTile(desPos + Vector2f(heroWidth/2 - .1, heroHeight/2 - .1)) ||
-            mediator->getLevel()->isOnTile(desPos + Vector2f(heroWidth/2 - .1, -heroHeight/2 + .1)) ||
-            mediator->getLevel()->isOnTile(desPos + Vector2f(heroWidth/2 - .1, 0))) {
+    if (mediator->getLevel()->isOnTile(desPos + Vector2f(playerWidth / 2 - .1, playerHeight / 2 - .1)) ||
+        mediator->getLevel()->isOnTile(desPos + Vector2f(playerWidth / 2 - .1, -playerHeight / 2 + .1)) ||
+        mediator->getLevel()->isOnTile(desPos + Vector2f(playerWidth / 2 - .1, 0))) {
 
         ///else move right to the obstacle and mirror speed
-        setPos(Vector2f(((int) getPos().x / (int) scale + 1) * scale - heroWidth/2, getPos().y));
+        setPos(Vector2f(((int) getPos().x / (int) scale + 1) * scale - playerWidth / 2, getPos().y));
         velocity.x = 0;
     }
 
@@ -108,11 +108,11 @@ void Player::updateMovement() {
     ///process left moving if player moves left
     desPos = getPos() + Vector2f(velocity.x, 0);
 
-    if (mediator->getLevel()->isOnTile(desPos + Vector2f(-heroWidth/2 + .1, heroHeight/2 - .1)) ||
-            mediator->getLevel()->isOnTile(desPos + Vector2f(-heroWidth/2 + .1, -heroHeight/2 + .1)) ||
-            mediator->getLevel()->isOnTile(desPos + Vector2f(-heroWidth/2 + .1, 0))) {
+    if (mediator->getLevel()->isOnTile(desPos + Vector2f(-playerWidth / 2 + .1, playerHeight / 2 - .1)) ||
+        mediator->getLevel()->isOnTile(desPos + Vector2f(-playerWidth / 2 + .1, -playerHeight / 2 + .1)) ||
+        mediator->getLevel()->isOnTile(desPos + Vector2f(-playerWidth / 2 + .1, 0))) {
 
-        setPos(Vector2f(((int) getPos().x / (int) scale) * scale + heroWidth/2, getPos().y));
+        setPos(Vector2f(((int) getPos().x / (int) scale) * scale + playerWidth / 2, getPos().y));
         velocity.x = 0;
     }
 
@@ -121,36 +121,36 @@ void Player::updateMovement() {
     ///process up moving if player moves up
     desPos = getPos() + Vector2f(0, velocity.y);
 
-    if (mediator->getLevel()->isOnTile(desPos + Vector2f(heroWidth/2 - .1, -heroHeight/2 + .1)) ||
-            mediator->getLevel()->isOnTile(desPos + Vector2f(-heroWidth/2 + .1, -heroHeight/2 + .1))) {
+    if (mediator->getLevel()->isOnTile(desPos + Vector2f(playerWidth / 2 - .1, -playerHeight / 2 + .1)) ||
+        mediator->getLevel()->isOnTile(desPos + Vector2f(-playerWidth / 2 + .1, -playerHeight / 2 + .1))) {
 
         states.space = false;
         states.jumpAble = false;
 
-        setPos(Vector2f(getPos().x, ((int)getPos().y / (int) scale) * scale + heroHeight/2));
+        setPos(Vector2f(getPos().x, ((int)getPos().y / (int) scale) * scale + playerHeight / 2));
         velocity.y = -velocity.y * 0.2;
     }
 
     ///process down moving if player moves down
     desPos = getPos() + Vector2f(0, velocity.y);
 
-    if (mediator->getLevel()->isOnTile(desPos + Vector2f(heroWidth/2 - .1, heroHeight/2 - .1)) ||
-            mediator->getLevel()->isOnTile(desPos + Vector2f(-heroWidth/2 + .1, heroHeight/2 - .1)) ) {
+    if (mediator->getLevel()->isOnTile(desPos + Vector2f(playerWidth / 2 - .1, playerHeight / 2 - .1)) ||
+        mediator->getLevel()->isOnTile(desPos + Vector2f(-playerWidth / 2 + .1, playerHeight / 2 - .1)) ) {
 
-        setPos(Vector2f(getPos().x, ((int) getPos().y / (int) scale + 1) * scale - heroHeight/2));
+        setPos(Vector2f(getPos().x, ((int) getPos().y / (int) scale + 1) * scale - playerHeight / 2));
         velocity.y = 0;
     }
     else {
         states.jumpAble = false;
     }
+    ///If idling, allow jumping
     if (velocity.y == 0)
         states.jumpAble = true;///////////////
 
 
-
     ///decrease velocity if no input
     if (!states.right && !states.left)
-        velocity = Vector2f(velocity.x * 0.83, velocity.y);
+        velocity = Vector2f(velocity.x * speedDecreaseCoef, velocity.y);
 
 
 

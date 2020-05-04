@@ -39,9 +39,6 @@ Game::Game() {
     /// TODO: extract method
     bufferTex.create(windowSize.x, windowSize.y);
     bufferTex.setSmooth(true);
-    bufferSprite.setTexture(bufferTex.getTexture());
-    bufferSprite.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
-    bufferSprite.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
     ///
 
 
@@ -166,7 +163,8 @@ void Game::input()  {
                 break;
             case Event::KeyPressed:
                 if(event.key.code == Keyboard::LShift) {
-                    lightScene.addEmitterOnInput(eVector2f(Vector2f(Mouse::getPosition(window))));
+                    //lightScene.addEmitterOnInput(eVector2f(Vector2f(Mouse::getPosition(window))));
+                    lightScene.addEmitter(eVector2f(Vector2f(Mouse::getPosition(window))));
                 }
                 if(event.key.code == Keyboard::LControl) {
                     lightScene.deleteEmitter(Vector2f(Vector2f(Mouse::getPosition(window))));

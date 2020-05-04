@@ -106,7 +106,7 @@ bool LightScene::setShaders() {
 
 void LightScene::addEmitter(eVector2f position, eVector2f view, EmitterBehaviour::Behaviour* behaviour, bool isRestricted) {
     ///updateOmDemand must be smart
-    Emitter emitter(position, view, isRestricted, lightColorDefault);
+    Emitter emitter(position, view, isRestricted, lightDefaultColor);
     if (behaviour != nullptr) {
         emitter.setBehaviour(behaviour);
         behaviourPool.push_back(behaviour);
@@ -116,7 +116,7 @@ void LightScene::addEmitter(eVector2f position, eVector2f view, EmitterBehaviour
 }
 
 void LightScene::addEmitterOnInput(eVector2f position) {
-    Emitter emitter(position, eVector2f(0, 1), true, lightColorDefault);
+    Emitter emitter(position, eVector2f(0, 1), true, lightDefaultColor);
     scene.push_back(emitter);
     updateEmittersRayTracing(true);
     sceneLoader.loadToFile(position);

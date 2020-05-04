@@ -12,7 +12,7 @@ Emitter::Emitter() {
     view = DEFAULTEMITTER_VIEW;
     isRestricted = true;
     lineOfSight = DEFAULTEMITTER_LINEOFSIGHT;
-    color = lightColorDefault;
+    color = lightDefaultColor;
     behaviour = nullptr;
 }
 

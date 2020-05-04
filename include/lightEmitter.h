@@ -28,7 +28,7 @@ private:
     EmitterBehaviour::Behaviour *behaviour = nullptr;
 public:
     Emitter();
-    Emitter(eVector2f position, eVector2f view, bool isRestricted = true, Color color = consts::lightColorDefault);
+    Emitter(eVector2f position, eVector2f view, bool isRestricted = true, Color color = consts::lightDefaultColor);
     ~Emitter();
 
     void updateLightMap(const RayTracing* _rayTracing); /// sets RayTracing equal to lightScene RayTracing (basically all obstacles)

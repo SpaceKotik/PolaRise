@@ -15,7 +15,6 @@
 #include "util/ResourceHolders/resourceIdentifiers.h"
 #include "tile.hpp"
 
-
 using namespace sf;
 
 enum GameState {Menu, Menu_2, Gameplay, Leaderboard};
@@ -32,7 +31,6 @@ private:
     TextureHolder textures;
     ShaderHolder shaders;
 
-    Sprite bufferSprite;
     RenderTexture bufferTex;
 
 protected:
@@ -40,7 +38,6 @@ protected:
     void drawTiles();
 public:
     Game();
-    //~Game();
     void run();
     void input();
     void draw();
