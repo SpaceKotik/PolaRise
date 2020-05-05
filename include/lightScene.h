@@ -48,6 +48,7 @@ public:
     void reset();
     bool setShaders();
     Player* getPlayer();     ///Used in Scene loader
+    std::string getLevelPath();
 
     void addEmitter(eVector2f position, eVector2f view = {0, 1}, EmitterBehaviour::Behaviour* behaviour = nullptr, bool isRestricted = true);
     void addEmitterOnInput(eVector2f position);

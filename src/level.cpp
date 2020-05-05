@@ -1,22 +1,20 @@
 #include "level.hpp"
 
+#include "include/game.hpp"
 #include <cmath>
 #include "rayTracing.hpp"
 
 using namespace consts;
 using namespace sf;
 
-Level::Level() {
-	for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
-		Vector2f pos = Vector2f ((int)(i % fieldSize.x)*scale , ((int)i/(int)fieldSize.x)*scale) + offset;
-        level.emplace_back(pos, Void);
-	}
-	loadFromFile();
-}
+Level::Level() = default;
 
-///FIXME: Deprecated
 void Level::setField() {
-	loadFromFile();
+    for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
+        Vector2f pos = Vector2f ((int)(i % fieldSize.x)*scale , ((int)i/(int)fieldSize.x)*scale) + offset;
+        level.emplace_back(pos, Void);
+    }
+    loadFromFile();
 }
 
 std::vector<Tile>* Level::getField() {
@@ -61,7 +59,7 @@ void Level::removeTile(Vector2f pos) {
 }
 
 int Level::loadToFile() {
-	std::ofstream levelFile("../Levels/Level_01.txt");
+	std::ofstream levelFile(mediator->getLevelPath() + "level.txt");
     if(!levelFile.is_open())
         return -1;
     for (int i = 0; i < fieldSize.y; ++i) {
@@ -96,7 +94,7 @@ int Level::loadToFile() {
 }
 
 int Level::loadFromFile() {
-	std::ifstream levelFile("../Levels/Level_01.txt");
+	std::ifstream levelFile(mediator->getLevelPath() + "level.txt");
     if(!levelFile.is_open())
         return -1;
 
@@ -207,4 +205,6 @@ void Level::setDynamicTiles(std::array<Vertex, 2> line) {
 void Level::setMediator(Game* _game) {
     mediator = _game;
 }
+
+
 

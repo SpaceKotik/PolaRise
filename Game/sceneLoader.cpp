@@ -15,7 +15,7 @@ std::map <std::string, int> behaviourNamesMapping {
 };
 
 bool SceneLoader::loadToFile(eVector2f pos) {
-    std::ofstream levelFile("../Levels/Level_01_lightScene.txt", std::ios::app);
+    std::ofstream levelFile(lightScene->getLevelPath() + "lightScene.txt", std::ios::app);
     if(!levelFile.is_open())
         return false;
     levelFile << "NoBehaviour " << pos.x << " " << pos.y << std::endl;
@@ -23,7 +23,7 @@ bool SceneLoader::loadToFile(eVector2f pos) {
 }
 
 bool SceneLoader::loadFromFile() {
-    std::ifstream levelFile("../Levels/Level_01_lightScene.txt");
+    std::ifstream levelFile(lightScene->getLevelPath() + "lightScene.txt");
     if(!levelFile.is_open())
         return false;
 

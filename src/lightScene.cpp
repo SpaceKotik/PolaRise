@@ -292,6 +292,10 @@ Player *LightScene::getPlayer() {
     return mediator->getPlayer();
 }
 
+std::string LightScene::getLevelPath() {
+    return mediator->getLevelPath();
+}
+
 void LightScene::loadScene() {
     sceneLoader.loadFromFile();
 }

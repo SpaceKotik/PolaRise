@@ -5,7 +5,9 @@
 using namespace sf;
 using namespace consts;
 
+
 Game::Game() {
+    levelPath = "../Levels/1/";
 
     textures.load(Textures::Background, "../Textures/background.png");
     textures.setRepeat(Textures::Background, true);
@@ -19,9 +21,12 @@ Game::Game() {
 
     ///Using Mediator pattern; set mediator's pointer for all components
     level.setMediator(this);
+    level.setField();
+
     player.setMediator(this);
     lightScene.setMediator(this);
     lightScene.setShaders();
+    lightScene.loadScene();
 
     ///probably will be used while adding GUI
     gameState = Gameplay;
@@ -37,14 +42,11 @@ Game::Game() {
 
 
     /// TODO: extract method
-    bufferTex.create(windowSize.x, windowSize.y);
-    bufferTex.setSmooth(true);
+    bufferWindow.create(windowSize.x, windowSize.y);
+    bufferWindow.setSmooth(true);
     ///
 
 
-    //SceneLoader sceneLoader;
-    //sceneLoader.loadFromFile(&lightScene);
-    lightScene.loadScene();
 }
 
 void Game::run() {
@@ -113,31 +115,31 @@ void Game::drawTiles() {
     }
     ///States for pixelating tiles
     RenderStates statesPixel;
-    shaders.get(Shaders::Pixel)->setUniform("image", bufferTex.getTexture());
+    shaders.get(Shaders::Pixel)->setUniform("image", bufferWindow.getTexture());
     statesPixel.blendMode = BlendAdd;
     statesPixel.shader = shaders.get(Shaders::Pixel);
 
     ///Sprite for drawing buffer texture
     Sprite bufferSpr;
-    bufferSpr.setTexture(bufferTex.getTexture());
+    bufferSpr.setTexture(bufferWindow.getTexture());
     bufferSpr.setOrigin(windowSize.x / 2.f, windowSize.y / 2.f);
     bufferSpr.setPosition(windowSize.x / 2.f, windowSize.y / 2.f);
 
     ///Start of actual drawing
-    bufferTex.clear(Color::Transparent);
+    bufferWindow.clear(Color::Transparent);
 
     ///Draw tiles
     for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
         if (level.getField()->at(i).checkIfDrawable()) {
             ///Basically drawing a tile and then drawing light mask above it (quite elegant solution in 1 line of code instead
             /// of rewriting the whole shader logic)
-            bufferTex.draw(level.getField()->at(i).physForm, BlendAdd);
-            bufferTex.draw(level.getField()->at(i).physForm, statesTiles);
+            bufferWindow.draw(level.getField()->at(i).physForm, BlendAdd);
+            bufferWindow.draw(level.getField()->at(i).physForm, statesTiles);
             //spr2.setPosition(level.getField()->at(i).physForm.getPosition());
             //window.draw(spr2, statesTiles);
         }
     }
-    bufferTex.display();
+    bufferWindow.display();
 
     ///pixelate tiles
     if (DOPIXEL)
@@ -246,6 +248,7 @@ void Game::logic() {
 }
 
 void Game::restart() {
+    //levelPath = "../Levels/2/";
     player.reset();
     level.setField();
     lightScene.reset();
@@ -262,6 +265,10 @@ Player* Game::getPlayer() {
 
 ShaderHolder* Game::getShaders() {
     return &shaders;
+}
+
+std::string Game::getLevelPath() {
+    return levelPath;
 }
 
 /*

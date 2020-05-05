@@ -17,7 +17,7 @@
 
 using namespace sf;
 
-enum GameState {Menu, Menu_2, Gameplay, Leaderboard};
+enum GameState {Menu, Gameplay};
 
 class Game {
 private:
@@ -30,8 +30,9 @@ private:
 
     TextureHolder textures;
     ShaderHolder shaders;
+    RenderTexture bufferWindow;
 
-    RenderTexture bufferTex;
+    std::string levelPath;
 
 protected:
     void drawLight();
@@ -46,4 +47,5 @@ public:
     Level* getLevel();
     Player* getPlayer();
     ShaderHolder* getShaders();
+    std::string getLevelPath();
 };
