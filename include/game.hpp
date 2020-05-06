@@ -14,6 +14,7 @@
 #include "util/ResourceHolders/ShaderHolder/shaderHolder.h"
 #include "util/ResourceHolders/resourceIdentifiers.h"
 #include "tile.hpp"
+#include <TGUI/TGUI.hpp>
 
 using namespace sf;
 
@@ -33,6 +34,8 @@ private:
     RenderTexture bufferWindow;
 
     std::string levelPath;
+
+    tgui::Gui* gui = new tgui::Gui{window};
 
 protected:
     void drawLight();

@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
 project(PolaRise)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+#set(MALLOC_CHECK_ "0")
+#-fno-stack-protector
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread")
 SET(PLATFORM_SPECIFIC_LIBS "-lpthread")
 find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 set(SFML_STATIC_LIBRARIES TRUE)
@@ -43,4 +45,4 @@ add_executable(PolaRise
         src/lantern.cpp
         util/ResourceHolders/TextureHolder/textureHolder.cpp
         util/ResourceHolders/TextureHolder/textureHolder.h util/ResourceHolders/resourceIdentifiers.h util/ResourceHolders/ShaderHolder/shaderHolder.cpp util/ResourceHolders/ShaderHolder/shaderHolder.h Game/sceneLoader.cpp Game/sceneLoader.h)
-target_link_libraries(PolaRise sfml-graphics sfml-window sfml-system)
+target_link_libraries(PolaRise sfml-graphics sfml-window sfml-system -ltgui -lsfml-graphics -lsfml-window -lsfml-system)

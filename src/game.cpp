@@ -1,14 +1,20 @@
 #include <SFML/Graphics.hpp>
 #include "game.hpp"
 #include "Game/sceneLoader.h"
+#include <TGUI/TGUI.hpp>
 
 using namespace sf;
 using namespace consts;
 
+void sigFunc() {
+    std::cout << "pressed\n";
+}
 
 Game::Game() {
+    ///Setting level path used in scene and level loaders
     levelPath = "../Levels/1/";
 
+    /// Setting up resource holders
     textures.load(Textures::Background, "../Textures/background.png");
     textures.setRepeat(Textures::Background, true);
 
@@ -31,6 +37,7 @@ Game::Game() {
     ///probably will be used while adding GUI
     gameState = Gameplay;
 
+    ///Setting window
     ContextSettings settings;
     settings.antialiasingLevel = 8;
     window.create(VideoMode(windowSize.x, windowSize.y), "PolaRise",
@@ -41,12 +48,26 @@ Game::Game() {
     window.setMouseCursorGrabbed(false);
 
 
-    /// TODO: extract method
+    /// TODO: move bufferWindow from Game class
     bufferWindow.create(windowSize.x, windowSize.y);
     bufferWindow.setSmooth(true);
     ///
 
 
+
+    tgui::Button::Ptr buttonRestart = tgui::Button::create();
+
+    buttonRestart->setText("restart");
+    buttonRestart->setSize(100, 50);
+    buttonRestart->connect("pressed", &Game::restart, this);
+
+    tgui::Button::Ptr buttonClose = tgui::Button::create();
+    buttonClose->setPosition(100, 0);
+    buttonClose->setText("quit");
+    buttonClose->setSize(100, 50);
+    buttonClose->connect("pressed", [this](){this->window.close();});
+    gui->add(buttonClose, "button2");
+    gui->add(buttonRestart, "button");
 }
 
 void Game::run() {
@@ -65,6 +86,7 @@ void Game::draw() {
     drawLight();
     drawTiles();
     window.draw(player.flashLight.sprite);
+    gui->draw();
     window.display();
 }
 
@@ -151,8 +173,8 @@ void Game::drawTiles() {
 void Game::input()  {
     Event event{};
     static bool isMouseInside = true;
-
     while (window.pollEvent(event)) {
+        gui->handleEvent(event);
         switch (event.type) {
             case Event::MouseLeft:
                 isMouseInside = false;
