@@ -15,8 +15,8 @@
 #include "util/ResourceHolders/resourceIdentifiers.h"
 #include "tile.hpp"
 #include <TGUI/TGUI.hpp>
-#include "Menu/MenuGUI.h"
-#include "Pause/PauseGUI.h"
+#include "GUI/Menu/MenuGUI.h"
+#include "GUI/Pause/PauseGUI.h"
 
 using namespace sf;
 

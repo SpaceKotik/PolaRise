@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GUI/BaseGUI.h"
+#include "GUI/BaseGUI/BaseGUI.h"
 
 class PauseGUI : public BaseGUI {
 public:

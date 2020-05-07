@@ -1,7 +1,7 @@
 #pragma once
 #include <TGUI/TGUI.hpp>
 #include <SFML/Graphics.hpp>
-#include "GUI/BaseGUI.h"
+#include "GUI/BaseGUI/BaseGUI.h"
 
 class Game;
 
