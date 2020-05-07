@@ -1,6 +1,6 @@
 #pragma once
 
-#include <../SmartVector2/SmartVector2f.h>
+#include <util/SmartVector2/SmartVector2f.h>
 
 class Lantern {
 private:

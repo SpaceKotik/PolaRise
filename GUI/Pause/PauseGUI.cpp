@@ -1,5 +1,5 @@
 #include "PauseGUI.h"
-#include "game.hpp"
+#include "Game/include/game.hpp"
 
 void PauseGUI::setup(Game *game) {
     mediator = game;

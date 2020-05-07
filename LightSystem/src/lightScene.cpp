@@ -1,9 +1,9 @@
-#include "lightScene.h"
-#include "consts.h"
-#include "game.hpp"
+#include "LightSystem/include/lightScene.h"
+#include "Game/include/consts.h"
+#include "Game/include/game.hpp"
 #include "util/ResourceHolders/ShaderHolder/shaderHolder.h"
 #include "util/ResourceHolders/resourceIdentifiers.h"
-#include "Game/sceneLoader.h"
+#include "Game/include/sceneLoader.h"
 #include <typeinfo>
 
 using namespace consts;

@@ -1,10 +1,10 @@
 #include "SFML/Graphics.hpp"
 #include "util/eMath/eMath.h"
-#include "emitterBehaviour.h"
-#include "lightEmitter.h"
-#include "player.hpp"
+#include "LightSystem/include/emitterBehaviour.h"
+#include "LightSystem/include/lightEmitter.h"
+#include "Game/include/player.hpp"
 #include <iostream>
-#include "consts.h"
+#include "Game/include/consts.h"
 
 using namespace EmitterBehaviour;
 using namespace consts;

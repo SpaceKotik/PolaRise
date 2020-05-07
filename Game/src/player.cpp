@@ -1,7 +1,7 @@
 #include <cmath>
-#include "player.hpp"
-#include "consts.h"
-#include "game.hpp"
+#include "Game/include/player.hpp"
+#include "Game/include/consts.h"
+#include "Game/include/game.hpp"
 using namespace consts;
 
 Player::Player() {

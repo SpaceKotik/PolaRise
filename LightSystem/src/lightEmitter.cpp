@@ -1,5 +1,5 @@
-#include "emitterBehaviour.h"
-#include "lightEmitter.h"
+#include "LightSystem/include/emitterBehaviour.h"
+#include "LightSystem/include/lightEmitter.h"
 
 using namespace consts;
 

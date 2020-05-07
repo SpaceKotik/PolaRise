@@ -1,5 +1,5 @@
-#include "lantern.h"
-#include "consts.h"
+#include "Game/include/lantern.h"
+#include "Game/include/consts.h"
 using namespace consts;
 
 Lantern::Lantern() {

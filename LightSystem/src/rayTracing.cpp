@@ -1,4 +1,4 @@
-#include "rayTracing.hpp"
+#include "LightSystem/include/rayTracing.hpp"
 
 
 using namespace consts;

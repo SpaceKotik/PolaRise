@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
-#include "game.hpp"
-#include "Game/sceneLoader.h"
+#include "Game/include/game.hpp"
+#include "Game/include/sceneLoader.h"
 #include <TGUI/TGUI.hpp>
 
 using namespace sf;

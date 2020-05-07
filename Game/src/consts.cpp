@@ -1,5 +1,5 @@
 #include <SFML/Graphics.hpp>
-#include "consts.h"
+#include "Game/include/consts.h"
 
 namespace consts {
     using namespace sf;

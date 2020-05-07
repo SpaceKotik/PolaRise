@@ -13,41 +13,41 @@ include_directories(.)
 include_directories(include)
 
 add_executable(PolaRise
-        include/dump.hpp
-        include/game.hpp
-        include/player.hpp
-        src/level.cpp
-        include/level.hpp
-        include/rayTracing.hpp
-        include/tile.hpp
-        src/consts.cpp
-        src/dump.cpp
-        src/game.cpp
-        src/player.cpp
-        src/main.cpp
-        src/rayTracing.cpp
-        src/tile.cpp
+        Game/include/dump.hpp
+        Game/include/game.hpp
+        Game/include/player.hpp
+        Game/src/level.cpp
+        Game/include/level.hpp
+        LightSystem/include/rayTracing.hpp
+        Game/include/tile.hpp
+        Game/src/consts.cpp
+        Game/src/dump.cpp
+        Game/src/game.cpp
+        Game/src/player.cpp
+        Game/src/main.cpp
+        LightSystem/src/rayTracing.cpp
+        Game/src/tile.cpp
 
-        SmartVector2/SmartVector2f.cpp
-        SmartVector2/SmartVector2f.h
-        src/lightEmitter.cpp
-        include/lightEmitter.h
-        include/lightScene.h
-        src/lightScene.cpp
-        include/consts.h
+        util/SmartVector2/SmartVector2f.cpp
+        util/SmartVector2/SmartVector2f.h
+        LightSystem/src/lightEmitter.cpp
+        LightSystem/include/lightEmitter.h
+        LightSystem/include/lightScene.h
+        LightSystem/src/lightScene.cpp
+        Game/include/consts.h
         util/FpsCounter/fpsCounter.cpp
         util/FpsCounter/fpsCounter.h
-        include/emitterBehaviour.h
-        src/emitterBehaviour.cpp
+        LightSystem/include/emitterBehaviour.h
+        LightSystem/src/emitterBehaviour.cpp
         util/eMath/eMath.cpp
         util/eMath/eMath.h
-        include/lantern.h
-        src/lantern.cpp
+        Game/include/lantern.h
+        Game/src/lantern.cpp
         util/ResourceHolders/TextureHolder/textureHolder.cpp
         util/ResourceHolders/TextureHolder/textureHolder.h
         util/ResourceHolders/resourceIdentifiers.h
         util/ResourceHolders/ShaderHolder/shaderHolder.cpp
         util/ResourceHolders/ShaderHolder/shaderHolder.h
-        Game/sceneLoader.cpp Game/sceneLoader.h
+        Game/src/sceneLoader.cpp Game/include/sceneLoader.h
         GUI/Menu/MenuGUI.cpp GUI/Menu/MenuGUI.h GUI/Pause/PauseGUI.cpp GUI/Pause/PauseGUI.h GUI/BaseGUI/BaseGUI.cpp GUI/BaseGUI/BaseGUI.h)
 target_link_libraries(PolaRise sfml-graphics sfml-window sfml-system -ltgui -lsfml-graphics -lsfml-window -lsfml-system)

@@ -6,10 +6,10 @@
 #include <unistd.h>
 #include "rayTracing.hpp"
 #include "lightEmitter.h"
-#include "level.hpp"
-#include "../SmartVector2/SmartVector2f.h"
+#include "Game/include/level.hpp"
+#include "util/SmartVector2/SmartVector2f.h"
 #include "emitterBehaviour.h"
-#include "Game/sceneLoader.h"
+#include "Game/include/sceneLoader.h"
 
 
 class Game;

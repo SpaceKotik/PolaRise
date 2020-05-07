@@ -2,9 +2,9 @@
 
 #include <algorithm>
 #include "rayTracing.hpp"
-#include "level.hpp"
-#include "../SmartVector2/SmartVector2f.h"
-#include "consts.h"
+#include "Game/include/level.hpp"
+#include "util/SmartVector2/SmartVector2f.h"
+#include "Game/include/consts.h"
 
 namespace EmitterBehaviour {
     class Behaviour;

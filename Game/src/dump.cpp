@@ -1,5 +1,5 @@
 
-#include "dump.hpp"
+#include "Game/include/dump.hpp"
 
 Dump::Dump() {
 	output.clear();

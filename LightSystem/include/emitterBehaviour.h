@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "../SmartVector2/SmartVector2f.h"
+#include "util/SmartVector2/SmartVector2f.h"
 class Emitter;
 class Player;
 class Level;

@@ -1,5 +1,5 @@
 #include "MenuGUI.h"
-#include "game.hpp"
+#include "Game/include/game.hpp"
 
 using namespace sf;
 

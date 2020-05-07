@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../util/FpsCounter/fpsCounter.h"
-#include "../SmartVector2/SmartVector2f.h"
+#include "util/FpsCounter/fpsCounter.h"
+#include "util/SmartVector2/SmartVector2f.h"
 #include <SFML/Graphics.hpp>
 #include "level.hpp"
 #include "player.hpp"
 #include "dump.hpp"
-#include "lightScene.h"
-#include "emitterBehaviour.h"
+#include "LightSystem/include/lightScene.h"
+#include "LightSystem/include/emitterBehaviour.h"
 #include "lantern.h"
 #include "consts.h"
 #include "util/ResourceHolders/TextureHolder/textureHolder.h"

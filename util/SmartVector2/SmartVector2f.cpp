@@ -1,4 +1,4 @@
-#include "SmartVector2/SmartVector2f.h"
+#include "SmartVector2f.h"
 #include "cmath"
 #include <SFML/Graphics.hpp>
 

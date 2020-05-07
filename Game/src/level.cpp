@@ -1,8 +1,8 @@
-#include "level.hpp"
+#include "Game/include/level.hpp"
 
-#include "include/game.hpp"
+#include "Game/include/game.hpp"
 #include <cmath>
-#include "rayTracing.hpp"
+#include "LightSystem/include/rayTracing.hpp"
 
 using namespace consts;
 using namespace sf;

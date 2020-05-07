@@ -1,7 +1,7 @@
 #include <fstream>
-#include "sceneLoader.h"
-#include "SmartVector2/SmartVector2f.h"
-#include "lightScene.h"
+#include "Game/include/sceneLoader.h"
+#include "util/SmartVector2/SmartVector2f.h"
+#include "LightSystem/include/lightScene.h"
 
 
 /// Used for convenient interpretation of file commands
