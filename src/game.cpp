@@ -38,7 +38,7 @@ Game::Game() {
     ContextSettings settings;
     settings.antialiasingLevel = 8;
     window.create(VideoMode(windowSize.x, windowSize.y), "PolaRise",
-                  Style::Titlebar | Style::Close);
+                  Style::Titlebar | Style::Close, settings);
     window.setKeyRepeatEnabled(false);
     window.setVerticalSyncEnabled(true);
     window.setPosition(Vector2i(600, 0));
@@ -197,6 +197,9 @@ void Game::input()  {
                 }
                 if(event.key.code == Keyboard::R) {
                     restart();
+                }
+                if(event.key.code == Keyboard::Tab) {
+                    changeState("Menu");
                 }
 
                 if(event.key.code == Keyboard::D) {

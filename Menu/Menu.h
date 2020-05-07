@@ -9,7 +9,6 @@ private:
     tgui::Gui* gui;
     sf::RenderWindow* window;
     Game* mediator;
-
 public:
     Menu(Game *game) : mediator(game) {};
     void setup();
