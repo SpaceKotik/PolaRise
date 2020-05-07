@@ -1,9 +1,10 @@
-#include "Menu.h"
+#include "MenuGUI.h"
 #include "game.hpp"
 
 using namespace sf;
 
-void Menu::setup() {
+void MenuGUI::setup(Game *game) {
+    mediator = game;
     window = mediator->getWindow();
     gui = new tgui::Gui{*window};
 
@@ -17,7 +18,10 @@ void Menu::setup() {
     buttonPlay->setText("Play");
     buttonPlay->setTextSize(50);
 
-    buttonPlay->connect("pressed", [this](){this->mediator->changeState("Gameplay");});
+    buttonPlay->connect("pressed", [this](){
+        this->mediator->changeState("Gameplay");
+        this->mediator->restart();
+    });
     buttonPlay->setFocusable(false);
 
     tgui::Button::Ptr buttonExit = tgui::Button::create();
@@ -46,29 +50,7 @@ void Menu::setup() {
     gui->add(buttonSettings, "buttonSettings");
 }
 
-void Menu::input() {
-    Event event{};
-    while (window->pollEvent(event)) {
-        gui->handleEvent(event);
-        switch (event.type) {
-            case Event::Closed:
-                window->close();
-                break;
-            case Event::KeyPressed:
-                if (event.key.code == Keyboard::Escape) {
-                    window->close();
-                }
-            default:
-                break;
-        }
-    }
-}
-
-void Menu::update() {
-
-}
-
-void Menu::draw() {
+void MenuGUI::draw() {
     window->clear(Color (100, 100, 100));
     gui->draw();
     window->display();

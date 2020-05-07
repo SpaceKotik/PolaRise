@@ -7,9 +7,10 @@ using namespace sf;
 using namespace consts;
 
 Game::Game() {
-    menu.setup();
-    ///probably will be used while adding GUI
-    gameState = MenuState;
+    menuScreen.setup(this);
+    pauseScreen.setup(this);
+
+    gameState = Menu;
 
     ///Setting level path used in scene and level loaders
     levelPath = "../Levels/1/";
@@ -55,15 +56,19 @@ Game::Game() {
 void Game::run() {
     FPScounter fpsCounter;
     while(window.isOpen()) {
-        if (gameState == GameplayState) {
+        if (gameState == Gameplay) {
             window.setTitle("PolaRise" + fpsCounter.get());
             input();
             logic();
             draw();
         }
-        else if (gameState == MenuState) {
-            menu.input();
-            menu.draw();
+        else if (gameState == Menu) {
+            menuScreen.input();
+            menuScreen.draw();
+        }
+        else if (gameState == Pause) {
+            pauseScreen.input();
+            pauseScreen.draw();
         }
     }
 }
@@ -201,6 +206,9 @@ void Game::input()  {
                 if(event.key.code == Keyboard::Tab) {
                     changeState("Menu");
                 }
+                if(event.key.code == Keyboard::P) {
+                    changeState("Pause");
+                }
 
                 if(event.key.code == Keyboard::D) {
                     player.states.right = true;
@@ -262,9 +270,11 @@ void Game::restart() {
 
 void Game::changeState(std::string state) {
     if (state == "Menu")
-        gameState = MenuState;
+        gameState = Menu;
     else if (state == "Gameplay")
-        gameState = GameplayState;
+        gameState = Gameplay;
+    else if (state == "Pause")
+        gameState = Pause;
 }
 
 Level* Game::getLevel() {

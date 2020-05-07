@@ -15,15 +15,18 @@
 #include "util/ResourceHolders/resourceIdentifiers.h"
 #include "tile.hpp"
 #include <TGUI/TGUI.hpp>
-#include "Menu/Menu.h"
+#include "Menu/MenuGUI.h"
+#include "Pause/PauseGUI.h"
 
 using namespace sf;
 
-enum GameState {MenuState, GameplayState};
+enum GameState {Menu, Gameplay, Pause};
 
 class Game {
 private:
-    Menu menu{this};
+    MenuGUI menuScreen;
+    PauseGUI pauseScreen;
+
     GameState gameState;
     RenderWindow window;
 

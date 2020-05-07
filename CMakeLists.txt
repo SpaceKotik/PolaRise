@@ -49,5 +49,5 @@ add_executable(PolaRise
         util/ResourceHolders/ShaderHolder/shaderHolder.cpp
         util/ResourceHolders/ShaderHolder/shaderHolder.h
         Game/sceneLoader.cpp Game/sceneLoader.h
-        Menu/Menu.cpp Menu/Menu.h)
+        Menu/MenuGUI.cpp Menu/MenuGUI.h Pause/PauseGUI.cpp Pause/PauseGUI.h GUI/BaseGUI.cpp GUI/BaseGUI.h)
 target_link_libraries(PolaRise sfml-graphics sfml-window sfml-system -ltgui -lsfml-graphics -lsfml-window -lsfml-system)
