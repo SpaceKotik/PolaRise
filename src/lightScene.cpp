@@ -24,6 +24,7 @@ void LightScene::setMediator(Game* _game) {
 }
 
 void LightScene::update() {
+    updateEmittersRayTracing();
     ///reset activated tiles from previous update call
     mediator->getLevel()->resetActive();
     ///and set new

@@ -1,14 +1,19 @@
-//
-// Created by ilya on 5/7/20.
-//
+#pragma once
+#include <TGUI/TGUI.hpp>
+#include <SFML/Graphics.hpp>
 
-#ifndef POLARISE_MENU_H
-#define POLARISE_MENU_H
-
+class Game;
 
 class Menu {
+private:
+    tgui::Gui* gui;
+    sf::RenderWindow* window;
+    Game* mediator;
 
+public:
+    Menu(Game *game) : mediator(game) {};
+    void setup();
+    void input();
+    void update();
+    void draw();
 };
-
-
-#endif //POLARISE_MENU_H

@@ -15,13 +15,15 @@
 #include "util/ResourceHolders/resourceIdentifiers.h"
 #include "tile.hpp"
 #include <TGUI/TGUI.hpp>
+#include "Menu/Menu.h"
 
 using namespace sf;
 
-enum GameState {Menu, Gameplay};
+enum GameState {MenuState, GameplayState};
 
 class Game {
 private:
+    Menu menu{this};
     GameState gameState;
     RenderWindow window;
 
@@ -47,8 +49,10 @@ public:
     void draw();
     void logic();
     void restart();
+    void changeState(std::string State);
     Level* getLevel();
     Player* getPlayer();
     ShaderHolder* getShaders();
+    RenderWindow* getWindow();
     std::string getLevelPath();
 };

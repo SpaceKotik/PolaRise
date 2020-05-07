@@ -6,11 +6,11 @@
 using namespace sf;
 using namespace consts;
 
-void sigFunc() {
-    std::cout << "pressed\n";
-}
-
 Game::Game() {
+    menu.setup();
+    ///probably will be used while adding GUI
+    gameState = MenuState;
+
     ///Setting level path used in scene and level loaders
     levelPath = "../Levels/1/";
 
@@ -34,14 +34,11 @@ Game::Game() {
     lightScene.setShaders();
     lightScene.loadScene();
 
-    ///probably will be used while adding GUI
-    gameState = Gameplay;
-
     ///Setting window
     ContextSettings settings;
     settings.antialiasingLevel = 8;
     window.create(VideoMode(windowSize.x, windowSize.y), "PolaRise",
-                  Style::Titlebar | Style::Close, settings);
+                  Style::Titlebar | Style::Close);
     window.setKeyRepeatEnabled(false);
     window.setVerticalSyncEnabled(true);
     window.setPosition(Vector2i(600, 0));
@@ -53,30 +50,21 @@ Game::Game() {
     bufferWindow.setSmooth(true);
     ///
 
-
-
-    tgui::Button::Ptr buttonRestart = tgui::Button::create();
-
-    buttonRestart->setText("restart");
-    buttonRestart->setSize(100, 50);
-    buttonRestart->connect("pressed", &Game::restart, this);
-
-    tgui::Button::Ptr buttonClose = tgui::Button::create();
-    buttonClose->setPosition(100, 0);
-    buttonClose->setText("quit");
-    buttonClose->setSize(100, 50);
-    buttonClose->connect("pressed", [this](){this->window.close();});
-    gui->add(buttonClose, "button2");
-    gui->add(buttonRestart, "button");
 }
 
 void Game::run() {
     FPScounter fpsCounter;
     while(window.isOpen()) {
-        window.setTitle("PolaRise" + fpsCounter.get());
-        input();
-        logic();
-        draw();
+        if (gameState == GameplayState) {
+            window.setTitle("PolaRise" + fpsCounter.get());
+            input();
+            logic();
+            draw();
+        }
+        else if (gameState == MenuState) {
+            menu.input();
+            menu.draw();
+        }
     }
 }
 
@@ -255,16 +243,8 @@ void Game::input()  {
 }
 
 void Game::logic() {
-    ///memory test
-    /*
-    for (int i = 0; i < 200; ++i) {
-        lightScene.addEmitter(eVector2f(500, 300), eVector2f(0, 1), new EmitterBehaviour::Rotate(0.04));
-        //lightScene.setBehaviour(3, new EmitterBehaviour::Rotate(0.04));
-        lightScene.deleteEmitter({500, 300});
-    }
-    */
     player.update((Vector2f)Mouse::getPosition(window));
-    lightScene.updateEmittersRayTracing();
+    //lightScene.updateEmittersRayTracing();
     lightScene.update();
 
 }
@@ -275,6 +255,13 @@ void Game::restart() {
     level.setField();
     lightScene.reset();
     lightScene.loadScene();
+}
+
+void Game::changeState(std::string state) {
+    if (state == "Menu")
+        gameState = MenuState;
+    else if (state == "Gameplay")
+        gameState = GameplayState;
 }
 
 Level* Game::getLevel() {
@@ -289,9 +276,14 @@ ShaderHolder* Game::getShaders() {
     return &shaders;
 }
 
+RenderWindow *Game::getWindow() {
+    return &window;
+}
+
 std::string Game::getLevelPath() {
     return levelPath;
 }
+
 
 /*
 ///Tiles texturing
