@@ -6,6 +6,7 @@
 using namespace sf;
 using namespace consts;
 
+
 std::map <int, std::string> levelPaths {
         {1, "../Levels/1/"},
         {2, "../Levels/2/"},
@@ -22,7 +23,7 @@ Game::Game() {
     gameState = Menu;
 
     ///Setting level path used in scene and level loaders
-    levelPath = levelPaths[1];
+    currentLevel = 1;
 
     /// Setting up resource holders
     textures.load(Textures::Background, "../Textures/background.png");
@@ -58,9 +59,10 @@ Game::Game() {
 
 
     /// TODO: move bufferWindow from Game class
+    ///Setting buffer texture for applying effects
     bufferWindow.create(windowSize.x, windowSize.y);
     bufferWindow.setSmooth(true);
-    ///
+
 
 }
 
@@ -292,7 +294,7 @@ void Game::changeState(std::string state) {
 }
 
 void Game::loadNextLevel() {
-    levelPath = "../Levels/2/";
+    currentLevel += 1;
     restart();
 }
 
@@ -313,20 +315,9 @@ RenderWindow *Game::getWindow() {
 }
 
 std::string Game::getLevelPath() {
-    return levelPath;
+    return levelPaths[currentLevel];
 }
 
 LightScene *Game::getLightScene() {
     return &lightScene;
 }
-
-
-/*
-///Tiles texturing
-Texture tex2;
-tex2.loadFromFile("../Textures/tile.png");
-Sprite spr2;
-spr2.setTexture(tex2);
-spr2.scale(scale/24.f, scale/24.f);
-spr2.setColor(Color(255, 210, 140));
-*/

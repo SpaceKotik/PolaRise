@@ -38,7 +38,7 @@ private:
     ShaderHolder shaders;
     RenderTexture bufferWindow;
 
-    std::string levelPath;
+    int currentLevel;
 
     tgui::Gui* gui = new tgui::Gui{window};
 
