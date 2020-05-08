@@ -6,6 +6,15 @@
 using namespace sf;
 using namespace consts;
 
+std::map <int, std::string> levelPaths {
+        {1, "../Levels/1/"},
+        {2, "../Levels/2/"},
+        {3, "../Levels/3/"},
+        {4, "../Levels/4/"},
+        {5, "../Levels/5/"},
+        {6, "../Levels/6/"},
+};
+
 Game::Game() {
     menuScreen.setup(this);
     pauseScreen.setup(this);
@@ -13,7 +22,7 @@ Game::Game() {
     gameState = Menu;
 
     ///Setting level path used in scene and level loaders
-    levelPath = "../Levels/1/";
+    levelPath = levelPaths[1];
 
     /// Setting up resource holders
     textures.load(Textures::Background, "../Textures/background.png");
@@ -31,6 +40,8 @@ Game::Game() {
     level.setField();
 
     player.setMediator(this);
+    player.setOnStart();
+
     lightScene.setMediator(this);
     lightScene.setShaders();
     lightScene.loadScene();
@@ -145,7 +156,7 @@ void Game::drawTiles() {
 
     ///Draw tiles
     for (int i = 0; i < fieldSize.x*fieldSize.y; ++i) {
-        if (level.getField()->at(i).checkIfDrawable()) {
+        if (level.getField()->at(i).isDrawable()) {
             ///Basically drawing a tile and then drawing light mask above it (quite elegant solution in 1 line of code instead
             /// of rewriting the whole shader logic)
             bufferWindow.draw(level.getField()->at(i).physForm, BlendAdd);
@@ -255,15 +266,18 @@ void Game::input()  {
 
 void Game::logic() {
     player.update((Vector2f)Mouse::getPosition(window));
-    //lightScene.updateEmittersRayTracing();
+    if (level.isOnFinish(player.getPos())) {
+        loadNextLevel();
+    }
     lightScene.update();
 
 }
 
 void Game::restart() {
-    //levelPath = "../Levels/2/";
-    player.reset();
     level.setField();
+
+    player.reset();
+
     lightScene.reset();
     lightScene.loadScene();
 }
@@ -275,6 +289,11 @@ void Game::changeState(std::string state) {
         gameState = Gameplay;
     else if (state == "Pause")
         gameState = Pause;
+}
+
+void Game::loadNextLevel() {
+    levelPath = "../Levels/2/";
+    restart();
 }
 
 Level* Game::getLevel() {
@@ -295,6 +314,10 @@ RenderWindow *Game::getWindow() {
 
 std::string Game::getLevelPath() {
     return levelPath;
+}
+
+LightScene *Game::getLightScene() {
+    return &lightScene;
 }
 
 

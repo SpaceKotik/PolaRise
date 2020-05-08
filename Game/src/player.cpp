@@ -2,6 +2,7 @@
 #include "Game/include/player.hpp"
 #include "Game/include/consts.h"
 #include "Game/include/game.hpp"
+
 using namespace consts;
 
 Player::Player() {
@@ -44,8 +45,20 @@ void Player::disableDynamicTiles() {
     playerRect.width -= 2*playerOffset;
     playerRect.height -= 2*playerOffset;
     ///check all tiles and set inactive all intersecting
+    ///also update tilemap for emitters if player entered or leaved the dynamic tile
+    bool isChanged = false;
+    bool currIntersection = false;
     for (auto &e: *(mediator->getLevel()->getField())) {
-        e.isUnderPlayer = e.getRect().getGlobalBounds().intersects(playerRect);
+        if (e.type == Dynamic) {
+            currIntersection = e.getRect().getGlobalBounds().intersects(playerRect);
+            if (e.underPlayer != currIntersection) {
+                e.underPlayer = currIntersection;
+                isChanged = true;
+            }
+        }
+    }
+    if (isChanged) {
+        mediator->getLightScene()->updateEmittersRayTracing(true);
     }
 }
 
@@ -171,7 +184,7 @@ void Player::updateMovement() {
 }
 
 void Player::reset() {
-    physForm.setPosition(Vector2f(100, 100));
+    setPos(mediator->getLevel()->getStartPos());
     velocity = {0, 0};
 }
 
@@ -189,5 +202,9 @@ void Player::update(Vector2f mousePos) {
     flashLight.sprite.setPosition(physForm.getPosition());
     flashLight.sprite.setRotation(-atan2(view.x, view.y)*180/M_PI + 135);
 
+}
+
+void Player::setOnStart() {
+    setPos(mediator->getLevel()->getStartPos());
 }
 

@@ -46,7 +46,7 @@ public:
     void reset();
 
     void setMediator(Game* game);
-
+    void setOnStart();
 	friend class Game;
 
 };

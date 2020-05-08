@@ -53,9 +53,11 @@ public:
     void logic();
     void restart();
     void changeState(std::string State);
+    void loadNextLevel();
     Level* getLevel();
     Player* getPlayer();
     ShaderHolder* getShaders();
     RenderWindow* getWindow();
+    LightScene* getLightScene();
     std::string getLevelPath();
 };

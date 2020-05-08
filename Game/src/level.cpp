@@ -24,7 +24,7 @@ std::vector<Tile>* Level::getField() {
 void Level::update() {
     for (auto &e : level) {
         if (e.type == Dynamic) {
-            if (e.isActive && !e.isUnderPlayer)
+            if (e.isActive && !e.underPlayer)
                 e.physForm.setFillColor(activeTileColor);
             else {
                 e.physForm.setFillColor(DEBUG ? inactiveTileColor : Color::Transparent);
@@ -74,10 +74,10 @@ int Level::loadToFile() {
                 case Deadly:
                     levelFile << 3 << ' ';
                     break;
-                case StartPos:
+                case Start:
                     levelFile << 4 << ' ';
                     break;
-                case FinishPos:
+                case Finish:
                     levelFile << 5 << ' ';
                     break;
                 case Void:
@@ -89,6 +89,10 @@ int Level::loadToFile() {
     	}
     	levelFile << std::endl;
     }
+
+    levelFile << startPos << std::endl;
+    levelFile << finishPos << std::endl;
+
     levelFile.close();
     return 0;
 }
@@ -119,14 +123,14 @@ int Level::loadFromFile() {
                 level[i * fieldSize.x + j].physForm.setFillColor(sf::Color::Red);
                 break;
     		case 4:
-                level[i * fieldSize.x + j].type = StartPos;
+                level[i * fieldSize.x + j].type = Start;
                 level[i * fieldSize.x + j].physForm.setFillColor(Color::Green);
                 level[i * fieldSize.x + j].physForm.setOutlineColor(Color::Black);
                 level[i * fieldSize.x + j].physForm.setOutlineThickness(1);
     			break;
     		case 5:
-                level[i * fieldSize.x + j].type = FinishPos;
-                level[i * fieldSize.x + j].physForm.setFillColor(Color::Red);
+                level[i * fieldSize.x + j].type = Finish;
+                level[i * fieldSize.x + j].physForm.setFillColor(Color(100, 255, 100));
                 level[i * fieldSize.x + j].physForm.setOutlineColor(Color::Black);
                 level[i * fieldSize.x + j].physForm.setOutlineThickness(1);
     		
@@ -135,6 +139,13 @@ int Level::loadFromFile() {
 	    	}
     	}
     }
+
+    levelFile >> startPos.x;
+    levelFile >> startPos.y;
+    levelFile >> finishPos.x;
+    levelFile >> finishPos.y;
+
+    level.at(index(finishPos, fieldSize, scale)).type = Finish;
 
     levelFile.close();
     return 0;
@@ -145,7 +156,7 @@ bool Level::isOnTile(Vector2f pos) {
     if(level.size() <= i || i < 0)
         return false;
 	Tile currTile = level.at(i);
-    return (currTile.checkIfSolid() && !currTile.isUnderPlayer);
+    return (currTile.isSolid() && !currTile.underPlayer);
 }
 
 bool Level::isOnDeadly(Vector2f pos) {
@@ -157,7 +168,11 @@ bool Level::isOnDeadly(Vector2f pos) {
 }
 
 bool Level::isOnFinish(Vector2f pos) {
-    return level.at((index(pos, {fieldSize.x, fieldSize.y}, scale))).type == FinishPos;
+    return level.at((index(pos, {fieldSize.x, fieldSize.y}, scale))).isFinish();
+}
+
+bool Level::isUnderPlayer(Vector2f pos) {
+    return level.at((index(pos, {fieldSize.x, fieldSize.y}, scale))).isUnderPlayer();
 }
 
 // TODO: Maybe do something with indexes of tiles to make it look cleaner
@@ -204,6 +219,10 @@ void Level::setDynamicTiles(std::array<Vertex, 2> line) {
 
 void Level::setMediator(Game* _game) {
     mediator = _game;
+}
+
+eVector2f Level::getStartPos() {
+    return startPos;
 }
 
 

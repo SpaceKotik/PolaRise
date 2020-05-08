@@ -1,5 +1,5 @@
 #include "Game/include/tile.hpp"
-
+#include <iostream>
 using namespace sf;
 using namespace consts;
 
@@ -28,24 +28,38 @@ RectangleShape Tile::getRect() {
 	return physForm;
 }
 
-bool Tile::checkIfSolid() {
+bool Tile::isSolid() {
+    if (type == Finish)
+        return false;
     return (type != Void) && !(type == Dynamic && !isActive);
 
 }
 
-bool Tile::checkIfLightAbsorb() {
-    return (type != Void && !isUnderPlayer);
+bool Tile::isLightAbsorb() {
+    if (type == Finish)
+        return false;
+    if (type == Dynamic && underPlayer)
+        return false;
+    return (type != Void && !underPlayer);
 }
 
-bool Tile::checkIfDrawable() {
-    if (type == Standart || type == Deadly)
+bool Tile::isDrawable() {
+    if (type == Standart || type == Deadly || type == Finish)
         return true;
-    if (!isUnderPlayer && type == Dynamic && isActive)
+    if (!underPlayer && type == Dynamic && isActive)
         return true;
     return false;
 }
 
-bool Tile::checkIfDeadly() {
+bool Tile::isDeadly() {
     return type == Deadly;
+}
+
+bool Tile::isFinish() {
+    return type == Finish;
+}
+
+bool Tile::isUnderPlayer() {
+    return underPlayer;
 }
 

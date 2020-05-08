@@ -55,7 +55,7 @@ void RayTracing::convertTileMapToPolyMap(Level *level) {
 				tempCell.edgeId[k] = -1;
 			}
 
-            tempCell.exist = !(level->getField()->at(i * fieldSize.x + j).checkIfLightAbsorb());
+            tempCell.exist = !(level->getField()->at(i * fieldSize.x + j).isLightAbsorb());
 			processingCells.push_back(tempCell);
 		}
 	}
@@ -330,11 +330,6 @@ void RayTracing::update(Vector2f pos, bool _isRestricted, Vector2f view, float _
         transform.scale(alpha, alpha, pos.x, pos.y);
         e[1].position = transform.transformPoint(e[1].position);
 	}
-}
-
-
-bool isNear(float a, float b) {
-    return (a - b) < 0.1 && (a - b) > -0.1;
 }
 
 Line RayTracing::getPartIntersection(Line ray, Line line) {
